@@ -1,0 +1,23 @@
+[remap]
+
+importer="YATI"
+type="PackedScene"
+uid="uid://ck5n6ttwh0trd"
+path="res://.godot/imported/cliff-transp-rule1-places all tiles.tmx-cf5f82d03327c9840bff512bdef013a8.tscn"
+
+[deps]
+
+source_file="res://assets/sprites/tilemaps/meadow/TiledMap Editor/rules/cliff-transp-rule1-places all tiles.tmx"
+dest_files=["res://.godot/imported/cliff-transp-rule1-places all tiles.tmx-cf5f82d03327c9840bff512bdef013a8.tscn"]
+
+[params]
+
+use_default_filter=false
+add_class_as_metadata=false
+add_id_as_metadata=false
+no_alternative_tiles=false
+map_wangset_to_terrain=false
+custom_data_prefix="data_"
+tiled_project_file=""
+post_processor=""
+save_tileset_to=""

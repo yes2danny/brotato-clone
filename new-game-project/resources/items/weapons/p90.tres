@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/data/WeaponData.gd" id="1_weapon_data"]
+[ext_resource type="Texture2D" path="res://assets/projectiles/BulletsAndBombs-PROJECTILEKIT/SPRITES SEPARATED/Projectiles-Bullets-(RIGHT)/Tiny-Bullet-(tracer) (1).png" id="2_bullet"]
+
+[resource]
+script = ExtResource("1_weapon_data")
+weapon_name = "P90"
+description = "SMG profile (custom sheet crop)."
+bullet_sprite = ExtResource("2_bullet")
+cost = 68
+damage = 8
+fire_rate = 13.5
+bullet_speed = 470.0
+bullet_lifetime = 2.0
+detection_range = 295.0
+projectile_count = 1
+spread_angle = 6.0
+use_sprite_region_rect = true
+sprite_region_rect = Rect2(5, 349, 42, 18)
+spritesheet_cell_index = 0
+weapon_sprite_scale = Vector2(1.45, 1.45)
+damage_scale = 1.15
+fire_rate_scale = 1.1

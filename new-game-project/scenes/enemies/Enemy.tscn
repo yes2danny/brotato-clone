@@ -1,0 +1,103 @@
+[gd_scene load_steps=17 format=3 uid="uid://enemy_scene_01"]
+
+; ── Scripts ──
+[ext_resource type="Script" path="res://scripts/enemies/ai/EnemyAI.gd" id="1_enemy"]
+[ext_resource type="Script" path="res://scripts/systems/HealthSystem.gd" id="2_health"]
+
+; ── XP Gem scene — spawned on enemy death ──
+[ext_resource type="PackedScene" path="res://scenes/items/pickups/XPGem.tscn" id="14_xpgem"]
+
+; ── Goblin Idle frame (1 frame) ──
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_01 (Green Skinned)/Goblin_Barrel_01_Idle/000.png" id="3_idle0"]
+
+; ── Goblin Move frames (10 frames) ──
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_01 (Green Skinned)/Goblin_Barrel_01_Move/000.png" id="4_move0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_01 (Green Skinned)/Goblin_Barrel_01_Move/001.png" id="5_move1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_01 (Green Skinned)/Goblin_Barrel_01_Move/002.png" id="6_move2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_01 (Green Skinned)/Goblin_Barrel_01_Move/003.png" id="7_move3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_01 (Green Skinned)/Goblin_Barrel_01_Move/004.png" id="8_move4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_01 (Green Skinned)/Goblin_Barrel_01_Move/005.png" id="9_move5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_01 (Green Skinned)/Goblin_Barrel_01_Move/006.png" id="10_move6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_01 (Green Skinned)/Goblin_Barrel_01_Move/007.png" id="11_move7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_01 (Green Skinned)/Goblin_Barrel_01_Move/008.png" id="12_move8"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_01 (Green Skinned)/Goblin_Barrel_01_Move/009.png" id="13_move9"]
+
+; ── SpriteFrames: Idle (1 frame) + Move (10 frames) animations ──
+[sub_resource type="SpriteFrames" id="SpriteFrames_goblin"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_idle0")
+}],
+"loop": true,
+"name": &"Idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_move0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_move1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_move2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_move3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_move4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_move5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_move6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_move7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_move8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_move9")
+}],
+"loop": true,
+"name": &"Move",
+"speed": 10.0
+}]
+
+; ── Circle hitbox — snug fit for the goblin ──
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 12.0
+
+; ────────────────────────────────────────────────────────────────
+; NODE TREE
+;
+; Enemy (CharacterBody2D)   ← EnemyAI.gd drives movement + contact damage
+; ├── AnimatedSprite2D      ← green goblin, 10-frame walk cycle, scale 3x
+; ├── CollisionShape2D      ← circle hitbox r=12
+; └── HealthSystem (Node)   ← 30 HP, emits died signal on death
+; ────────────────────────────────────────────────────────────────
+
+[node name="Enemy" type="CharacterBody2D"]
+script = ExtResource("1_enemy")
+move_speed = 80.0
+damage = 10
+contact_cooldown = 1.0
+xp_gem_scene = ExtResource("14_xpgem")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_goblin")
+animation = &"Idle"
+autoplay = "Idle"
+scale = Vector2(3, 3)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_1")
+
+[node name="HealthSystem" type="Node" parent="."]
+script = ExtResource("2_health")
+max_health = 30

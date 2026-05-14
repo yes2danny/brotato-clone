@@ -1,0 +1,23 @@
+[remap]
+
+importer="YATI"
+type="PackedScene"
+uid="uid://c8kq4b3gyopdk"
+path="res://.godot/imported/Crypt example map.tmx-8dc30f65e416944ca70c3063076b9fa9.tscn"
+
+[deps]
+
+source_file="res://assets/sprites/tilemaps/crypt/TiledMap Editor/Crypt example map.tmx"
+dest_files=["res://.godot/imported/Crypt example map.tmx-8dc30f65e416944ca70c3063076b9fa9.tscn"]
+
+[params]
+
+use_default_filter=false
+add_class_as_metadata=false
+add_id_as_metadata=false
+no_alternative_tiles=false
+map_wangset_to_terrain=false
+custom_data_prefix="data_"
+tiled_project_file=""
+post_processor=""
+save_tileset_to=""

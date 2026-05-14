@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BrotatoClone — Alpha discovery report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;0,7..72,700;1,7..72,400&family=Syne:wght@500;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0c0d11;
+      --paper: #f4f1ea;
+      --paper2: #e8e4db;
+      --muted: #5c5a54;
+      --accent: #1a6b5c;
+      --accent2: #6b3d8c;
+      --warn: #b45309;
+      --bad: #9f1239;
+      --line: #c9c4b8;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+      --serif: "Literata", Georgia, serif;
+      --sans: "Syne", system-ui, sans-serif;
+      --max: 720px;
+      --wide: 1040px;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      line-height: 1.65;
+      font-optical-sizing: auto;
+    }
+
+    /* ─── Top stripe ─── */
+    .mast {
+      background: var(--ink);
+      color: var(--paper2);
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 0.55rem 1.25rem;
+      text-align: center;
+    }
+
+    .page {
+      max-width: var(--wide);
+      margin: 0 auto;
+      padding: 0 1.25rem 4rem;
+    }
+
+    /* ─── Hero image ─── */
+    .hero-visual {
+      margin: 2rem 0 0;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--line);
+      box-shadow: 0 24px 60px rgba(12, 13, 17, 0.12);
+      background: var(--ink);
+    }
+    .hero-visual img {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      vertical-align: middle;
+    }
+    .hero-visual figcaption {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #9a958a;
+      padding: 0.65rem 1rem;
+      background: #faf8f4;
+      border-top: 1px solid var(--line);
+    }
+
+    /* ─── Title block ─── */
+    .title-block {
+      margin: 2.25rem 0 2.5rem;
+      padding-bottom: 2rem;
+      border-bottom: 2px solid var(--ink);
+    }
+    .title-block .kicker {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .title-block h1 {
+      font-family: var(--sans);
+      font-weight: 800;
+      font-size: clamp(2rem, 5vw, 3.1rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin: 0 0 1rem;
+      max-width: 14ch;
+    }
+    .title-block .subtitle {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 42ch;
+      margin: 0;
+      font-weight: 400;
+    }
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1.35rem;
+    }
+    .meta-row span {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      padding: 0.35rem 0.65rem;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    /* ─── Layout: TOC + article ─── */
+    .doc-grid {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+    @media (max-width: 880px) {
+      .doc-grid { grid-template-columns: 1fr; }
+      .toc { position: static !important; border-right: none !important; padding-right: 0 !important; }
+    }
+
+    .toc {
+      position: sticky;
+      top: 1rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      padding-right: 1rem;
+      border-right: 1px solid var(--line);
+    }
+    .toc strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 0.85rem;
+      font-size: 0.65rem;
+    }
+    .toc a {
+      display: block;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 0.35rem 0;
+      border-bottom: 1px dotted transparent;
+    }
+    .toc a:hover {
+      color: var(--accent2);
+      border-bottom-color: var(--accent2);
+    }
+
+    article { min-width: 0; }
+
+    /* ─── Long-form prose ─── */
+    .prose {
+      max-width: var(--max);
+    }
+    .prose h2 {
+      font-family: var(--sans);
+      font-weight: 700;
+      font-size: 1.35rem;
+      margin: 2.75rem 0 1rem;
+      letter-spacing: -0.02em;
+      scroll-margin-top: 1.2rem;
+    }
+    .prose h2:first-of-type { margin-top: 0; }
+    .prose h3 {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin: 1.75rem 0 0.5rem;
+    }
+    .prose p { margin: 0 0 1rem; hyphens: auto; }
+    .prose .lead::first-letter {
+      float: left;
+      font-family: var(--sans);
+      font-weight: 800;
+      font-size: 3.4rem;
+      line-height: 0.85;
+      padding-right: 0.55rem;
+      margin-top: 0.12rem;
+      color: var(--accent2);
+    }
+    .prose .lead { min-height: 3.5rem; }
+
+    blockquote.pull {
+      font-family: var(--sans);
+      font-size: 1.25rem;
+      font-weight: 600;
+      line-height: 1.35;
+      margin: 2rem 0 2rem -0.5rem;
+      padding: 0 0 0 1.1rem;
+      border-left: 4px solid var(--accent);
+      color: var(--ink);
+      max-width: 36ch;
+    }
+
+    /* ─── Definition list (pretty facts) ─── */
+    dl.facts {
+      margin: 1.5rem 0;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #fff;
+    }
+    dl.facts div {
+      display: grid;
+      grid-template-columns: 11rem 1fr;
+      border-bottom: 1px solid var(--line);
+    }
+    dl.facts div:last-child { border-bottom: none; }
+    @media (max-width: 520px) {
+      dl.facts div { grid-template-columns: 1fr; }
+      dl.facts dt { border-bottom: 1px dashed var(--line); }
+    }
+    dl.facts dt {
+      margin: 0;
+      padding: 0.65rem 0.85rem;
+      background: var(--paper2);
+      color: var(--muted);
+      font-weight: 500;
+    }
+    dl.facts dd {
+      margin: 0;
+      padding: 0.65rem 0.85rem;
+      color: var(--ink);
+    }
+
+    /* ─── Bars ─── */
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.35rem;
+      background: #fff;
+      margin: 1rem 0 1.5rem;
+      max-width: var(--max);
+    }
+    .panel > p:first-child { margin-top: 0; }
+    .bar-row { display: grid; gap: 0.55rem; margin-top: 0.75rem; }
+    .bar-item label {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+    }
+    .bar-track {
+      height: 7px;
+      border-radius: 99px;
+      background: var(--paper2);
+      overflow: hidden;
+    }
+    .bar-fill { height: 100%; border-radius: 99px; }
+    .bar-fill.full { background: linear-gradient(90deg, #1a6b5c, #2a9d8f); }
+    .bar-fill.low { background: linear-gradient(90deg, #9f1239, #e11d48); }
+
+    /* ─── Pretty-print blocks ─── */
+    pre.pretty {
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      line-height: 1.45;
+      margin: 1.25rem 0;
+      padding: 1.1rem 1.2rem;
+      background: var(--ink);
+      color: #d6d3cd;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      max-width: min(100%, 52rem);
+      border: 1px solid #2a2d35;
+    }
+    pre.pretty .c { color: #7a9e8e; }
+    pre.pretty .m { color: #c4a8d8; }
+    pre.pretty .y { color: #d4a574; }
+
+    /* ─── Wide figures (diagrams) ─── */
+    .wide {
+      max-width: min(100%, 52rem);
+      margin: 1.5rem 0;
+    }
+    .wide.card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      background: #fff;
+    }
+    .flow-svg { width: 100%; height: auto; display: block; max-height: 300px; }
+    .atlas-svg { width: 100%; display: block; height: auto; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      max-width: min(100%, 52rem);
+    }
+    @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .mini-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.2rem;
+      background: #fff;
+    }
+    .mini-card h3 {
+      font-family: var(--sans);
+      font-size: 1rem;
+      margin: 0 0 0.5rem;
+    }
+    .mini-card p { margin: 0; font-size: 0.95rem; color: var(--muted); }
+
+    ul.clean {
+      margin: 0.5rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    ul.clean li {
+      position: relative;
+      padding-left: 1rem;
+      margin-bottom: 0.45rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    ul.clean li::before {
+      content: "▸";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-size: 0.75rem;
+    }
+
+    .callout {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      padding: 0.85rem 1rem;
+      margin: 1rem 0 0;
+      background: #fdf6e3;
+      border-left: 3px solid var(--warn);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      color: #5c4a32;
+      max-width: min(100%, 52rem);
+    }
+
+    hr.chapter {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--line), transparent);
+      margin: 3rem 0;
+      max-width: var(--max);
+    }
+
+    footer {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--line);
+    }
+
+    @media print {
+      .mast, .toc { display: none; }
+      .hero-visual { break-inside: avoid; }
+      body { font-size: 11pt; }
+    }
+  </style>
+</head>
+<body>
+  <div class="mast">BrotatoClone · internal alpha report · generated notes</div>
+
+  <div class="page">
+    <figure class="hero-visual">
+      <img src="alpha-report-hero.png" width="1600" height="900" alt="Stylized top-down dungeon arena with cyan and purple light, abstract wave rings and gem sparkles" loading="lazy" decoding="async" />
+      <figcaption>Figure 0 — Mood board: arena pressure, gems, waves (generated art for this document).</figcaption>
+    </figure>
+
+    <header class="title-block">
+      <p class="kicker">Codebase walkthrough</p>
+      <h1>What the build actually is today</h1>
+      <p class="subtitle">A long-form, print-friendly layout: hero image, table of contents, prose, data tables, diagrams, and monospace “spec” blocks — all offline in one HTML file.</p>
+      <div class="meta-row">
+        <span>Godot 4.6</span>
+        <span>Main.tscn</span>
+        <span>Autoloads: GameManager · XPSystem</span>
+        <span>Map: room_crypt (1920² px arena)</span>
+      </div>
+    </header>
+
+    <div class="doc-grid">
+      <nav class="toc" aria-label="Table of contents">
+        <strong>Contents</strong>
+        <a href="#s1">01 &nbsp; Summary</a>
+        <a href="#s2">02 &nbsp; Hard facts</a>
+        <a href="#s3">03 &nbsp; Readiness</a>
+        <a href="#s4">04 &nbsp; Architecture</a>
+        <a href="#s5">05 &nbsp; Flow</a>
+        <a href="#s6">06 &nbsp; Strengths</a>
+        <a href="#s7">07 &nbsp; Risks</a>
+        <a href="#s8">08 &nbsp; Content</a>
+        <a href="#s9">09 &nbsp; File index</a>
+        <a href="#s10">10 &nbsp; Next moves</a>
+      </nav>
+
+      <article class="prose">
+        <h2 id="s1">01 — Executive summary</h2>
+        <p class="lead">Your project already implements the spine of a top-down arena survivor: movement, waves, spawning, auto-target gun logic, XP gems, and enemy AI that wanders, chases, separates, and slides along walls. What is not yet fully glued is the meta loop that players expect from the genre: visible level-up picks, a shop beat between waves, a safe main menu path, and a clean run reset for autoloaded XP.</p>
+        <p>Visually the repo mixes a knight player, goblin-family enemies, and a crypt tilemap — perfectly acceptable for alpha before a single art direction locks in.</p>
+
+        <blockquote class="pull">The fun loop is further along than the “wrapper” UI and economy.</blockquote>
+
+        <hr class="chapter" />
+
+        <h2 id="s2">02 — Hard facts (inspector view)</h2>
+        <dl class="facts">
+          <div><dt>Project name</dt><dd><code>BrotatoClone</code> — <code>project.godot</code></dd></div>
+          <div><dt>Boot scene</dt><dd><code>res://scenes/world/Main.tscn</code></dd></div>
+          <div><dt>Singletons</dt><dd><code>XPSystem</code>, <code>GameManager</code></dd></div>
+          <div><dt>Tiled import</dt><dd>YATI plugin enabled</dd></div>
+          <div><dt>Active room</dt><dd><code>room_crypt.tscn</code> scaled 3×, centered; boundary script matches 960 px half-extent</dd></div>
+        </dl>
+
+        <hr class="chapter" />
+
+        <h2 id="s3">03 — Systems readiness</h2>
+        <p>Subjective wiring bar: strong means “plays as intended in code,” not “content complete.”</p>
+        <div class="panel">
+          <p style="margin:0 0 0.5rem;font-family:var(--mono);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)">Integration health</p>
+          <div class="bar-row">
+            <div class="bar-item"><label><span>Core loop</span><span>high</span></label><div class="bar-track"><div class="bar-fill full" style="width:88%"></div></div></div>
+            <div class="bar-item"><label><span>Enemy AI</span><span>high</span></label><div class="bar-track"><div class="bar-fill full" style="width:90%"></div></div></div>
+            <div class="bar-item"><label><span>XP / levels</span><span>mid</span></label><div class="bar-track"><div class="bar-fill full" style="width:72%"></div></div></div>
+            <div class="bar-item"><label><span>Upgrade UI</span><span>low</span></label><div class="bar-track"><div class="bar-fill low" style="width:26%"></div></div></div>
+            <div class="bar-item"><label><span>Shop in wave flow</span><span>low</span></label><div class="bar-track"><div class="bar-fill low" style="width:20%"></div></div></div>
+            <div class="bar-item"><label><span>Main menu scene</span><span>low</span></label><div class="bar-track"><div class="bar-fill low" style="width:14%"></div></div></div>
+          </div>
+        </div>
+
+        <hr class="chapter" />
+
+        <h2 id="s4">04 — Scene graph (pretty print)</h2>
+        <p>Approximate runtime hierarchy from <code>Main.tscn</code> — useful when you reason about pause ownership.</p>
+        <pre class="pretty"><span class="c"># res://scenes/world/Main.tscn (conceptual)</span>
+Main <span class="m">(Node2D)</span>
+├── Map <span class="y">→ room_crypt instance</span>
+├── MapBoundary <span class="y">→ invisible walls + camera limits</span>
+├── Player <span class="y">→ CharacterBody2D + HealthSystem + WeaponController</span>
+├── Camera <span class="y">→ CameraFollow.gd</span>
+├── EnemySpawner
+├── WaveManager
+├── ShopManager
+├── UpgradeUI / UpgradeManager
+├── GameUI · PauseMenu · GameOverUI · ShopUI
+</pre>
+
+        <hr class="chapter" />
+
+        <h2 id="s5">05 — One-screen flow</h2>
+        <div class="wide card">
+          <svg class="flow-svg" viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Player row and world row flow">
+            <defs>
+              <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#1a6b5c"/><stop offset="100%" stop-color="#6b3d8c"/></linearGradient>
+              <filter id="glow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <text x="20" y="28" fill="#8b93a8" font-family="IBM Plex Mono, monospace" font-size="11">PLAYER</text>
+            <text x="20" y="148" fill="#8b93a8" font-family="IBM Plex Mono, monospace" font-size="11">WORLD</text>
+            <rect x="40" y="45" width="100" height="44" rx="10" fill="#fff" stroke="#c9c4b8"/>
+            <text x="90" y="72" text-anchor="middle" fill="#0c0d11" font-family="Syne, sans-serif" font-size="13" font-weight="600">Spawn</text>
+            <path d="M145 67h35" stroke="#c9c4b8" stroke-width="2"/>
+            <rect x="185" y="45" width="110" height="44" rx="10" fill="#fff" stroke="#c9c4b8"/>
+            <text x="240" y="72" text-anchor="middle" fill="#0c0d11" font-family="Syne, sans-serif" font-size="13" font-weight="600">WASD</text>
+            <path d="M300 67h35" stroke="#c9c4b8" stroke-width="2"/>
+            <rect x="340" y="38" width="130" height="58" rx="10" fill="#f4f1ea" stroke="url(#g1)" filter="url(#glow)"/>
+            <text x="405" y="65" text-anchor="middle" fill="#1a6b5c" font-family="Syne, sans-serif" font-size="13" font-weight="700">Auto-aim</text>
+            <text x="405" y="82" text-anchor="middle" fill="#5c5a54" font-family="Syne, sans-serif" font-size="10">nearest enemy</text>
+            <path d="M475 67h35" stroke="#c9c4b8" stroke-width="2"/>
+            <rect x="515" y="45" width="165" height="44" rx="10" fill="#fff" stroke="#c9c4b8"/>
+            <text x="597" y="72" text-anchor="middle" fill="#0c0d11" font-family="Syne, sans-serif" font-size="13" font-weight="600">Gems → XP</text>
+            <rect x="40" y="165" width="120" height="44" rx="10" fill="#fff" stroke="#c9c4b8"/>
+            <text x="100" y="192" text-anchor="middle" fill="#0c0d11" font-family="Syne, sans-serif" font-size="13" font-weight="600">Wave clock</text>
+            <path d="M165 187h30" stroke="#c9c4b8" stroke-width="2"/>
+            <rect x="200" y="165" width="140" height="44" rx="10" fill="#fff" stroke="#b45309"/>
+            <text x="270" y="192" text-anchor="middle" fill="#b45309" font-family="Syne, sans-serif" font-size="13" font-weight="600">Spawner</text>
+            <path d="M345 187h30" stroke="#c9c4b8" stroke-width="2"/>
+            <rect x="380" y="165" width="150" height="44" rx="10" fill="#fff" stroke="#c9c4b8"/>
+            <text x="455" y="192" text-anchor="middle" fill="#0c0d11" font-family="Syne, sans-serif" font-size="13" font-weight="600">Clear</text>
+            <path d="M535 187h30" stroke="#c9c4b8" stroke-width="2"/>
+            <rect x="570" y="165" width="110" height="44" rx="10" fill="#fff" stroke="#6b3d8c"/>
+            <text x="625" y="192" text-anchor="middle" fill="#6b3d8c" font-family="Syne, sans-serif" font-size="13" font-weight="600">Break</text>
+            <path d="M405 96v25" stroke="#c9c4b8" stroke-width="1.5" stroke-dasharray="4 4"/>
+            <path d="M405 165V131" stroke="#c9c4b8" stroke-width="1.5" stroke-dasharray="4 4"/>
+          </svg>
+          <p class="callout">Figure 1 — Parallel lanes: player moment-to-moment vs world pacing. Dashed tie: combat feeds pressure into the wave clock.</p>
+        </div>
+
+        <hr class="chapter" />
+
+        <h2 id="s6">06 — What is already strong</h2>
+        <h3>Enemy presentation of intelligence</h3>
+        <p>Wander versus chase, neighbor separation, and wall-slide steering are the sort of systems players credit as “good AI” even when they do not inspect your scripts. That is a strong early investment.</p>
+        <h3>Spawn safety</h3>
+        <p>Point queries against collision mask 1 to avoid spawning inside static geometry is a small detail that prevents a class of “unfair spawn” bugs later.</p>
+
+        <hr class="chapter" />
+
+        <h2 id="s7">07 — Sharp edges for playtests</h2>
+        <div class="grid-2">
+          <div class="mini-card">
+            <h3>Level-up pause</h3>
+            <p><code>UpgradeManager</code> pauses the scene tree; without UI calling <code>_on_upgrade_chosen</code>, the run can freeze in a paused state.</p>
+          </div>
+          <div class="mini-card">
+            <h3>Autoload XP</h3>
+            <p><code>restart_game()</code> reloads the scene but does not reset <code>XPSystem</code> in the reviewed code — XP may survive a “restart.”</p>
+          </div>
+          <div class="mini-card">
+            <h3>Bullet scene</h3>
+            <p>Ensure <code>WeaponController.bullet_scene</code> is assigned on the Player scene in the inspector so the serialized scene always fires.</p>
+          </div>
+          <div class="mini-card">
+            <h3>Main menu</h3>
+            <p><code>load_main_menu()</code> targets <code>MainMenu.tscn</code>, which was not present in the tree when scanned.</p>
+          </div>
+        </div>
+
+        <hr class="chapter" />
+
+        <h2 id="s8">08 — Content atlas</h2>
+        <div class="wide card" style="padding:0;overflow:hidden">
+          <svg class="atlas-svg" viewBox="0 0 900 200" height="200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Maps cast data">
+            <rect width="900" height="200" fill="#f4f1ea"/>
+            <rect x="0" y="0" width="300" height="200" fill="#fff" stroke="#c9c4b8"/>
+            <rect x="300" y="0" width="300" height="200" fill="#faf8f4" stroke="#c9c4b8"/>
+            <rect x="600" y="0" width="300" height="200" fill="#fff" stroke="#c9c4b8"/>
+            <text x="150" y="40" text-anchor="middle" fill="#1a6b5c" font-family="Syne, sans-serif" font-size="15" font-weight="700">Maps</text>
+            <text x="150" y="125" text-anchor="middle" fill="#0c0d11" font-family="Literata, serif" font-size="13">Crypt (in Main)</text>
+            <text x="150" y="175" text-anchor="middle" fill="#5c5a54" font-family="IBM Plex Mono, monospace" font-size="10">cemetery · meadow assets</text>
+            <text x="450" y="40" text-anchor="middle" fill="#6b3d8c" font-family="Syne, sans-serif" font-size="15" font-weight="700">Cast</text>
+            <text x="450" y="125" text-anchor="middle" fill="#0c0d11" font-family="Literata, serif" font-size="13">Knight + goblins + cyclops</text>
+            <text x="750" y="40" text-anchor="middle" fill="#b45309" font-family="Syne, sans-serif" font-size="15" font-weight="700">Data</text>
+            <text x="750" y="110" text-anchor="middle" fill="#0c0d11" font-family="IBM Plex Mono, monospace" font-size="11">ItemData · WeaponData</text>
+            <text x="750" y="132" text-anchor="middle" fill="#0c0d11" font-family="IBM Plex Mono, monospace" font-size="11">EnemyData · WaveData</text>
+            <text x="750" y="165" text-anchor="middle" fill="#9f1239" font-family="IBM Plex Mono, monospace" font-size="10">schemas ahead of runtime</text>
+          </svg>
+        </div>
+
+        <hr class="chapter" />
+
+        <h2 id="s9">09 — File index (pretty print)</h2>
+        <pre class="pretty"><span class="c"># Primary scripts (new-game-project/scripts/)</span>
+systems/GameManager.gd      <span class="m">run state, stats, restart, menu hook</span>
+systems/XPSystem.gd         <span class="m">levels; signals UpgradeManager</span>
+systems/HealthSystem.gd     <span class="m">reusable HP + signals</span>
+systems/UpgradeManager.gd   <span class="m">level-up offers (needs UI)</span>
+player/PlayerMovement.gd
+player/CameraFollow.gd
+weapons/WeaponController.gd
+weapons/projectiles/Bullet.gd
+enemies/ai/EnemyAI.gd
+enemies/spawning/EnemySpawner.gd
+enemies/spawning/WaveManager.gd
+shop/ShopManager.gd         <span class="y">open_shop not called from waves</span>
+world/MapBoundary.gd
+</pre>
+
+        <hr class="chapter" />
+
+        <h2 id="s10">10 — Suggested next moves</h2>
+        <p><strong>Session-safe:</strong> four visible upgrade cards or keys 1–4 mapped to <code>_on_upgrade_chosen</code>; reset XP in <code>restart_game()</code> or on <code>Main</code> ready; assign bullet scene on Player.</p>
+        <p><strong>Genre-shaped:</strong> invoke <code>ShopManager.open_shop()</code> after wave end (before or after break, your call); add a few <code>.tres</code> items; add a stub <code>MainMenu.tscn</code> so pause never errors.</p>
+
+        <footer>
+          <code>new-game-project/docs/ALPHA_REPORT.html</code> + <code>alpha-report-hero.png</code> (same folder) · open in any browser · Ctrl+P for print
+        </footer>
+      </article>
+    </div>
+  </div>
+</body>
+</html>

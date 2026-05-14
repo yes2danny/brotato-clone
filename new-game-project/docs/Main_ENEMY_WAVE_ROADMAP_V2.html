@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wave Roadmap v2 — BrotatoClone — 20-wave math + full roster</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#0b0c12; --bg2:#11141d; --card:#161a25; --b:#2a2f42;
+      --t:#e8ecf4; --m:#8b95ad; --dim:#5d667d;
+      --a:#a78bfa;        /* primary violet */
+      --a2:#f472b6;       /* accent magenta */
+      --ok:#6ee7b7; --warn:#fbbf24; --bad:#f87171;
+      --mini:#fbbf24; --boss:#a78bfa; --final:#ec4899;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0; background:var(--bg); color:var(--t);
+      font-family:"DM Sans",system-ui,sans-serif; line-height:1.55; font-size:1rem;
+    }
+    .top {
+      background:linear-gradient(90deg,#1e1b4b,#831843);
+      padding:.55rem 1rem; font-family:"JetBrains Mono",monospace;
+      font-size:.65rem; letter-spacing:.14em; text-transform:uppercase;
+      text-align:center; color:#fff9;
+    }
+    .w { max-width:1080px; margin:0 auto; padding:2rem 1.25rem 4rem; }
+    h1 { font-size:clamp(1.7rem,3.5vw,2.4rem); margin:0 0 .4rem; letter-spacing:-.02em; }
+    .sub { color:var(--m); max-width:64ch; margin:0 0 1.5rem; }
+    h2 {
+      font-size:1.2rem; color:var(--a); margin:2.5rem 0 .65rem;
+      border-bottom:1px solid var(--b); padding-bottom:.4rem;
+      font-weight:700; letter-spacing:-.01em;
+    }
+    h3 { font-size:1rem; color:var(--a2); margin:1.25rem 0 .4rem; }
+    .card {
+      background:var(--card); border:1px solid var(--b);
+      border-radius:10px; padding:1rem 1.15rem; margin:.75rem 0;
+    }
+    p { margin:.5rem 0; }
+    ul, ol { margin:.4rem 0; padding-left:1.25rem; }
+    li { margin:.3rem 0; }
+    code, .mono {
+      font-family:"JetBrains Mono",monospace; font-size:.82em;
+      background:#0a0b10; padding:.12em .4em; border-radius:4px;
+      border:1px solid var(--b);
+    }
+    .eq {
+      display:block; font-family:"JetBrains Mono",monospace; font-size:.86rem;
+      background:#0a0b10; padding:.7rem .85rem; border-radius:6px;
+      border:1px solid var(--b); border-left:3px solid var(--a2);
+      margin:.65rem 0; overflow-x:auto; white-space:pre;
+    }
+    table {
+      width:100%; border-collapse:collapse; font-size:.84rem; margin:.85rem 0;
+    }
+    th, td {
+      border:1px solid var(--b); padding:.45rem .55rem; text-align:left;
+      vertical-align:top;
+    }
+    th {
+      background:#0a0b10; color:var(--m);
+      font-family:"JetBrains Mono",monospace; font-size:.7rem;
+      text-transform:uppercase; letter-spacing:.05em;
+    }
+    th.r, td.r { text-align:right; font-variant-numeric:tabular-nums; }
+    th.c, td.c { text-align:center; font-variant-numeric:tabular-nums; }
+    tr.mini td { background:rgba(251,191,36,0.06); }
+    tr.boss td { background:rgba(167,139,250,0.08); }
+    tr.final td { background:rgba(236,72,153,0.10); }
+    .tag {
+      display:inline-block; font-size:.66rem; padding:.13rem .45rem;
+      border-radius:999px; border:1px solid var(--b); color:var(--m);
+      font-family:"JetBrains Mono",monospace; letter-spacing:.04em;
+    }
+    .tag-mini { border-color:var(--mini); color:#fde68a; }
+    .tag-boss { border-color:var(--boss); color:#ddd6fe; }
+    .tag-final { border-color:var(--final); color:#fbcfe8; }
+    .tag-tF { color:#cbd5e1; border-color:#475569; }
+    .tag-tE { color:#67e8f9; border-color:#155e75; }
+    .tag-tD { color:#86efac; border-color:#166534; }
+    .tag-tC { color:#fde68a; border-color:#854d0e; }
+    .tag-tB { color:#fca5a5; border-color:#991b1b; }
+    .tag-tA { color:#c4b5fd; border-color:#5b21b6; }
+    .tag-tS { color:#f9a8d4; border-color:#9d174d; }
+    .note {
+      font-size:.88rem; color:var(--m);
+      border-left:3px solid var(--warn);
+      padding:.55rem .8rem; background:#0a0b10;
+      margin:1rem 0; border-radius:0 6px 6px 0;
+    }
+    .note.bad { border-left-color:var(--bad); }
+    .note.good { border-left-color:var(--ok); }
+    .grid2 { display:grid; gap:1rem; grid-template-columns:1fr; }
+    @media(min-width:780px){ .grid2 { grid-template-columns:1fr 1fr; } }
+    .fault {
+      background:var(--bg2); border:1px solid var(--b);
+      border-left:3px solid var(--bad); border-radius:0 8px 8px 0;
+      padding:.65rem .85rem; margin:.55rem 0;
+    }
+    .fault strong { color:#fca5a5; }
+    .fix {
+      background:var(--bg2); border:1px solid var(--b);
+      border-left:3px solid var(--ok); border-radius:0 8px 8px 0;
+      padding:.5rem .8rem; margin:.35rem 0 .85rem; font-size:.92rem;
+    }
+    .fix strong { color:#6ee7b7; }
+    footer {
+      margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--b);
+      font-family:"JetBrains Mono",monospace; font-size:.72rem;
+      color:var(--dim); text-align:center;
+    }
+    .toc {
+      background:var(--bg2); border:1px solid var(--b); border-radius:8px;
+      padding:.85rem 1rem; margin:0 0 1.5rem;
+      font-family:"JetBrains Mono",monospace; font-size:.78rem;
+    }
+    .toc a { color:var(--a); text-decoration:none; margin-right:1rem; }
+    .toc a:hover { color:var(--a2); }
+    .pill {
+      display:inline-block; font-family:"JetBrains Mono",monospace;
+      font-size:.68rem; padding:.18rem .5rem; border-radius:5px;
+      background:#0a0b10; border:1px solid var(--b); color:var(--m);
+      margin:.15rem .25rem .15rem 0;
+    }
+    .pill-on { color:var(--ok); border-color:#166534; }
+    .pill-w { color:#fca5a5; border-color:#7f1d1d; }
+  </style>
+</head>
+<body>
+  <div class="top">Wave roadmap v2 · supersedes ENEMY_WAVE_ROLLOUT_PLAN.html · math + all 54 sprites + boss schedule</div>
+  <div class="w">
+
+    <h1>20-wave roadmap, with math.</h1>
+    <p class="sub">Audit of the v1 plan, then a full rebuild: numbers per wave (NPW), HP / damage / spawn-interval equations, every one of the <strong>54 megapack characters</strong> slotted to a wave band, mini-bosses at 5 / 10 / 15, and a real boss fight at 20. Tuned against what Brotato and Vampire Survivors actually feel like to play.</p>
+
+    <div class="toc">
+      <a href="#faults">1 · faults in v1</a>
+      <a href="#reference">2 · what other games do</a>
+      <a href="#math">3 · the math</a>
+      <a href="#table">4 · 20-wave table</a>
+      <a href="#roster">5 · roster (all 54)</a>
+      <a href="#bosses">6 · mini-boss + boss</a>
+      <a href="#player">7 · player power curve</a>
+      <a href="#impl">8 · build order</a>
+      <a href="#nine">9 · out of scope</a>
+      <a href="#appendix">10 · doc → folder map</a>
+      <a href="#deferred">11 · deferred (do later)</a>
+    </div>
+
+    <!-- ─── 1 FAULTS ─── -->
+    <h2 id="faults">1 — What's broken / weak in the v1 plan</h2>
+    <p>The v1 doc has the right shape, but several gaps would break tuning the moment you start playtesting. Reading it carefully:</p>
+
+    <div class="fault">
+      <strong>Fault A — No numbers per wave (NPW).</strong> v1 says “relaxed interval,” “pressure up,” “hard floor on interval.” That's vibes, not data. You can't tune what you can't count. <em>Wave 1 should spawn N enemies total, with max M alive at once</em> — those numbers don't exist anywhere.
+    </div>
+    <div class="fix"><strong>Fix:</strong> §3 below defines <code>N_total(w)</code> and <code>N_max(w)</code> as equations, then §4 prints the resulting integer per wave.</div>
+
+    <div class="fault">
+      <strong>Fault B — Enemy HP scales but player damage doesn't.</strong> v1 has <code>health_scale_per_wave</code> growing 4–8% per wave, but nothing about player DPS keeping up. If guns stay the same and HP doubles, the player gets <em>slower</em> at clearing without it feeling like power growth — they just feel weaker.
+    </div>
+    <div class="fix"><strong>Fix:</strong> §7 defines a player DPS budget that targets clearing the concurrent-cap in ~5s, so weapon/damage upgrades have a target to hit per shop visit.</div>
+
+    <div class="fault">
+      <strong>Fault C — Mini-boss is one row, not a schedule.</strong> v1 mentions “mini at 5/10/15, boss every 10.” That's a sentence, not a design — what scales between minis? Why does wave 15 mini differ from wave 5? What HP, what damage, what reward?
+    </div>
+    <div class="fix"><strong>Fix:</strong> §6 specifies count, HP multiplier, damage multiplier, reward delta, and a unique twist per mini-boss wave.</div>
+
+    <div class="fault">
+      <strong>Fault D — Tier bands name sprites, but no wave-by-wave unlock.</strong> v1 lists Tier F → Tier S but never says “Sorcerer_LVL2 first appears wave 9.” Without a schedule the spawner has nothing to read.
+    </div>
+    <div class="fix"><strong>Fix:</strong> §5 prints all 54 characters with their unlock wave and tier; §4's table shows which pool is active per wave.</div>
+
+    <div class="fault">
+      <strong>Fault E — Boss wave 20 = “FrogBoss with ×5–8 HP.”</strong> That's a fat trash mob, not a boss. A real boss needs phases, telegraphed attacks, or adds — otherwise the run ends with one big HP sponge.
+    </div>
+    <div class="fix"><strong>Fix:</strong> §6 splits boss into three phases (100/66/33% HP), each unlocking a new attack and an adds wave from the existing megapack.</div>
+
+    <div class="fault">
+      <strong>Fault F — Spawn interval is the only difficulty knob.</strong> v1 says “interval −0.1.” But two enemies at <code>0.4s</code> intervals with HP 50 each is very different from one big enemy every <code>2s</code> with HP 500. v1 conflates pressure with difficulty.
+    </div>
+    <div class="fix"><strong>Fix:</strong> §3 separates four independent levers — spawn rate, HP mult, damage mult, and pool composition — so you can change pressure without changing lethality, or vice versa.</div>
+
+    <div class="fault">
+      <strong>Fault G — No win condition.</strong> Both v1 docs end at “wave 20 boss, ×5–8 HP.” Nothing says what happens when you kill it. Does the run end? Roll into endless? Show a victory screen? Without that decision the rest of the boss design has nothing to anchor to.
+    </div>
+    <div class="fix"><strong>Fix:</strong> §6 specifies: boss death → 3-second cinematic pause → <code>GameManager.win_run()</code> → results screen → meta currency awarded → menu. Endless mode is a separate toggle, not the default. <em>Repo status:</em> <code>win_run()</code> exists on <code>GameManager</code> (cleanup + placeholder meta + victory UI); slow-mo / full results flow still optional polish.</div>
+
+    <h2 id="reference">2 — What other games do (so our numbers aren't pulled from thin air)</h2>
+    <p>Quick reference so the math below is anchored to real, shipped, profitable games rather than guessing.</p>
+    <table>
+      <thead><tr><th>Game</th><th>Run length</th><th>Wave length</th><th>NPW (early)</th><th>NPW (late)</th><th>Concurrent cap (late)</th><th>Boss cadence</th></tr></thead>
+      <tbody>
+        <tr><td>Brotato (D0)</td><td>20 waves, ~10–15 min</td><td>20s → 60s</td><td>~30–50 / wave</td><td>~300–500 / wave</td><td>~80–150</td><td>Wave 20 finale + horde</td></tr>
+        <tr><td>Brotato (D5, max danger)</td><td>20 waves, ~10–15 min</td><td>20s → 60s</td><td>~60 / wave</td><td>~600+ / wave</td><td>~200–300</td><td>Plus elites from w2+</td></tr>
+        <tr><td>Vampire Survivors</td><td>30 min single map</td><td>continuous</td><td>~20–40 / minute</td><td>~200 / minute</td><td>~300 (engine cap)</td><td>Named bosses every 1–5 min</td></tr>
+        <tr><td>Holocure</td><td>20 min or boss kill</td><td>continuous</td><td>~30 / min</td><td>~250 / min</td><td>~250</td><td>5/10/15/20 min bosses</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Reading the table: Brotato D0 = "comfortable but engaging" — that's the difficulty we should match for default. Our curve targets <strong>wave 1: ~14 enemies, wave 20: ~290 enemies, concurrent cap ~110 at peak</strong>. Below Brotato D5 hellfire numbers, well above a sleepy clicker.</p>
+
+    <!-- ─── 3 MATH ─── -->
+    <h2 id="math">3 — The math (the four difficulty levers)</h2>
+    <p>Four independent equations. Each takes the wave number <code>w</code> (1 → 20). You can tune each curve without touching the others.</p>
+
+    <h3>3.1 — Wave duration</h3>
+    <p>How long the player has to survive in a wave (seconds).</p>
+    <span class="eq">D(w) = 20 + 2·w        # seconds
+  → w1=22  w5=30  w10=40  w15=50  w20=60</span>
+    <p>Matches Brotato's 20→60s ramp. Long enough at wave 20 to give the boss room to breathe; short enough at wave 1 not to bore.</p>
+
+    <h3>3.2 — Spawn interval (pressure lever)</h3>
+    <p>Seconds between trash spawns from the ring spawner. Cap floor at 0.4s so it never gets unfair.</p>
+    <span class="eq">T(w) = max(0.4, 2.0 − 0.08·w)        # seconds
+  → w1=1.92  w5=1.60  w10=1.20  w15=0.80  w20=0.40</span>
+
+    <h3>3.3 — Total spawns per wave (the NPW you asked for)</h3>
+    <p>Total enemies that <em>will</em> spawn over the wave. We use a smoother direct curve so wave 20 isn't bottlenecked by the floor of <code>T</code>:</p>
+    <span class="eq">N_total(w) = round(10 + 4·w + 0.5·w²)
+  → w1=14   w2=20   w3=26   w4=34   w5=42
+    w6=52   w7=62   w8=74   w9=86   w10=100
+    w11=114 w12=130 w13=146 w14=164 w15=182
+    w16=202 w17=222 w18=244 w19=266 w20=290*</span>
+    <p>* Wave 20 is a <strong>boss wave override</strong> — it does not follow this formula. Trash is throttled (T=1.0s, N_max=30) so the boss reads clearly. ~60 trash spawns + ~13 scripted boss adds + 1 boss ≈ 75 total enemies. See §6.</p>
+
+    <h3>3.4 — Max concurrent enemies (the screen-pressure lever)</h3>
+    <p>Hard cap on enemies alive at once so the player isn't drowned <em>and</em> performance doesn't tank on low-end PCs.</p>
+    <span class="eq">N_max(w) = round(10 + 2·w + 0.15·w²)
+  → w1=12   w5=24   w10=45   w15=74   w20=110</span>
+    <p>If <code>get_tree().get_nodes_in_group("enemies").size() >= N_max(w)</code>, spawner skips its tick. This is your kindness valve.</p>
+
+    <h3>3.5 — Enemy HP multiplier</h3>
+    <p>Multiplies each enemy's base HP (from its <code>EnemyData.max_health</code>). Capped so wave 20 doesn't turn every goblin into a brick.</p>
+    <span class="eq">HP_mult(w) = min(3.5, 1 + 0.08·(w − 1))
+  → w1=1.00  w5=1.32  w10=1.72  w15=2.12  w20=2.52</span>
+
+    <h3>3.6 — Enemy damage multiplier</h3>
+    <p>Multiplies contact / projectile damage on enemies. Grows slower than HP so the game gets <em>longer</em> before it gets <em>more lethal</em>.</p>
+    <span class="eq">DMG_mult(w) = min(2.0, 1 + 0.04·(w − 1))
+  → w1=1.00  w5=1.16  w10=1.36  w15=1.56  w20=1.76</span>
+
+    <h3>3.7 — XP per kill</h3>
+    <span class="eq">XP_per_kill(w) = round(5 + 0.8·w)
+  → w1=6   w10=13   w20=21</span>
+
+    <h3>3.8 — Gold per kill</h3>
+    <span class="eq">Gold_per_kill(w) = max(1, round(1 + 0.25·w))
+  → w1=1   w5=2   w10=4   w15=5   w20=6</span>
+    <p>Wave 19 total gold ≈ <code>266 × 6 = 1596</code>. Across the whole run a typical player banks ~5–7k gold before the boss intro — enough to fully kit out the final shop visit.</p>
+
+    <h3>3.9 — Player DPS budget (target, not enforced)</h3>
+    <p>For the player to feel powerful, they should be able to clear <code>N_max(w)</code> enemies in roughly 5 seconds. So the required DPS is:</p>
+    <span class="eq">DPS_target(w) = (N_max(w) · HP_avg_pool(w)) / 5
+  HP_avg_pool(w) ≈ HP_mult(w) · base_avg(w)
+  base_avg(w) grows from 15 (w1 trash) → 80 (w20 trash) as pool shifts</span>
+    <p>Concrete: wave 10 ≈ <code>(45 · 1.72 · 40) / 5 = 619 DPS</code>. Wave 20 ≈ <code>(110 · 2.52 · 80) / 5 ≈ 4435 DPS</code>. Your default weapon at <code>10 dmg × 4 shots/s = 40 DPS</code>, so the player needs roughly <strong>×100 effective DPS growth across the run</strong>. That's what items and weapon upgrades pay for — see §7.</p>
+
+    <!-- ─── 4 TABLE ─── -->
+    <h2 id="table">4 — The 20-wave table (the actual schedule)</h2>
+    <p>Each row is one <code>WaveData.tres</code>. Columns map 1-to-1 with fields you'll add to <code>WaveData.gd</code>.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>W</th>
+          <th>Dur (s)</th>
+          <th>T (s)</th>
+          <th class="r">N_total</th>
+          <th class="r">N_max</th>
+          <th class="r">HP×</th>
+          <th class="r">DMG×</th>
+          <th>Trash pool unlock</th>
+          <th>Event</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>22</td><td>1.92</td><td class="r">14</td><td class="r">12</td><td class="r">1.00</td><td class="r">1.00</td><td>Dummy_LVL1, Mushroom, Goblin_Regular green</td><td>—</td></tr>
+        <tr><td>2</td><td>24</td><td>1.84</td><td class="r">20</td><td class="r">15</td><td class="r">1.08</td><td class="r">1.04</td><td>+ Dummy_LVL2, Goblin_Regular blue</td><td>—</td></tr>
+        <tr><td>3</td><td>26</td><td>1.76</td><td class="r">26</td><td class="r">17</td><td class="r">1.16</td><td class="r">1.08</td><td>+ Goblin_Barrel green, Monsterfly_01</td><td>—</td></tr>
+        <tr><td>4</td><td>28</td><td>1.68</td><td class="r">34</td><td class="r">20</td><td class="r">1.24</td><td class="r">1.12</td><td>+ Dummy_LVL3, Goblin_Regular red, Ent_LVL1</td><td>—</td></tr>
+        <tr class="mini"><td>5</td><td>30</td><td>1.60</td><td class="r">42</td><td class="r">24</td><td class="r">1.32</td><td class="r">1.16</td><td>+ Goblin_Barrel blue, Mimic_LVL1</td><td><span class="tag tag-mini">MINI 1</span> Cyclop_Archer_01 ×1, HP ×3.0, DMG ×1.5</td></tr>
+        <tr><td>6</td><td>32</td><td>1.52</td><td class="r">52</td><td class="r">27</td><td class="r">1.40</td><td class="r">1.20</td><td>+ Dummy_LVL4, Goblin_Barrel red, Dwarfette_LVL1</td><td>—</td></tr>
+        <tr><td>7</td><td>34</td><td>1.44</td><td class="r">62</td><td class="r">31</td><td class="r">1.48</td><td class="r">1.24</td><td>+ FrogMonster, Ent_LVL2</td><td>—</td></tr>
+        <tr><td>8</td><td>36</td><td>1.36</td><td class="r">74</td><td class="r">36</td><td class="r">1.56</td><td class="r">1.28</td><td>+ Mimic_LVL2, Sorcerer_LVL1, Orc_Archer green</td><td>—</td></tr>
+        <tr><td>9</td><td>38</td><td>1.28</td><td class="r">86</td><td class="r">40</td><td class="r">1.64</td><td class="r">1.32</td><td>+ Dwarfette_LVL2, Knight_LVL1</td><td>Drop Dummy_LVL1–2 from pool</td></tr>
+        <tr class="mini"><td>10</td><td>40</td><td>1.20</td><td class="r">100</td><td class="r">45</td><td class="r">1.72</td><td class="r">1.36</td><td>+ RhinoMonster_01 Regular, Orc_Barbare green</td><td><span class="tag tag-mini">MINI 2</span> Vampire_Archer ×1 + RhinoMonster_02 Silver ×1, HP ×3.5 each</td></tr>
+        <tr><td>11</td><td>42</td><td>1.12</td><td class="r">114</td><td class="r">50</td><td class="r">1.80</td><td class="r">1.40</td><td>+ Ent_LVL3, Sorcerer_LVL2, Orc_Archer blue</td><td>Drop Goblin_Regular green/blue</td></tr>
+        <tr><td>12</td><td>44</td><td>1.04</td><td class="r">130</td><td class="r">56</td><td class="r">1.88</td><td class="r">1.44</td><td>+ Mimic_LVL3, Dwarfette_LVL3, Knight_LVL2</td><td>—</td></tr>
+        <tr><td>13</td><td>46</td><td>0.96</td><td class="r">146</td><td class="r">61</td><td class="r">1.96</td><td class="r">1.48</td><td>+ RhinoMonster_03 Gold, Orc_Barbare blue</td><td>—</td></tr>
+        <tr><td>14</td><td>48</td><td>0.88</td><td class="r">164</td><td class="r">67</td><td class="r">2.04</td><td class="r">1.52</td><td>+ Sorcerer_LVL3, MonsterSlasher_01</td><td>—</td></tr>
+        <tr class="mini"><td>15</td><td>50</td><td>0.80</td><td class="r">182</td><td class="r">74</td><td class="r">2.12</td><td class="r">1.56</td><td>+ Ent_LVL4, Orc_Archer red</td><td><span class="tag tag-mini">MINI 3</span> Knight_LVL3 ×2 + Mimic_LVL4 ×1, HP ×3.0 each + shared "shield" buff</td></tr>
+        <tr><td>16</td><td>52</td><td>0.72</td><td class="r">202</td><td class="r">80</td><td class="r">2.20</td><td class="r">1.60</td><td>+ RhinoMonster_05 Orc, RhinoMonster_06 OrcRed</td><td>Drop Goblin_Regular red, Monsterfly</td></tr>
+        <tr><td>17</td><td>54</td><td>0.64</td><td class="r">222</td><td class="r">87</td><td class="r">2.28</td><td class="r">1.64</td><td>+ Dwarfette_LVL4, Orc_Barbare red, Sorcerer_LVL4</td><td>—</td></tr>
+        <tr><td>18</td><td>56</td><td>0.56</td><td class="r">244</td><td class="r">95</td><td class="r">2.36</td><td class="r">1.68</td><td>+ RhinoMonster_04 Devil, Knight_LVL4</td><td>—</td></tr>
+        <tr><td>19</td><td>58</td><td>0.48</td><td class="r">266</td><td class="r">102</td><td class="r">2.44</td><td class="r">1.72</td><td>+ RhinoMonster_07 Frozen, 08 Bioluminescent, 09 Radioactive, 10 Oniric</td><td>"Rhino night" — all 10 rhinos in pool, ×1.1 weight</td></tr>
+        <tr class="final"><td>20</td><td>60</td><td>1.00*</td><td class="r">~75*</td><td class="r">30*</td><td class="r">2.52</td><td class="r">1.76</td><td>Throttled trash (tier D + E only) + scripted boss adds</td><td><span class="tag tag-final">FINAL BOSS</span> FrogBoss + GameMaster phase 3 — see §6</td></tr>
+      </tbody>
+    </table>
+    <p class="note good"><strong>Reading the table:</strong> spawn interval (T) hits its floor at wave 20, so beyond that pressure can't increase via timing — it has to come from <em>composition</em> (which is why pool widens late). HP and DMG multipliers grow linearly. If wave 13 feels too easy in playtest, the lever to twist first is <em>pool composition</em> (swap a Goblin slot for a Rhino), not raw HP.</p>
+
+    <!-- ─── 5 ROSTER ─── -->
+    <h2 id="roster">5 — Full 54-character roster → tiers and unlock waves</h2>
+    <p>Every sprite folder under <code>assets/sprites/characters/megapack/</code>. Tier sets base stats; unlock wave is the earliest wave the type can appear in the trash pool. Mini-boss bodies can appear earlier as mini-bosses (with their HP multiplier) before they appear as trash.</p>
+
+    <h3>Tier F — Tutorial trash · base HP 12 · speed 70 · damage 4</h3>
+    <p>
+      <span class="pill">Dummy_LVL1 <em>(w1)</em></span>
+      <span class="pill">Dummy_LVL2 <em>(w2)</em></span>
+      <span class="pill">Dummy_LVL3 <em>(w4)</em></span>
+      <span class="pill">Dummy_LVL4 <em>(w6)</em></span>
+      <span class="pill">Mushroom <em>(w1)</em></span>
+      <span class="pill">Goblin_Regular green <em>(w1)</em></span>
+    </p>
+    <p style="font-size:.86rem;color:var(--m)">6 sprites. These die in 1–2 hits. Stay in pool through ~w8, then start dropping from rotation as harder enemies replace them.</p>
+
+    <h3>Tier E — Early swarm · base HP 25 · speed 90 · damage 6</h3>
+    <p>
+      <span class="pill">Goblin_Regular blue <em>(w2)</em></span>
+      <span class="pill">Goblin_Regular red <em>(w4)</em></span>
+      <span class="pill">Goblin_Barrel green <em>(w3)</em></span>
+      <span class="pill">Goblin_Barrel blue <em>(w5)</em></span>
+      <span class="pill">Goblin_Barrel red <em>(w6)</em></span>
+      <span class="pill">Monsterfly_01 <em>(w3)</em></span>
+      <span class="pill">Ent_LVL1 <em>(w4)</em></span>
+    </p>
+    <p style="font-size:.86rem;color:var(--m)">7 sprites. Barrels = explosive variant (slow, big AOE on death — future feature, ship as fast goblin first).</p>
+
+    <h3>Tier D — Mid-game · base HP 45 · speed 80 · damage 9</h3>
+    <p>
+      <span class="pill">Ent_LVL2 <em>(w7)</em></span>
+      <span class="pill">FrogMonster <em>(w7)</em></span>
+      <span class="pill">Mimic_LVL1 <em>(w5)</em></span>
+      <span class="pill">Mimic_LVL2 <em>(w8)</em></span>
+      <span class="pill">Dwarfette_LVL1 <em>(w6)</em></span>
+      <span class="pill">Dwarfette_LVL2 <em>(w9)</em></span>
+      <span class="pill">Sorcerer_LVL1 <em>(w8)</em></span>
+      <span class="pill">Orc_Archer green <em>(w8)</em></span>
+    </p>
+    <p style="font-size:.86rem;color:var(--m)">8 sprites. Sorcerers + archers want ranged behavior eventually — they read as ranged from the sprite, so it'll feel wrong to make them melee forever. Phase D-2 of the build adds a <code>RangedEnemyAI</code> behavior.</p>
+
+    <h3>Tier C — Mid-late · base HP 70 · speed 70 · damage 12</h3>
+    <p>
+      <span class="pill">RhinoMonster_01 Regular <em>(w10)</em></span>
+      <span class="pill">RhinoMonster_02 Silver <em>(w10 mini)</em></span>
+      <span class="pill">Knight_LVL1 <em>(w9)</em></span>
+      <span class="pill">Knight_LVL2 <em>(w12)</em></span>
+      <span class="pill">Sorcerer_LVL2 <em>(w11)</em></span>
+      <span class="pill">Orc_Barbare green <em>(w10)</em></span>
+      <span class="pill">Orc_Archer blue <em>(w11)</em></span>
+      <span class="pill">Ent_LVL3 <em>(w11)</em></span>
+      <span class="pill">Dwarfette_LVL3 <em>(w12)</em></span>
+      <span class="pill">Mimic_LVL3 <em>(w12)</em></span>
+    </p>
+    <p style="font-size:.86rem;color:var(--m)">10 sprites. Rhinos have a charge animation in the megapack — wire <code>Charge_Begin</code> → <code>Charge_Full</code> → <code>Charge_Recover</code> as a windup attack later. Ship as plain ram first.</p>
+
+    <h3>Tier B — Heavy · base HP 110 · speed 60 · damage 16</h3>
+    <p>
+      <span class="pill">RhinoMonster_03 Gold <em>(w13)</em></span>
+      <span class="pill">RhinoMonster_05 Orc <em>(w16)</em></span>
+      <span class="pill">RhinoMonster_06 OrcRed <em>(w16)</em></span>
+      <span class="pill">Sorcerer_LVL3 <em>(w14)</em></span>
+      <span class="pill">Sorcerer_LVL4 <em>(w17)</em></span>
+      <span class="pill">Orc_Archer red <em>(w15)</em></span>
+      <span class="pill">Orc_Barbare blue <em>(w13)</em></span>
+      <span class="pill">Orc_Barbare red <em>(w17)</em></span>
+      <span class="pill">MonsterSlasher_01 <em>(w14)</em></span>
+      <span class="pill">Ent_LVL4 <em>(w15)</em></span>
+      <span class="pill">Mimic_LVL4 <em>(w15 mini)</em></span>
+      <span class="pill">Dwarfette_LVL4 <em>(w17)</em></span>
+    </p>
+    <p style="font-size:.86rem;color:var(--m)">12 sprites. The wall of difficulty starts here. Mix these with tier C trash; don't run a wave that's pure tier B or the player just kites forever.</p>
+
+    <h3>Tier A — Elite / mini-boss bodies · base HP 180 · speed 65 · damage 22</h3>
+    <p>
+      <span class="pill">Cyclop_Archer_01 <em>(w5 mini, w15 trash)</em></span>
+      <span class="pill">Vampire_Archer_01 <em>(w10 mini, w16 trash)</em></span>
+      <span class="pill">Knight_LVL3 <em>(w15 mini, w18 trash)</em></span>
+      <span class="pill">Knight_LVL4 <em>(w18)</em></span>
+      <span class="pill">RhinoMonster_04 Devil <em>(w18)</em></span>
+      <span class="pill">RhinoMonster_07 Frozen <em>(w19)</em></span>
+      <span class="pill">RhinoMonster_08 Bioluminescent <em>(w19)</em></span>
+      <span class="pill">RhinoMonster_09 Radioactive <em>(w19)</em></span>
+      <span class="pill">RhinoMonster_10 Oniric <em>(w19)</em></span>
+    </p>
+    <p style="font-size:.86rem;color:var(--m)">9 sprites. These do double duty — first appear as mini-bosses with HP multiplier, then re-enter the pool as scary-but-killable trash a few waves later.</p>
+
+    <h3>Tier S — Boss only · base HP 2500 (w20) · damage 35</h3>
+    <p>
+      <span class="pill">FrogBoss <em>(w20 phase 1–2)</em></span>
+      <span class="pill">GameMaster <em>(w20 phase 3, optional alt)</em></span>
+    </p>
+    <p style="font-size:.86rem;color:var(--m)">2 sprites. FrogBoss is the main fight; GameMaster appears as a phase-3 transformation or alt boss for a future variant run.</p>
+
+    <p class="note good">Count check: 6 + 7 + 8 + 10 + 12 + 9 + 2 = <strong>54 sprites accounted for</strong>, exactly matching the folder count.</p>
+
+    <!-- ─── 6 BOSSES ─── -->
+    <h2 id="bosses">6 — Mini-boss schedule + final boss design</h2>
+
+    <h3>6.1 — Mini-boss generic rules</h3>
+    <ul>
+      <li>Spawn at <strong>wave start</strong>, before trash ramp begins (1s delay).</li>
+      <li><code>add_to_group("mini_boss")</code> so UI can show a skull icon and a separate HP bar.</li>
+      <li>Visual: <code>scale = Vector2(1.15, 1.15)</code> + slight red modulate to read as "elite."</li>
+      <li>Death reward: <code>3× gold</code>, drops a guaranteed large XP gem worth <code>5× normal kill XP</code>.</li>
+      <li>Mini-bosses do <strong>not</strong> count toward <code>N_total</code>; trash still spawns normally around them.</li>
+    </ul>
+
+    <h3>6.2 — The three minis</h3>
+    <table>
+      <thead><tr><th>Wave</th><th>Identity</th><th>Count</th><th>HP ×</th><th>DMG ×</th><th>Twist</th></tr></thead>
+      <tbody>
+        <tr><td>5</td><td>Cyclop_Archer_01</td><td>1</td><td>3.0</td><td>1.5</td><td>First mini, simple — same AI as trash, just chunkier.</td></tr>
+        <tr><td>10</td><td>Vampire_Archer_01 + RhinoMonster_02 Silver</td><td>2 (one of each)</td><td>3.5</td><td>1.5</td><td>Two health bars, two threats. Forces target prioritization.</td></tr>
+        <tr><td>15</td><td>Knight_LVL3 + Mimic_LVL4</td><td>3 (2 knights, 1 mimic)</td><td>3.0</td><td>1.5</td><td>"Shield link" — all 3 take 50% reduced damage while ≥2 are alive. Kill order matters.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>6.3 — Final boss (wave 20)</h3>
+    <p>Wave 20 is the entire run's payoff. Trash spawns are <strong>throttled</strong> (T = 1.0s instead of 0.4s) and <code>N_max</code> is reduced to 30 so the boss is readable.</p>
+    <p><strong>Boss:</strong> FrogBoss, base HP 2500, scaled to ~6300 HP at wave 20 multiplier.</p>
+    <ul>
+      <li><strong>Phase 1 (100% → 66% HP)</strong> — Slow chase. Periodic tongue lash attack (single-line telegraph, 1.2s windup). Trash pool: tier D + E only.</li>
+      <li><strong>Phase 2 (66% → 33% HP)</strong> — Adds wave on transition: spawn 8 × Goblin_Barrel red (suicide bombers) all at once. Boss gains "leap" attack — short telegraph circle, deals high damage on landing.</li>
+      <li><strong>Phase 3 (33% → 0% HP)</strong> — Adds wave: spawn 1 × GameMaster + 4 × Mushroom (poison cloud variant — future). Boss now also fires a 5-projectile spread on a 4s cooldown.</li>
+      <li><strong>Death</strong> — All remaining enemies die, 3-second slow-mo, <code>GameManager.win_run()</code>, results screen, run ends.</li>
+    </ul>
+
+    <p class="note">Coding shortcut: phase transitions can be three booleans on the boss script + a signal each time HP crosses a threshold. You do NOT need a state machine. Yet.</p>
+
+    <!-- ─── 7 PLAYER POWER ─── -->
+    <h2 id="player">7 — Player power curve (so guns scale with enemies)</h2>
+    <p>If you don't scale the player, the curve from §3.5–3.6 means the run gets unwinnable around wave 12. Three independent player levers:</p>
+
+    <h3>7.1 — Weapon tiers (shop unlocks)</h3>
+    <table>
+      <thead><tr><th>Wave unlocked</th><th>Tier</th><th>Base DPS</th><th>Example name</th></tr></thead>
+      <tbody>
+        <tr><td>1 (default)</td><td>I — Pistol</td><td>40</td><td>Rusted Revolver</td></tr>
+        <tr><td>4 (shop)</td><td>II — SMG</td><td>120</td><td>Cracked SMG</td></tr>
+        <tr><td>8 (shop)</td><td>III — Shotgun</td><td>320</td><td>Wormtooth Shotgun</td></tr>
+        <tr><td>12 (shop)</td><td>IV — Crossbow</td><td>800</td><td>Bone Crossbow</td></tr>
+        <tr><td>16 (shop)</td><td>V — Plasma</td><td>2000</td><td>Voidlance</td></tr>
+        <tr><td>19 (rare shop roll)</td><td>VI — Mythic</td><td>5000</td><td>Crowned Calamity</td></tr>
+      </tbody>
+    </table>
+    <p>Each tier is roughly <strong>×2.5–3 the previous</strong>. Player carries 1–2 weapons; the ramp from <code>DPS_target</code> in §3.9 is met if they buy roughly every other tier on schedule.</p>
+
+    <h3>7.2 — Item-stat multipliers</h3>
+    <p>Items multiply weapon DPS via 4 stats — these get aggregated into the equation below:</p>
+    <span class="eq">effective_DPS = weapon_DPS
+             × (1 + damage_pct)
+             × (1 + atk_speed_pct)
+             × (1 + crit_chance · crit_mult)
+             × projectile_count</span>
+    <p>By wave 20 a typical run should hit roughly <code>+150% damage, +80% atk speed, 30% crit @ 2× mult, 2 projectiles</code>: <code>5000 × 2.5 × 1.8 × 1.6 × 2 ≈ 72000 DPS</code> peak — well above the <code>4435 DPS_target</code> from §3.9, leaving headroom for unlucky runs.</p>
+
+    <h3>7.3 — Survivability scaling</h3>
+    <p>Enemy DMG multiplier hits 1.76× at wave 20. Player max HP should grow to ~3× via items + level-ups, so they take real damage but aren't one-shot.</p>
+    <span class="eq">target_player_HP(w) ≈ 100 · (1 + 0.10·w)
+  → w1=110  w10=200  w20=300</span>
+
+    <!-- ─── 8 BUILD ORDER ─── -->
+    <h2 id="impl">8 — Build order (small scope, ship-able chunks)</h2>
+    <p>Don't try to land this whole doc in one weekend. Five chunks, each one playable on its own:</p>
+
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">Chunk 1 — Spine (1 evening)</h3>
+        <ul>
+          <li>Add <code>@export var waves: Array[WaveData]</code> to <code>WaveManager</code>.</li>
+          <li><code>_start_wave()</code> reads <code>waves[current_wave - 1]</code>, applies <code>wave_duration</code>, <code>spawn_interval</code>, calls <code>spawner.apply_wave(wave_data)</code>.</li>
+          <li><code>EnemySpawner.apply_wave()</code> replaces its <code>enemy_scenes</code> with the wave's pool.</li>
+          <li>Create <code>wave_01.tres</code> through <code>wave_05.tres</code> with numbers from §4. Game should now play differently per wave.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Chunk 2 — Scaling hook (1 evening)</h3>
+        <ul>
+          <li>Add <code>EnemyScaler.apply(enemy, wave)</code> static utility — multiplies HP and damage from <code>EnemyData</code> by the curves in §3.5 / §3.6.</li>
+          <li>Call from <code>EnemySpawner._spawn_enemy()</code> right after <code>instantiate()</code>.</li>
+          <li>Cap <code>N_max</code>: spawner skips its tick if <code>get_tree().get_nodes_in_group("enemies").size() >= N_max(current_wave)</code>.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Chunk 3 — Roster + tier scenes (3–4 evenings)</h3>
+        <ul>
+          <li>Write a one-off editor script that walks <code>assets/sprites/characters/megapack/</code> and emits one <code>EnemyData.tres</code> + one <code>Enemy_&lt;name&gt;.tscn</code> per folder, using tier base stats from §5.</li>
+          <li>Hand-assign per-tier stats (HP, speed, damage) on the EnemyData; sprite paths come from the folder.</li>
+          <li>Fill <code>wave_06.tres</code> through <code>wave_20.tres</code> using §4.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Chunk 4 — Mini-boss channel (1 evening)</h3>
+        <ul>
+          <li>Extend <code>WaveData</code>: <code>mini_boss_scene: PackedScene</code>, <code>mini_boss_count: int</code>, <code>mini_boss_hp_mult: float</code>, <code>mini_boss_dmg_mult: float</code>.</li>
+          <li>On <code>wave_started</code>, if <code>mini_boss_scene != null</code>, spawn at start with multipliers, add to <code>"mini_boss"</code> group.</li>
+          <li>Wave 15 "shield link" can be a future polish pass — ship the simple version first.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Chunk 5 — Final boss (2–3 evenings)</h3>
+        <ul>
+          <li>New scene <code>Enemy_FrogBoss.tscn</code> with a dedicated <code>FrogBossAI.gd</code> (don't reuse <code>EnemyAI</code> here — boss earns its own script).</li>
+          <li>Three phase booleans + HP-threshold signals. Phase 1 = wired AI. Phases 2 + 3 add one attack each.</li>
+          <li><code>GameManager.win_run()</code> + simple results screen. Endless mode is a flag on <code>GameManager</code>, default off.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Chunk 6 — Player power (parallel anytime)</h3>
+        <ul>
+          <li>Author <code>WeaponData</code> resources for tiers I → VI per §7.1.</li>
+          <li>Shop rolls weighted by current wave — only show appropriate tier or one below.</li>
+          <li>Item resources for the four stat buckets in §7.2.</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="note good"><strong>Order matters:</strong> chunks 1 + 2 alone make the game feel like it has waves. Don't author all 54 scenes before that spine works — you'll re-do half of them when you realize the scaling needs a different export.</p>
+
+    <h2 id="nine">9 — What I'm NOT putting in this doc on purpose</h2>
+    <ul>
+      <li><strong>Difficulty modes / danger levels.</strong> Brotato has 5 of these. We don't need them for v1 — ship the default curve, add a "Hard" toggle later that just multiplies HP/DMG by 1.25.</li>
+      <li><strong>Status effects (burn, slow, poison).</strong> Tempting, but they're a multi-week system. Skip until after first playtest.</li>
+      <li><strong>Enemy abilities beyond contact damage.</strong> Charges, ranged shots, leaps — those are tier-by-tier polish. The math above works with everyone running at the player.</li>
+      <li><strong>Procedural wave generation.</strong> 20 hand-authored <code>WaveData.tres</code> files. No PCG. You'll thank yourself when tuning.</li>
+    </ul>
+
+    <h2 id="appendix">10 — Doc label → megapack folder (canonical paths)</h2>
+    <p>Pills and the wave table use <strong>short names</strong> for readability. On disk, art lives under <code class="mono">res://assets/sprites/characters/megapack/&lt;FolderName&gt;/</code>. Everything below was checked against this repo so generators and scene authors point at the <strong>real</strong> folder.</p>
+
+    <h3>10.1 — Goblins &amp; Orcs (short name → exact folder)</h3>
+    <table>
+      <thead><tr><th>Label in this doc</th><th>Megapack folder (exact)</th></tr></thead>
+      <tbody>
+        <tr><td>Goblin_Regular green</td><td><code>Goblin_Regular_01 (Green Skinned)</code></td></tr>
+        <tr><td>Goblin_Regular blue</td><td><code>Goblin_Regular_02 (Blue Skinned)</code></td></tr>
+        <tr><td>Goblin_Regular red</td><td><code>Goblin_Regular_03 (Red Skinned)</code></td></tr>
+        <tr><td>Goblin_Barrel green</td><td><code>Goblin_Barrel_01 (Green Skinned)</code></td></tr>
+        <tr><td>Goblin_Barrel blue</td><td><code>Goblin_Barrel_02 (Blue Skinned)</code></td></tr>
+        <tr><td>Goblin_Barrel red</td><td><code>Goblin_Barrel_03 (Red Skinned)</code></td></tr>
+        <tr><td>Orc_Archer green</td><td><code>Orc_Archer_01 (Green Skinned)</code></td></tr>
+        <tr><td>Orc_Archer blue</td><td><code>Orc_Archer_02 (Blue Skinned)</code></td></tr>
+        <tr><td>Orc_Archer red</td><td><code>Orc_Archer_03 (Red Skinned)</code></td></tr>
+        <tr><td>Orc_Barbare green</td><td><code>Orc_Barbare_01 (Green Skinned)</code></td></tr>
+        <tr><td>Orc_Barbare blue</td><td><code>Orc_Barbare_02 (Blue Skinned)</code></td></tr>
+        <tr><td>Orc_Barbare red</td><td><code>Orc_Barbare_03 (Red Skinned)</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>10.2 — Wave table phrasing → Rhino folders (spaces vs underscores)</h3>
+    <p>The §4 table sometimes writes human-readable names with spaces. Folders use underscores.</p>
+    <table>
+      <thead><tr><th>Text in §4 table</th><th>Megapack folder (exact)</th></tr></thead>
+      <tbody>
+        <tr><td>RhinoMonster_01 Regular</td><td><code>RhinoMonster_01_Regular</code></td></tr>
+        <tr><td>RhinoMonster_02 Silver</td><td><code>RhinoMonster_02_Silver</code></td></tr>
+        <tr><td>RhinoMonster_03 Gold</td><td><code>RhinoMonster_03_Gold</code></td></tr>
+        <tr><td>RhinoMonster_04 Devil</td><td><code>RhinoMonster_04_Devil</code></td></tr>
+        <tr><td>RhinoMonster_05 Orc</td><td><code>RhinoMonster_05_Orc</code></td></tr>
+        <tr><td>RhinoMonster_06 OrcRed</td><td><code>RhinoMonster_06_OrcRedSkinned</code></td></tr>
+        <tr><td>RhinoMonster_07 Frozen</td><td><code>RhinoMonster_07_Frozen</code></td></tr>
+        <tr><td>RhinoMonster_08 Bioluminescent</td><td><code>RhinoMonster_08_Bioluminescent</code></td></tr>
+        <tr><td>RhinoMonster_09 Radioactive</td><td><code>RhinoMonster_09_Radioactive</code></td></tr>
+        <tr><td>RhinoMonster_10 Oniric</td><td><code>RhinoMonster_10_Oniric</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>10.3 — One-to-one names (doc = folder)</h3>
+    <p>All other roster entries in §5 — <code>Dummy_LVL1</code>, <code>Mushroom</code>, <code>Monsterfly_01</code>, <code>Ent_LVL1</code>–<code>Ent_LVL4</code>, <code>Mimic_LVL1</code>–<code>Mimic_LVL4</code>, <code>Dwarfette_LVL1</code>–<code>Dwarfette_LVL4</code>, <code>FrogMonster</code>, <code>Sorcerer_LVL1</code>–<code>Sorcerer_LVL4</code>, <code>Knight_LVL1</code>–<code>Knight_LVL4</code>, <code>MonsterSlasher_01</code>, <code>Cyclop_Archer_01</code>, <code>Vampire_Archer_01</code>, <code>FrogBoss</code>, <code>GameMaster</code> — use the <strong>same</strong> string as the megapack directory name (no skin suffix).</p>
+
+    <h2 id="deferred">11 — Deferred work (known gaps, tackle after spine ships)</h2>
+    <p class="note">These items were flagged during roadmap review. <strong>Not blocking</strong> the next implementation chunk — write them down so we can move on and come back without losing context.</p>
+
+    <div class="card">
+      <h3 style="margin-top:0">11.1 — Spawn count vs timer (<code>N_total</code>)</h3>
+      <p><strong>Plain English:</strong> The math says “this wave should spawn about <em>N</em> enemies,” but the game only has a <em>clock between spawns</em> right now. It does <strong>not</strong> yet count “I have spawned 14 of 14 for wave 1, so stop.”</p>
+      <p><strong>Later:</strong> Add a counter on <code>EnemySpawner</code> (or wave controller): each trash spawn increments; when <code>spawns_done &gt;= N_total</code> for the active wave, stop spawning trash. Respect pauses (level-up / shop) and wave-20 boss overrides.</p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">11.2 — Wave 15 “shield link” mini-boss</h3>
+      <p><strong>Plain English:</strong> The idea that multiple minis share damage reduction until enough die is cool but <strong>extra systems</strong> (buff link, UI, edge cases).</p>
+      <p><strong>Later:</strong> Ship simple minis first (spawn + HP multiplier only). Add shield-link as a polish pass once minis feel good.</p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">11.3 — §7 player power numbers = targets, not proven</h3>
+      <p><strong>Plain English:</strong> Weapon tiers, item % stacks, and DPS math are <strong>starting guesses</strong>. They will move after real playtests once waves + shop exist.</p>
+      <p><strong>Later:</strong> First balance pass after Chunk 1–2 (wave spine + scaling) land.</p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">11.4 — Win flow polish (post-<code>win_run()</code>)</h3>
+      <p><strong>Plain English:</strong> <code>GameManager.win_run()</code> now clears enemies, stops the spawner, rolls placeholder meta, and fires victory UI. The doc still dreams of <strong>slow-mo</strong>, a dedicated <strong>results scene</strong>, <strong>persistent meta save</strong>, and an <strong>endless</strong> toggle.</p>
+      <p><strong>Later:</strong> Hook <code>victory_rewards_applied</code> to a real meta autoload; add cinematic pause; split “results” from <code>GameOverUI</code> if needed.</p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">11.5 — Two rollout HTML files</h3>
+      <p><strong>Plain English:</strong> This file (<code>Main_ENEMY_WAVE_ROADMAP_V2.html</code>) is canonical. <code>ENEMY_WAVE_ROLLOUT_PLAN.html</code> is the older v1-style note.</p>
+      <p><strong>Later:</strong> Archive or delete v1 when nobody references it, to avoid opening the wrong doc.</p>
+    </div>
+
+    <footer>
+      <code>docs/Main_ENEMY_WAVE_ROADMAP_V2.html</code> · supersedes <code>docs/ENEMY_WAVE_ROLLOUT_PLAN.html</code> · numbers are starting points, twist them in playtest
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3]
+
+; ── Script ──
+[ext_resource type="Script" path="res://scripts/items/pickups/XPGem.gd" id="1_gem"]
+
+; ── Small circle for the pickup area ──
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 6.0
+
+; ────────────────────────────────────────────────────────────────
+; NODE TREE
+;
+; XPGem (Area2D)            ← XPGem.gd — flies to player, gives XP on collect
+; ├── Sprite2D              ← drag a gem sprite here
+; └── CollisionShape2D      ← small circle, 6px radius
+;
+; The XPGem uses distance checks in _process(), NOT collision signals,
+; so the Area2D collision is just for visual reference / future use.
+; ────────────────────────────────────────────────────────────────
+
+[node name="XPGem" type="Area2D"]
+script = ExtResource("1_gem")
+; xp_value = 5, attract_radius = 150.0, collect_radius = 20.0 (all @export, adjust in Inspector)
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+; TODO: assign a gem sprite from assets/sprites/effects/gems/
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_1")

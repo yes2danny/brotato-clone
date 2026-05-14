@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="XPDropSettings" load_steps=3 format=3 uid="uid://xp_drop_settings_01"]
+
+[ext_resource type="Script" path="res://scripts/items/pickups/XPDropSettings.gd" id="1_settings"]
+[ext_resource type="PackedScene" path="res://scenes/items/pickups/XPGem.tscn" id="2_gem"]
+
+[resource]
+script = ExtResource("1_settings")
+pickup_scene = ExtResource("2_gem")
+xp_per_drop = 5
+spawn_scatter_radius = 18.0

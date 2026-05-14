@@ -1,0 +1,101 @@
+[gd_scene format=3 uid="uid://ps2fjjq5qs2n"]
+
+[ext_resource type="PackedScene" uid="uid://dlddurcnse07t" path="res://scenes/player/Player.tscn" id="1_player"]
+[ext_resource type="Script" uid="uid://dnnwgwhoednv8" path="res://scripts/player/CameraFollow.gd" id="2_camera"]
+[ext_resource type="Script" uid="uid://cw3vmy2tidwyq" path="res://scripts/enemies/spawning/EnemySpawner.gd" id="3_spawner"]
+[ext_resource type="Script" uid="uid://chif7nywae83" path="res://scripts/enemies/spawning/WaveManager.gd" id="4_wave"]
+[ext_resource type="Script" uid="uid://cddyueu8ann4h" path="res://scripts/shop/ShopManager.gd" id="5_shop"]
+[ext_resource type="Script" uid="uid://bdwre7a3vbkjm" path="res://scripts/systems/UpgradeManager.gd" id="6_upgrade"]
+[ext_resource type="Script" uid="uid://c5eb7tq31i3g" path="res://scripts/ui/hud/GameUI.gd" id="7_gameui"]
+[ext_resource type="Script" uid="uid://dkxaoc51542qm" path="res://scripts/ui/menus/PauseMenu.gd" id="8_pause"]
+[ext_resource type="Script" uid="uid://f5bksi0gwd7t" path="res://scripts/ui/menus/GameOverUI.gd" id="9_gameover"]
+[ext_resource type="Script" uid="uid://td71xf2yllrr" path="res://scripts/ui/shop/ShopUI.gd" id="10_shopui"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/Enemy.tscn" id="11_enemy"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/Enemy_GoblinBlue.tscn" id="12_enemy_blue"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/Enemy_GoblinRed.tscn" id="13_enemy_red"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/Enemy_Cyclop.tscn" id="14_enemy_cyclop"]
+[ext_resource type="PackedScene" uid="uid://c83u3rjuupajm" path="res://scenes/world/maps/room_crypt.tscn" id="15_map"]
+[ext_resource type="Script" uid="uid://bxtix7slpbot1" path="res://scripts/world/MapBoundary.gd" id="16_boundary"]
+[ext_resource type="Resource" path="res://resources/items/passive/heart_charm.tres" id="17_heart"]
+[ext_resource type="Resource" path="res://resources/items/passive/swift_boots.tres" id="18_boots"]
+[ext_resource type="Resource" path="res://resources/items/passive/heavy_round.tres" id="19_round"]
+[ext_resource type="Resource" path="res://resources/items/passive/spark_clock.tres" id="20_clock"]
+[ext_resource type="Resource" path="res://resources/items/passive/tin_can_armor.tres" id="21_can"]
+[ext_resource type="Resource" path="res://resources/items/passive/fridge_magnet.tres" id="22_magnet"]
+[ext_resource type="Resource" path="res://resources/items/passive/overclocked_toaster.tres" id="23_toaster"]
+[ext_resource type="Resource" path="res://resources/items/passive/emotional_support_rock.tres" id="24_rock"]
+[ext_resource type="Resource" path="res://resources/items/passive/suspicious_hotdog.tres" id="25_hotdog"]
+[ext_resource type="Resource" path="res://resources/items/passive/pocket_sand.tres" id="26_sand"]
+[ext_resource type="Resource" path="res://resources/items/passive/banana_peel_insurance.tres" id="27_banana"]
+[ext_resource type="Resource" path="res://resources/items/passive/lucky_parking_ticket.tres" id="28_ticket"]
+[ext_resource type="Resource" path="res://resources/items/passive/blue_ward.tres" id="29_ward"]
+[ext_resource type="Resource" path="res://resources/items/passive/stop_sign_question.tres" id="30_stop"]
+[ext_resource type="Resource" path="res://resources/items/passive/merchant_coupon.tres" id="31_coupon"]
+[ext_resource type="Resource" path="res://resources/items/passive/six_seven_dice.tres" id="32_dice"]
+[ext_resource type="Resource" path="res://resources/items/passive/jet_too_boarding_pass.tres" id="33_jet"]
+[ext_resource type="Resource" path="res://resources/items/passive/questionable_mystery_box.tres" id="34_box"]
+[ext_resource type="Resource" path="res://resources/items/passive/gem_alert_magnifier.tres" id="35_gem_alert"]
+
+[node name="Main" type="Node2D" unique_id=653105166]
+
+[node name="Map" parent="." unique_id=283127820 instance=ExtResource("15_map")]
+z_index = -1
+position = Vector2(-960, -960)
+scale = Vector2(3, 3)
+
+[node name="MapBoundary" type="Node2D" parent="." unique_id=2117047343]
+script = ExtResource("16_boundary")
+
+[node name="Player" parent="." unique_id=463093871 instance=ExtResource("1_player")]
+
+[node name="Camera" type="Camera2D" parent="." unique_id=11331246]
+script = ExtResource("2_camera")
+
+[node name="EnemySpawner" type="Node2D" parent="." unique_id=1526486497]
+script = ExtResource("3_spawner")
+enemy_scenes = Array[PackedScene]([ExtResource("11_enemy"), ExtResource("12_enemy_blue"), ExtResource("13_enemy_red"), ExtResource("14_enemy_cyclop")])
+spawn_radius = 500.0
+
+[node name="WaveManager" type="Node" parent="." unique_id=1124457478]
+script = ExtResource("4_wave")
+
+[node name="ShopManager" type="Node" parent="." unique_id=707534474]
+script = ExtResource("5_shop")
+available_items = Array[Resource]([ExtResource("17_heart"), ExtResource("18_boots"), ExtResource("19_round"), ExtResource("20_clock"), ExtResource("21_can"), ExtResource("22_magnet"), ExtResource("23_toaster"), ExtResource("24_rock"), ExtResource("25_hotdog"), ExtResource("26_sand"), ExtResource("27_banana"), ExtResource("28_ticket"), ExtResource("29_ward"), ExtResource("30_stop"), ExtResource("31_coupon"), ExtResource("32_dice"), ExtResource("33_jet"), ExtResource("34_box"), ExtResource("35_gem_alert")])
+available_weapons = Array[Resource]([])
+
+[node name="UpgradeUI" type="CanvasLayer" parent="." unique_id=501882532]
+layer = 10
+
+[node name="UpgradeRoot" type="Control" parent="UpgradeUI" unique_id=501882533]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="UpgradeManager" type="Control" parent="UpgradeUI/UpgradeRoot" unique_id=210258493]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("6_upgrade")
+
+[node name="GameUI" type="CanvasLayer" parent="." unique_id=1434850024]
+script = ExtResource("7_gameui")
+
+[node name="PauseMenu" type="CanvasLayer" parent="." unique_id=1656069387]
+layer = 5
+script = ExtResource("8_pause")
+
+[node name="GameOverUI" type="CanvasLayer" parent="." unique_id=2137144363]
+layer = 6
+script = ExtResource("9_gameover")
+
+[node name="ShopUI" type="CanvasLayer" parent="." unique_id=305259221]
+layer = 4
+script = ExtResource("10_shopui")

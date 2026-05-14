@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://bjdo40d35o611"]
+
+[ext_resource type="Texture2D" uid="uid://0exie8a4xd62" path="res://assets/weapons/ranged/weapons.png" id="1_tex"]
+[ext_resource type="Script" uid="uid://efdirtctfkhe" path="res://scripts/debug/WeaponRegionScratch.gd" id="2_scr"]
+
+[node name="WeaponRegionScratch" type="Node2D" unique_id=1825878239]
+script = ExtResource("2_scr")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=106248710]
+position = Vector2(80, 120)
+texture = ExtResource("1_tex")
+centered = false
+region_enabled = true
+region_rect = Rect2(3, 429, 40, 24)

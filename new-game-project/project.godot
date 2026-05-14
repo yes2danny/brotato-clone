@@ -1,0 +1,37 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="BrotatoClone"
+run/main_scene="res://scenes/world/Main.tscn"
+config/features=PackedStringArray("4.6", "Forward Plus")
+config/icon="res://icon.svg"
+
+[autoload]
+
+XPSystem="*res://scripts/systems/XPSystem.gd"
+GameManager="*res://scripts/systems/GameManager.gd"
+XPDropSystem="*res://scripts/items/pickups/XPDropSystem.gd"
+GoldDropSystem="*res://scripts/items/pickups/GoldDropSystem.gd"
+DevDebug="*res://scripts/debug/DevDebug.gd"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/YATI/plugin.cfg")
+
+[physics]
+
+3d/physics_engine="Jolt Physics"
+
+[rendering]
+
+rendering_device/driver.windows="d3d12"
+environment/defaults/default_clear_color=Color(0, 0, 0, 1)

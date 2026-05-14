@@ -1,0 +1,23 @@
+[remap]
+
+importer="YATI"
+type="PackedScene"
+uid="uid://dc3umtkmpgk54"
+path="res://.godot/imported/baluster-2-rule.tmx-4d2aea23be9cdfd7d64db015e32d3421.tscn"
+
+[deps]
+
+source_file="res://assets/sprites/tilemaps/crypt/TiledMap Editor/Rules/baluster-2-rule.tmx"
+dest_files=["res://.godot/imported/baluster-2-rule.tmx-4d2aea23be9cdfd7d64db015e32d3421.tscn"]
+
+[params]
+
+use_default_filter=false
+add_class_as_metadata=false
+add_id_as_metadata=false
+no_alternative_tiles=false
+map_wangset_to_terrain=false
+custom_data_prefix="data_"
+tiled_project_file=""
+post_processor=""
+save_tileset_to=""

@@ -1,0 +1,23 @@
+[remap]
+
+importer="YATI"
+type="PackedScene"
+uid="uid://bl6r8rc263hs5"
+path="res://.godot/imported/hole-transparency-rule0-erases all generated tiles and resets them to their initial state.tmx-02374afe8cbf46ef7f7fbf4591d1449c.tscn"
+
+[deps]
+
+source_file="res://assets/sprites/tilemaps/cemetery/TiledMap Editor/Rules/hole-transparency-rule0-erases all generated tiles and resets them to their initial state.tmx"
+dest_files=["res://.godot/imported/hole-transparency-rule0-erases all generated tiles and resets them to their initial state.tmx-02374afe8cbf46ef7f7fbf4591d1449c.tscn"]
+
+[params]
+
+use_default_filter=false
+add_class_as_metadata=false
+add_id_as_metadata=false
+no_alternative_tiles=false
+map_wangset_to_terrain=false
+custom_data_prefix="data_"
+tiled_project_file=""
+post_processor=""
+save_tileset_to=""

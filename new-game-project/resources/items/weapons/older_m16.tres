@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/data/WeaponData.gd" id="1_weapon_data"]
+[ext_resource type="Texture2D" path="res://assets/projectiles/BulletsAndBombs-PROJECTILEKIT/SPRITES SEPARATED/Projectiles-Bullets-(RIGHT)/Medium-Bullet (4).png" id="2_bullet"]
+
+[resource]
+script = ExtResource("1_weapon_data")
+weapon_name = "Older M16?"
+description = "Assault rifle profile (custom sheet crop)."
+bullet_sprite = ExtResource("2_bullet")
+cost = 54
+damage = 13
+fire_rate = 7.0
+bullet_speed = 530.0
+bullet_lifetime = 2.0
+detection_range = 410.0
+projectile_count = 1
+spread_angle = 1.5
+use_sprite_region_rect = true
+sprite_region_rect = Rect2(1, 67, 49, 13)
+spritesheet_cell_index = 0
+weapon_sprite_scale = Vector2(1.7, 1.7)
+damage_scale = 1.15
+fire_rate_scale = 1.1

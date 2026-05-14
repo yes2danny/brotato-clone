@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/data/ItemData.gd" id="1_item_data"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/shop_icons/icon_gem_alert_magnifier_64.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_item_data")
+item_name = "Gem Alert Magnifier"
+description = "Next shop guarantees Rare or better, but prices are +15%. Caught lacking. Found treasure."
+icon = ExtResource("2_icon")
+cost = 55
+rarity = 3
+bonus_guaranteed_high_rarity_shops = 1
+bonus_next_shop_price_percent = 0.15

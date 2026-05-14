@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Light deck + level-up cards — design note (BrotatoClone)</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      line-height: 1.55;
+      max-width: 52rem;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+      background: #0e1014;
+      color: #e8eaef;
+    }
+    h1 { font-size: 1.65rem; margin-top: 0; color: #f2f4f8; }
+    h2 { font-size: 1.2rem; margin-top: 2rem; color: #c8d0e0; border-bottom: 1px solid #2a3140; padding-bottom: 0.35rem; }
+    h3 { font-size: 1.05rem; margin-top: 1.35rem; color: #aeb8cc; }
+    p { margin: 0.65rem 0; }
+    ul, ol { margin: 0.5rem 0 0.75rem; padding-left: 1.35rem; }
+    li { margin: 0.35rem 0; }
+    code, .mono { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 0.92em; background: #1a1f2a; padding: 0.12em 0.35em; border-radius: 4px; }
+    .note { background: #1a2230; border-left: 4px solid #4a7dbc; padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0 6px 6px 0; }
+    .warn { border-left-color: #c9a227; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.95rem; }
+    th, td { border: 1px solid #2f3648; padding: 0.5rem 0.65rem; text-align: left; vertical-align: top; }
+    th { background: #1a1f2a; color: #b8c4d9; }
+    tr:nth-child(even) td { background: #12151c; }
+    .muted { color: #9aa5b8; font-size: 0.9rem; }
+    hr { border: 0; border-top: 1px solid #2a3140; margin: 2rem 0; }
+  </style>
+</head>
+<body>
+
+<h1>Light deckbuilder + level-up cards</h1>
+<p class="muted">Design note for this repo (waves, shop, XP, UpgradeManager-style level-ups). For deciding whether to add the feature and how to cap scope.</p>
+
+<h2>1. Context: what the game already has</h2>
+<ul>
+  <li><strong>Shop (between waves):</strong> spends <code class="mono">gold</code>, sells persistent items / stat-style effects (<code class="mono">ItemData</code>, weapons placeholder).</li>
+  <li><strong>Level-ups (during play, paused):</strong> pick 1 of several offers — today this reads like <strong>stat knobs</strong> (HP, move, damage, fire rate), which overlaps the shop lane.</li>
+  <li><strong>Combat loop:</strong> horde waves, pickups (XP gems, gold coins), <code class="mono">WeaponController</code>, <code class="mono">HealthSystem</code>.</li>
+</ul>
+<p>The design problem to solve: <strong>if level-ups are mostly “more stats,” they feel redundant next to shop items.</strong></p>
+
+<h2>2. One-sentence split (two lanes)</h2>
+<p><strong>Shop</strong> = economy + <em>permanent baseline</em> power (gear, passives, numbers).</p>
+<p><strong>Deck / cards</strong> = <em>short-horizon</em> combat decisions — what you do for the next few seconds, next few shots, or next trigger — not another permanent +% damage shop.</p>
+
+<h2>3. “Very light deck” — concrete numbers</h2>
+<ul>
+  <li><strong>Starter deck:</strong> 6–10 cards (character starter or one-time draft at run start).</li>
+  <li><strong>Hard cap (v1):</strong> e.g. <strong>12 cards max</strong> for the whole run — no 40-card deck fantasy yet.</li>
+  <li><strong>Level-up offer:</strong> draw <strong>3</strong> cards, pick <strong>1</strong> (matches “pick 1” muscle memory from current upgrade UI).</li>
+  <li><strong>Optional deck loop:</strong> draw pile + discard pile; when draw empties, reshuffle discard (classic “deck feel”). You can ship v0 <em>without</em> reshuffle (cards as charges) and add shuffle later.</li>
+</ul>
+
+<h2>4. Two v1 modes — pick one to fight scope creep</h2>
+
+<h3>Mode A — Tactical hand (recommended first)</h3>
+<ul>
+  <li>Level-up: 3 cards → pick 1 → <strong>play immediately</strong>.</li>
+  <li>Deck grows slowly or not at all (e.g. +1 card every 2 levels, still capped).</li>
+  <li><strong>Lowest UI and balance surface.</strong></li>
+</ul>
+
+<h3>Mode B — Run draft deck (medium scope)</h3>
+<ul>
+  <li>Level-up: pick 1 → <strong>add to deck</strong>; rare “remove a card” rewards.</li>
+  <li>More true deckbuilder, needs more card pool discipline and removal handling.</li>
+</ul>
+<div class="note warn"><strong>Scope:</strong> If you are fighting creep, ship <strong>Mode A</strong> first; add drafting/removal only after the card verbs feel great.</div>
+
+<h2>5. How it hooks into existing systems</h2>
+<table>
+  <thead><tr><th>System</th><th>Role with cards</th></tr></thead>
+  <tbody>
+    <tr><td><code class="mono">XPSystem</code> / level-up pause</td><td>Same moment: pause → overlay → pick. Content changes from “4 stat buttons” to “3 cards” (or keep 4 if you prefer).</td></tr>
+    <tr><td><code class="mono">WeaponController</code></td><td>Cards mostly apply <strong>windows</strong> on firing (next mag, next N seconds, after reload). This supports “gun fantasy” without every card being a new gun asset.</td></tr>
+    <tr><td><code class="mono">ShopManager</code> / gold</td><td>Gold buys <strong>items</strong>. Cards should not be “second shop” — avoid selling the same stat upgrades as cards in the shop at v1.</td></tr>
+    <tr><td>Optional bridge</td><td>Shop sometimes sells <strong>reroll tokens</strong>, or an item: “next level-up shows +1 option.” Keeps lanes related but distinct.</td></tr>
+    <tr><td>Waves</td><td>Cards naturally spike during pressure; good fit for horde tempo.</td></tr>
+  </tbody>
+</table>
+
+<h2>6. Card examples (good vs bad) — tailored to this project</h2>
+
+<h3>Good — verb / window / trigger (deck lane)</h3>
+<ol>
+  <li><strong>Burst Protocol</strong> — Play: for 6s, +fire rate; then cannot shoot for 0.7s (risk window).</li>
+  <li><strong>Magnet Shot</strong> — Play: next 8 shots slightly pull pickups (touches XP/gold pickups without permanent +radius item).</li>
+  <li><strong>Breacher Round</strong> — Play: next shot deals bonus damage to “tough” target (v1: highest HP in range).</li>
+  <li><strong>Panic Dive</strong> — Play: short move burst + one tiny iframe window (execution, not a passive stat).</li>
+  <li><strong>Overclock</strong> — Play: next reload 50% faster; for 5s you take slightly more damage (tunable).</li>
+  <li><strong>Treasure Tag</strong> — Play: next 10 kills grant +1 bonus gold (hooks to <code class="mono">ShopManager.add_gold</code>).</li>
+  <li><strong>Chain Coupon</strong> — Play: next projectile kill splashes a weak hit to a nearby enemy.</li>
+  <li><strong>Reroll Marker</strong> — Play: gain 1 charge of “shop reroll” consumed in shop UI (reroll fantasy without merging systems).</li>
+</ol>
+
+<h3>Medium — OK if shop does not own the same thing</h3>
+<ul>
+  <li><strong>Second Wind</strong> — one-time flat heal (not permanent max HP).</li>
+  <li><strong>Armor Flare</strong> — temporary armor for a few seconds.</li>
+</ul>
+
+<h3>Bad — overlaps shop / repeats the old problem</h3>
+<ul>
+  <li>Permanent +% damage, permanent +max HP, permanent +move speed as the main card line.</li>
+</ul>
+
+<h2>7. Minimum UI for v1 (deckbuilder vibe without Spire-scale UI)</h2>
+<ul>
+  <li>Card face: name + one rule line + optional icon.</li>
+  <li>Level-up: 3-up (or 4-up) choice.</li>
+  <li>Optional: small “deck list” in pause menu — current cards + discard count.</li>
+</ul>
+<p><strong>Skip for v1:</strong> drag-and-drop deck editor, large rarity tiers, 50+ card synergy web, relics + potions + curses + map nodes.</p>
+
+<h2>8. Short example run (how it feels)</h2>
+<p><strong>Wave 1 — level up:</strong> offers <em>Burst Protocol</em>, <em>Magnet Shot</em>, <em>Treasure Tag</em>. Player picks <em>Treasure Tag</em> to feed the shop economy.</p>
+<p><strong>Wave 2 — level up:</strong> picks <em>Panic Dive</em> for defensive execution.</p>
+<p><strong>Shop:</strong> spends gold on a passive that makes the build tankier — <strong>permanent lane</strong>.</p>
+<p><strong>Wave 3 — level up:</strong> picks <em>Burst Protocol</em> for a pressure spike.</p>
+<p>Net: shop = stability and numbers; deck = spikes and timing.</p>
+
+<h2>9. Decision checklist</h2>
+<p><strong>Add this</strong> if you want the core fantasy to be: <em>“I craft combat rhythm and spike windows,”</em> not only <em>“I stack numbers.”</em></p>
+<p><strong>Defer or skip</strong> if you are not ready to:</p>
+<ul>
+  <li>Demote or remove overlapping <strong>stat-only</strong> level-ups from the current upgrade flow, and</li>
+  <li>Enforce a <strong>hard cap</strong> on deck size and card pool for v1.</li>
+</ul>
+
+<h2>10. Recommendation (this repo + your stated goals)</h2>
+<p>For <strong>gun fantasy + rerolls + light deck vibe</strong> with minimal creep:</p>
+<ul>
+  <li>Ship <strong>Mode A (tactical hand)</strong> first.</li>
+  <li>Cards = weapon windows + triggers + reroll charges + pickup/gold tempo.</li>
+  <li>Shop = items / stats / economy.</li>
+  <li>Gun <strong>slot unlocks</strong> can stay a <strong>milestone</strong> outside the deck at first (simpler content). If you must put unlocks in the deck, make <strong>Unlock</strong> cards very rare or you balloon art + tuning.</li>
+</ul>
+
+<hr />
+<p class="muted">File: <code class="mono">docs/LIGHT_DECK_LEVEL_CARDS_DESIGN.html</code> — edit in repo as the spec evolves.</p>
+
+</body>
+</html>

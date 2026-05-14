@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/data/ItemData.gd" id="1_item_data"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/shop_icons/icon_six_seven_dice_64.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_item_data")
+item_name = "Six-Seven Dice"
+description = "+1 free shop reroll, -5% max health. No one knows what it means. It still works."
+icon = ExtResource("2_icon")
+cost = 35
+rarity = 2
+bonus_max_health_percent = -0.05
+bonus_free_rerolls = 1

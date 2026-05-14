@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BrotatoClone — 14-day roadmap &amp; 5-month arc</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1117;
+      --bg2: #161b26;
+      --card: #1a2130;
+      --border: #2a3447;
+      --text: #e8ecf4;
+      --muted: #8b95a8;
+      --accent: #5eead4;
+      --accent2: #a78bfa;
+      --warn: #fbbf24;
+      --danger: #fb7185;
+      --ok: #4ade80;
+      --radius: 10px;
+      --font: "DM Sans", system-ui, sans-serif;
+      --mono: "JetBrains Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 1rem;
+      line-height: 1.55;
+    }
+    .strip {
+      background: linear-gradient(90deg, #134e4a, #4c1d95);
+      padding: 0.45rem 1.25rem;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align: center;
+      color: rgba(255,255,255,0.9);
+    }
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 4rem;
+    }
+    h1 {
+      font-size: clamp(1.75rem, 4vw, 2.35rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.5rem;
+      line-height: 1.15;
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 52ch;
+      margin: 0 0 1.5rem;
+    }
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    .badge {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg2);
+      color: var(--muted);
+    }
+    .badge strong { color: var(--accent); font-weight: 600; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 720px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.15rem 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .card h2, .card h3 {
+      margin: 0 0 0.65rem;
+      font-size: 1.05rem;
+      color: var(--accent);
+    }
+    .card h3 { font-size: 0.95rem; color: var(--accent2); margin-top: 1rem; }
+    .card p:last-child, .card ul:last-child { margin-bottom: 0; }
+    ul { margin: 0.4rem 0 0; padding-left: 1.15rem; }
+    li { margin: 0.35rem 0; }
+    code, .mono {
+      font-family: var(--mono);
+      font-size: 0.82em;
+      background: var(--bg2);
+      padding: 0.12em 0.35em;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+    .toc {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(15, 17, 23, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      margin: 0 -1.25rem 1.5rem;
+      padding: 0.75rem 1.25rem;
+    }
+    .toc-inner {
+      max-width: 920px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      align-items: center;
+    }
+    .toc a {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .toc a:hover { color: var(--accent); }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot-full { background: var(--ok); }
+    .dot-eve { background: var(--warn); }
+
+    details.day {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 0.65rem;
+      overflow: hidden;
+    }
+    details.day > summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 0.85rem 1rem;
+      font-weight: 600;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.35rem 1rem;
+      font-size: 0.95rem;
+    }
+    details.day > summary::-webkit-details-marker { display: none; }
+    details.day > summary::after {
+      content: "▸";
+      margin-left: auto;
+      color: var(--muted);
+      transition: transform 0.2s;
+    }
+    details.day[open] > summary::after { transform: rotate(90deg); }
+    details.day .body {
+      padding: 0 1rem 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .time-tag {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: var(--bg2);
+      color: var(--warn);
+      border: 1px solid var(--border);
+    }
+    .time-tag.eve { color: var(--accent2); }
+    .block {
+      margin-top: 1rem;
+      padding-left: 0.75rem;
+      border-left: 2px solid var(--border);
+    }
+    .block h4 {
+      margin: 0 0 0.4rem;
+      font-size: 0.82rem;
+      font-family: var(--mono);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+    .checklist { list-style: none; padding-left: 0; }
+    .checklist li {
+      padding-left: 1.35rem;
+      position: relative;
+    }
+    .checklist li::before {
+      content: "☐";
+      position: absolute;
+      left: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .note {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-top: 0.75rem;
+      padding: 0.65rem 0.75rem;
+      background: var(--bg2);
+      border-radius: 6px;
+      border-left: 3px solid var(--accent);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin: 0.5rem 0;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.65rem;
+      text-align: left;
+    }
+    th {
+      background: var(--bg2);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+    .phase {
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .phase h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+    }
+    .bar {
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border);
+      overflow: hidden;
+      margin: 0.35rem 0 0;
+    }
+    .bar > i {
+      display: block;
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+  </style>
+</head>
+<body>
+  <div class="strip">BrotatoClone · living roadmap · open in browser · edit tasks as you ship</div>
+
+  <nav class="toc" aria-label="On this page">
+    <div class="toc-inner">
+      <a href="#snapshot">Snapshot</a>
+      <a href="#principles">Rules</a>
+      <a href="#d1">Days 1–2</a>
+      <a href="#week1">Week 1</a>
+      <a href="#week2">Week 2</a>
+      <a href="#months">Months 2–5</a>
+      <div class="legend">
+        <span><i class="dot dot-full"></i> Full session (6–8h)</span>
+        <span><i class="dot dot-eve"></i> After work (~1.5–2h)</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <header>
+      <h1>Development roadmap</h1>
+      <p class="sub">Grounded in your current Godot 4.6 project: core combat and waves work; genre wrapper (level-up UI, shop in the wave loop, run reset, main menu) is where the next wins live. Below is two weeks of day-labelled work, then a five-month expansion skeleton you can refine.</p>
+      <div class="badge-row">
+        <span class="badge"><strong>Stack</strong> Godot 4.6 · Main.tscn</span>
+        <span class="badge"><strong>Docs</strong> ALPHA_REPORT.html</span>
+        <span class="badge"><strong>Horizon</strong> ~5 months to “shippable hobby scope”</span>
+      </div>
+    </header>
+
+    <section id="snapshot" class="grid-2">
+      <div class="card">
+        <h2>Where you are</h2>
+        <ul>
+          <li>Wave timer, spawner ramp, enemy variety, XP gems, auto-aim weapon, solid enemy AI.</li>
+          <li><code>WaveData</code> resource exists but <code>WaveManager</code> is still timer-driven only.</li>
+          <li><code>UpgradeManager</code> pauses on level-up; needs visible cards or hotkeys so runs do not soft-lock.</li>
+          <li><code>ShopManager.open_shop()</code> is never called from <code>WaveManager</code>; shop UI only prints.</li>
+          <li><code>WeaponData</code> / <code>ItemData</code> schemas exist; no <code>.tres</code> content wired in repo yet.</li>
+          <li><code>GameManager.restart_game()</code> reloads scene but does not reset <code>XPSystem</code> autoload.</li>
+          <li><code>PauseMenu</code> → <code>MainMenu.tscn</code> path may be missing — verify before playtests.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>North star (8–12 weeks)</h2>
+        <p style="margin-top:0">One complete “run” loop a stranger can finish without you in the room: menu → run → die or win → meta reward stub → play again. Everything else is depth on that spine.</p>
+        <p style="margin:0.5rem 0 0.25rem;font-size:0.85rem;color:var(--muted)">Integration focus</p>
+        <div style="font-size:0.8rem;margin-bottom:0.15rem">Core loop / combat <div class="bar"><i style="width:88%"></i></div></div>
+        <div style="font-size:0.8rem;margin-bottom:0.15rem">XP &amp; upgrades <div class="bar"><i style="width:45%"></i></div></div>
+        <div style="font-size:0.8rem;margin-bottom:0.15rem">Shop &amp; economy <div class="bar"><i style="width:28%"></i></div></div>
+        <div style="font-size:0.8rem">Meta / polish <div class="bar"><i style="width:15%"></i></div></div>
+      </div>
+    </section>
+
+    <section id="principles" class="card">
+      <h2>How to read this schedule</h2>
+      <p style="margin-top:0"><strong>Days 1–2</strong> assume you can pour 6–8 focused hours per day (build + test + commit). <strong>Day 3 onward</strong> assumes a job day plus <strong>~1.5–2 hours</strong> most evenings — tasks are scoped to finish one vertical slice or one bug class, not “rewrite AI.” If a box slips, move it forward; do not collapse multiple day-sized blocks into one tired night.</p>
+      <p class="note">Ship in small commits: “upgrade UI wired,” “shop opens after wave,” “XP resets on restart.” That keeps morale and bisects regressions.</p>
+    </section>
+
+    <h2 id="d1" style="margin:2rem 0 0.75rem;font-size:1.1rem;">Intensive block — days 1 &amp; 2</h2>
+    <p style="color:var(--muted);margin:0 0 1rem;font-size:0.92rem;">Dense checklist while you have time; reorder within a day if you prefer UI-first, but do not skip run-safety fixes.</p>
+
+    <details class="day" open>
+      <summary>
+        <strong>Day 1 — Run safety + level-up UX</strong>
+        <span class="time-tag">Full day</span>
+      </summary>
+      <div class="body">
+        <div class="block">
+          <h4>Morning — unblock soft-locks</h4>
+          <ul class="checklist">
+            <li>Add <code>XPSystem.reset_run()</code> (or equivalent): zero XP, level, thresholds; call from <code>GameManager.restart_game()</code> and optionally from <code>Main._ready()</code> for clean boots.</li>
+            <li>Playtest: level up twice, restart from game over, confirm XP bar matches level 1.</li>
+            <li>Confirm <code>WeaponController.bullet_scene</code> assigned on Player in saved scene — document in commit message if you fix it.</li>
+          </ul>
+        </div>
+        <div class="block">
+          <h4>Afternoon — upgrade picker (minimum viable)</h4>
+          <ul class="checklist">
+            <li>In <code>UpgradeManager</code> scene: add four <code>Button</code> nodes (or one <code>GridContainer</code> of buttons); set text in <code>show_upgrades()</code> from <code>UPGRADE_NAMES</code>.</li>
+            <li>Connect each button to <code>_on_upgrade_chosen(0..3)</code>; hide overlay and <code>get_tree().paused = false</code> on pick.</li>
+            <li>Optional quality: number keys 1–4 as alternate input; debounce double-press.</li>
+            <li>Visual pass: semi-transparent full-screen tint + panel so the player understands the game is waiting for a choice.</li>
+          </ul>
+        </div>
+        <div class="block">
+          <h4>Evening buffer — polish or stop</h4>
+          <ul class="checklist">
+            <li>One playthrough to wave 5+ with intentional level-ups; fix any pause/upgrade edge case.</li>
+            <li>If time remains: stub <code>res://scenes/MainMenu.tscn</code> (title + Play + Quit) and point project main scene OR only <code>load_main_menu()</code> — avoid broken pause quit.</li>
+          </ul>
+        </div>
+      </div>
+    </details>
+
+    <details class="day" open>
+      <summary>
+        <strong>Day 2 — Shop in the wave loop + first data</strong>
+        <span class="time-tag">Full day</span>
+      </summary>
+      <div class="body">
+        <div class="block">
+          <h4>Morning — wire economy to waves</h4>
+          <ul class="checklist">
+            <li>Design decision (pick one, document in code comment): shop opens <em>immediately</em> after wave end, or after the short break. Brotato-likes usually shop then next wave.</li>
+            <li>From <code>WaveManager._end_wave()</code> (or after break before <code>_start_wave</code>), call <code>ShopManager.open_shop()</code>; ensure wave counter / spawner state stays coherent.</li>
+            <li>Gold: on <code>GameManager.register_kill()</code> or enemy death hook, <code>ShopManager.add_gold(small_amount)</code>; tune starting gold in inspector.</li>
+          </ul>
+        </div>
+        <div class="block">
+          <h4>Afternoon — ShopUI that actually sells</h4>
+          <ul class="checklist">
+            <li>Build panel: gold label, 4 slots (icon placeholder + name + price + Buy), Leave button → <code>close_shop()</code>.</li>
+            <li>Populate from <code>shop_opened</code> signal; gray out / disable bought slots.</li>
+            <li>Create 3–5 <code>ItemData</code> <code>.tres</code> files (even with duplicate art): e.g. +HP, +speed, +damage, +pickup radius (wire radius into <code>XPGem</code> attract if not global yet).</li>
+            <li>Assign <code>available_items</code> on <code>ShopManager</code> in <code>Main.tscn</code>.</li>
+          </ul>
+        </div>
+        <div class="block">
+          <h4>Evening — weapon purchase stub or defer</h4>
+          <ul class="checklist">
+            <li>Either: implement <code>WeaponController.apply_weapon_data(WeaponData)</code> and call from <code>ShopManager._apply_to_player</code>, <strong>or</strong> hide weapon entries in shop until Day 4 — but do not leave “buy” printing only.</li>
+            <li>End-to-end test: two waves, two shop visits, gold increases, purchases change stats.</li>
+          </ul>
+        </div>
+      </div>
+    </details>
+
+    <h2 id="week1" style="margin:2rem 0 0.75rem;font-size:1.1rem;">Week 1 — post-work evenings (days 3–7)</h2>
+    <p style="color:var(--muted);margin:0 0 1rem;font-size:0.92rem;">~1.5–2h per night; one primary outcome per day.</p>
+
+    <details class="day">
+      <summary><strong>Day 3</strong> — Main menu + boot flow <span class="time-tag eve">Evening</span></summary>
+      <div class="body">
+        <ul class="checklist">
+          <li>Finish or polish <code>MainMenu.tscn</code>: Play loads <code>Main.tscn</code>, Quit exits.</li>
+          <li>Set project <code>run/main_scene</code> to menu if you want proper boot order.</li>
+          <li>From game over, Restart vs Menu both reset autoloads consistently.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="day">
+      <summary><strong>Day 4</strong> — WeaponData runtime path <span class="time-tag eve">Evening</span></summary>
+      <div class="body">
+        <ul class="checklist">
+          <li><code>WeaponController</code>: optional <code>@export var weapon_data: WeaponData</code>; in <code>_ready</code>, apply damage, fire rate, bullet speed, range from resource.</li>
+          <li>Create 2 <code>WeaponData</code> resources (e.g. fast weak vs slow strong); second weapon only acquirable via shop for now.</li>
+          <li>Fix projectile count / spread if you touch firing logic — keep scope tiny.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="day">
+      <summary><strong>Day 5</strong> — Pause stack audit <span class="time-tag eve">Evening</span></summary>
+      <div class="body">
+        <ul class="checklist">
+          <li>Reproduce: pause during shop, during upgrade, during game over — ensure only one system owns <code>paused</code> or use layered pause flags.</li>
+          <li>Decide: block ESC during upgrade/shop or route to “confirm leave” — document behavior.</li>
+          <li>Fix worst bug found; defer nice-to-have.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="day">
+      <summary><strong>Day 6</strong> — WaveData step 1 <span class="time-tag eve">Evening</span></summary>
+      <div class="body">
+        <ul class="checklist">
+          <li>Create <code>wave_01.tres</code> … <code>wave_03.tres</code> with different <code>spawn_interval</code> / duration labels.</li>
+          <li><code>WaveManager</code>: <code>@export var waves: Array[WaveData]</code>; index by <code>current_wave - 1</code> with fallback to defaults if out of range.</li>
+          <li>Spawner: optional per-wave override of interval min/floor — even one field wired counts as win.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="day">
+      <summary><strong>Day 7</strong> — HUD + feedback pass <span class="time-tag eve">Evening</span></summary>
+      <div class="body">
+        <ul class="checklist">
+          <li><code>GameUI</code>: wave number label listening to <code>WaveManager</code> signals; gold label listening to <code>gold_changed</code>.</li>
+          <li>Light juice: hit flash on enemies or floating damage numbers (pick one, keep under ~40 new lines).</li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="week2" style="margin:2rem 0 0.75rem;font-size:1.1rem;">Week 2 — days 8–14</h2>
+    <p style="color:var(--muted);margin:0 0 1rem;font-size:0.92rem;">Still evening-sized; bias toward “more content through data” instead of new engines.</p>
+
+    <details class="day">
+      <summary><strong>Day 8</strong> — Enemy variety via data <span class="time-tag eve">Evening</span></summary>
+      <div class="body">
+        <ul class="checklist">
+          <li>Audit <code>EnemyData</code> usage; if unused, hook one stat (speed or HP) from resource on enemy <code>_ready</code>.</li>
+          <li>Duplicate one enemy scene with different tint + data; add to spawner pool for high waves only (simple wave threshold in spawner).</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="day">
+      <summary><strong>Day 9</strong> — Boss or elite wave stub <span class="time-tag eve">Evening</span></summary>
+      <div class="body">
+        <ul class="checklist">
+          <li>Use <code>WaveData.is_boss_wave</code>: on that wave, spawn one oversized enemy or reduce count + buff HP.</li>
+          <li>Boss drops extra gold or large XP gem — one reward type.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="day">
+      <summary><strong>Day 10</strong> — Items that need code hooks <span class="time-tag eve">Evening</span></summary>
+      <div class="body">
+        <ul class="checklist">
+          <li>Implement <code>bonus_armor</code> in <code>HealthSystem</code> (simple percent reduction cap).</li>
+          <li>Global pickup radius: player stat modified by item, read by <code>XPGem</code> via group lookup or signal.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="day">
+      <summary><strong>Day 11</strong> — Audio pass 1 <span class="time-tag eve">Evening</span></summary>
+      <div class="body">
+        <ul class="checklist">
+          <li>Add <code>AudioStreamPlayer2D</code> for fire, hit, gem, wave start (CC0 or your own).</li>
+          <li>Autoload optional music bus with ducking when shop opens — skip if over scope; SFX alone is fine.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="day">
+      <summary><strong>Day 12</strong> — Balance spreadsheet night <span class="time-tag eve">Evening</span></summary>
+      <div class="body">
+        <ul class="checklist">
+          <li>Export or list key tunables: spawn_interval curve, XP thresholds, gold per kill, shop prices.</li>
+          <li>Play one run, note time-to-first-death and boredom points; adjust two numbers only.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="day">
+      <summary><strong>Day 13</strong> — Second map swap experiment <span class="time-tag eve">Evening</span></summary>
+      <div class="body">
+        <ul class="checklist">
+          <li>Instance <code>room_cemetery.tscn</code> instead of crypt in a duplicate test scene OR export var map on Main.</li>
+          <li>Verify <code>MapBoundary</code> limits match; fix camera if scale differs.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="day">
+      <summary><strong>Day 14</strong> — Playtest build + backlog grooming <span class="time-tag eve">Evening</span></summary>
+      <div class="body">
+        <ul class="checklist">
+          <li>Export Windows build; write five bullet “known issues” from one friend or self with fresh eyes.</li>
+            <li>Reorder next month backlog: mark shipped vs cut vs “month 2.”</li>
+        </ul>
+      </div>
+    </details>
+
+    <section id="months" class="phase">
+      <h2>Months 2–5 — expansion skeleton</h2>
+      <p style="color:var(--muted);margin-top:0">Roughly one month per column; overlap is normal. Expand each into your own issue tracker when ready.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Month 2</th>
+            <th>Month 3</th>
+            <th>Month 4</th>
+            <th>Month 5</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Character stats screen; 2–3 playable “classes” as different starting <code>WeaponData</code> + stat offsets.</td>
+            <td>Weapon fusion or duplicate-item stacking rules; more projectiles (shotgun pattern) using existing <code>projectile_count</code>.</td>
+            <td>Elite modifiers on enemies; status effects (burn/slow) if you want ARPG depth.</td>
+            <td>Difficulty tiers; endless mode toggle; final boss sequence for “win” state.</td>
+          </tr>
+          <tr>
+            <td>Meta currency + persistent unlocks (new items appear in pool after unlock).</td>
+            <td>20+ items and 6+ weapons as data-only drops; rarity weights in shop roll.</td>
+            <td>Save/load run (mid-run quit) OR explicit roguelike “no save” policy polished in UI copy.</td>
+            <td>Performance: object pooling for bullets and gems; profiling on low-end GPU.</td>
+          </tr>
+          <tr>
+            <td>Localization hooks for all player-facing strings.</td>
+            <td>Controller support and aim-assist options.</td>
+            <td>Steam / itch page assets: trailer, GIFs, capsule art.</td>
+            <td>Release candidate: bug bash week, version numbering, patch notes template.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note">Five months to “done” is realistic for a solo Brotato-scale <em>hobby</em> vertical slice if you protect the spine (menu → run → meta → repeat) and add breadth mostly through <code>.tres</code> + scenes. A commercial clone with full content parity takes longer; adjust the table to your actual hours per week.</p>
+    </section>
+
+    <footer>
+      <code>new-game-project/docs/DEVELOPMENT_ROADMAP.html</code> — generated structure from repo review May 2026 — duplicate and trim for your calendar
+    </footer>
+  </div>
+</body>
+</html>

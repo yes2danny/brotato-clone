@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/data/WeaponData.gd" id="1_weapon_data"]
+[ext_resource type="Texture2D" path="res://assets/projectiles/BulletsAndBombs-PROJECTILEKIT/SPRITES SEPARATED/Projectiles-Bullets-(RIGHT)/Bullet-Silver (3).png" id="2_bullet"]
+
+[resource]
+script = ExtResource("1_weapon_data")
+weapon_name = "Rifle AR 1"
+description = "Assault rifle profile (custom sheet crop)."
+bullet_sprite = ExtResource("2_bullet")
+cost = 52
+damage = 14
+fire_rate = 7.5
+bullet_speed = 520.0
+bullet_lifetime = 2.0
+detection_range = 400.0
+projectile_count = 1
+spread_angle = 2.0
+use_sprite_region_rect = true
+sprite_region_rect = Rect2(5, 0, 34, 12)
+spritesheet_cell_index = 0
+weapon_sprite_scale = Vector2(2.0, 2.0)
+damage_scale = 1.15
+fire_rate_scale = 1.1

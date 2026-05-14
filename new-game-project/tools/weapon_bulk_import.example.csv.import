@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://ba12t4p4ak5aq"
+
+[deps]
+
+files=["res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation"]
+
+source_file="res://tools/weapon_bulk_import.example.csv"
+dest_files=["res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation", "res://tools/weapon_bulk_import.example.en.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

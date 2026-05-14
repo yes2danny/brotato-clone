@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/data/ItemData.gd" id="1_item_data"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/shop_icons/icon_jet_too_boarding_pass_64.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_item_data")
+item_name = "Jet-Too Boarding Pass"
+description = "Each wave: +20% move speed for 15s, then -10% move speed. Delayed departure."
+icon = ExtResource("2_icon")
+cost = 45
+rarity = 2
+bonus_delayed_departure = 1

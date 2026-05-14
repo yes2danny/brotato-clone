@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Weapon crop — easy ways (Godot first)</title>
+  <style>
+    body { font-family: "Segoe UI", system-ui, sans-serif; line-height: 1.55; max-width: 48rem; margin: 0 auto; padding: 1.5rem 1.25rem 2.5rem; background: #121418; color: #e6e9ef; }
+    h1 { font-size: 1.45rem; margin-top: 0; color: #fff; }
+    h2 { font-size: 1.12rem; margin-top: 1.75rem; color: #8eb4ff; border-bottom: 1px solid #2a3344; padding-bottom: 0.35rem; }
+    h3 { font-size: 1rem; margin-top: 1.25rem; color: #c4d0e8; }
+    code, .kbd { font-family: ui-monospace, Consolas, monospace; font-size: 0.92em; background: #1e2430; padding: 0.12em 0.38em; border-radius: 4px; }
+    .kbd { border: 1px solid #3a4558; }
+    ol.steps { counter-reset: step; list-style: none; padding-left: 0; }
+    ol.steps > li { counter-increment: step; margin: 0.85rem 0; padding-left: 2.2rem; position: relative; }
+    ol.steps > li::before { content: counter(step); position: absolute; left: 0; width: 1.5rem; height: 1.5rem; background: #2d3a55; border-radius: 4px; text-align: center; line-height: 1.5rem; font-size: 0.85rem; font-weight: 600; color: #a8c4ff; }
+    li { margin: 0.35rem 0; }
+    .path { color: #7dffb3; word-break: break-all; }
+    .calm { background: #1a2230; border-left: 4px solid #6a9fff; padding: 0.9rem 1rem; margin: 1rem 0; border-radius: 0 6px 6px 0; }
+    .ok { background: #18261c; border-left: 4px solid #3ecf8e; padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0 6px 6px 0; }
+    .muted { color: #8b96a8; font-size: 0.9rem; }
+    pre { background: #0d1016; padding: 0.9rem 1rem; border-radius: 6px; overflow: auto; border: 1px solid #2a3344; font-size: 0.88rem; }
+    table { border-collapse: collapse; width: 100%; margin: 0.75rem 0; font-size: 0.95rem; }
+    th, td { border: 1px solid #343d50; padding: 0.45rem 0.6rem; text-align: left; }
+    th { background: #1a2230; color: #b0c0d8; }
+  </style>
+</head>
+<body>
+
+<h1>Weapon crop — the easy ways</h1>
+
+<div class="calm">
+  <p><strong>You’re not missing something obvious.</strong> Hunting <code>x, y</code> in Aseprite’s status bar is awkward because the bar mixes <em>file size</em>, <em>selection size</em>, and <em>cursor position</em> depending on version and theme.</p>
+  <p><strong>Most people do not ship games by reading that bar all day.</strong> They either use the <strong>engine’s region editor</strong> (Godot shows all four numbers clearly) or a <strong>one-click script</strong> in Aseprite.</p>
+</div>
+
+<p class="muted">Target file: <span class="path">assets/weapons/ranged/weapons.png</span> → each gun’s numbers live on a <strong>WeaponData</strong> resource (<span class="path">resources/items/weapons/*.tres</span>), not on the scratch scene. The scratch scene is only a ruler. Swapping guns = shop calls <code>apply_from_weapon_data</code> — no new game scene.</p>
+
+<h2>Gun “profiles” (where the data actually lives)</h2>
+<div class="ok">
+  <p><strong>One WeaponData .tres = one gun profile</strong> (name, price, damage, fire rate, <em>and</em> how to crop the sprite).</p>
+  <ul>
+    <li><strong>Grid mode:</strong> turn <em>off</em> <strong>Use Sprite Region Rect</strong> on the resource; set <strong>Spritesheet Cell Index</strong> (good enough for many guns).</li>
+    <li><strong>Exact crop mode:</strong> turn <em>on</em> <strong>Use Sprite Region Rect</strong>; paste <strong>x, y, w, h</strong> from the Godot scratch scene into <strong>Sprite Region Rect</strong> on <em>that</em> weapon’s .tres.</li>
+    <li>New gun: <strong>duplicate</strong> an existing <code>.tres</code>, rename, edit stats + crop, drag into <code>ShopManager.available_weapons</code> in <code>scenes/world/Main.tscn</code> if it should appear in the shop.</li>
+  </ul>
+  <p>The player’s <strong>WeaponController → Starting Weapon</strong> picks the default profile for run start (same resource the shop can sell).</p>
+</div>
+
+<h2>Scaling to many guns (you do <em>not</em> use WeaponController as the list)</h2>
+<div class="ok">
+  <p><strong>WeaponController</strong> on the player is just the <em>runtime</em> hand holding one gun. The <em>catalog</em> of all guns is:</p>
+  <ol class="steps">
+    <li><strong>One file per gun:</strong> <span class="path">resources/items/weapons/your_gun_name.tres</span> (duplicate any existing <code>.tres</code> in that folder as a template).</li>
+    <li><strong>Sprite on each .tres:</strong> set <strong>Spritesheet Cell Index</strong> <em>or</em> <strong>Use Sprite Region Rect</strong> + paste <code>Rect2(…)</code> from the scratch tool.</li>
+    <li><strong>Shop pool:</strong> open <span class="path">scenes/world/Main.tscn</span> → node <strong>ShopManager</strong> → Inspector → <strong>Available Weapons</strong> → set <strong>Size</strong> to how many guns you have, then drag each <code>.tres</code> into the slots. That array <em>is</em> “all guns the shop can roll.”</li>
+    <li><strong>Starting gun only:</strong> <span class="path">scenes/player/Player.tscn</span> → <strong>WeaponController → Starting Weapon</strong> = whichever profile the player begins with (one reference, not forty).</li>
+  </ol>
+  <p class="muted">Adding gun #41 = new <code>.tres</code> + one more entry in <strong>Available Weapons</strong>. You never paste forty crops into WeaponController.</p>
+</div>
+
+<h2>What the four numbers mean</h2>
+<table>
+  <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><code>x</code>, <code>y</code></td><td>Top-left corner of the crop inside the PNG (pixels from the image’s top-left).</td></tr>
+    <tr><td><code>w</code>, <code>h</code></td><td>Width and height of the crop in pixels.</td></tr>
+  </tbody>
+</table>
+<p>Your sheet is <strong>66 × 704</strong>. So <code>x + w ≤ 66</code> and <code>y + h ≤ 704</code>.</p>
+
+<h2>Method 1 — All in Godot (recommended, ~2 minutes)</h2>
+<p>No Aseprite number hunting. Godot’s Inspector shows <strong>x, y, w, h</strong> after you drag the crop.</p>
+<ol class="steps">
+  <li>In Godot, open <span class="path">scenes/debug/WeaponRegionScratch.tscn</span> (included in this project).</li>
+  <li>Select the <strong>Sprite2D</strong> node.</li>
+  <li>In the Inspector, make sure <strong>Region Enabled</strong> is on (it should be).</li>
+  <li>Click the <strong>Region Rect</strong> row — Godot opens a <strong>texture / region editor</strong> where you drag a rectangle on the image. Drag it around <strong>one gun</strong>.</li>
+  <li>Close the editor. The Inspector now shows the four values under <strong>Region Rect</strong>: <code>x</code>, <code>y</code>, <code>w</code>, <code>h</code>.</li>
+  <li><strong>Fast copy:</strong> press <span class="kbd">F6</span> to <strong>run this scene</strong>. Use the on-screen <strong>Copy region to clipboard</strong> button (or <span class="kbd">F2</span>). Clipboard gets a <code>Rect2(…)</code> line; if your crop is a perfect 33×32 cell, you also get a <code>spritesheet_cell_index = N</code> line for grid mode.</li>
+  <li>Paste into the right <strong>WeaponData</strong> <code>.tres</code>: for a custom crop, enable <strong>Use Sprite Region Rect</strong> and paste into <strong>Sprite Region Rect</strong>. For grid mode, turn <strong>Use Sprite Region Rect</strong> off and type the cell index from the clipboard line.</li>
+  <li>Open <span class="path">scenes/player/Player.tscn</span> only if you’re testing the <strong>WeaponController</strong> node directly — normally you <strong>do not</strong> paste here; the <code>.tres</code> owns the crop.</li>
+  <li>Tune <strong>Weapon Sprite Scale</strong> if the gun is too big/small on the knight.</li>
+</ol>
+<div class="ok">This is the normal “how people do it” workflow: <strong>visual crop in the engine</strong>, numbers come from the Inspector.</div>
+
+<h2>Method 2 — Aseprite script (one click, all four numbers)</h2>
+<p>If you prefer to stay in Aseprite:</p>
+<ol class="steps">
+  <li>Open <span class="path">weapons.png</span> in Aseprite.</li>
+  <li><span class="kbd">M</span> → drag marching ants around <strong>one</strong> gun.</li>
+  <li>In Aseprite: <strong>File → Scripts → Open Script…</strong> (wording can be <strong>File → Scripts → Run</strong> depending on version).</li>
+  <li>Choose this file: <span class="path">docs/aseprite_weapon_rect_from_selection.lua</span></li>
+  <li>A dialog pops up with <strong>x, y, w, h</strong> and a <code>Rect2(…)</code> line. Copy those into the gun’s <strong>WeaponData</strong> <code>.tres</code> (<strong>Sprite Region Rect</strong> or grid index).</li>
+</ol>
+<p class="muted">If the script errors, use Method 1 — Godot doesn’t depend on Aseprite’s Lua version.</p>
+
+<h2>Method 3 — Aseprite only (manual, slower)</h2>
+<ul>
+  <li><strong>w, h:</strong> with the selection active, <strong>Edit → Copy</strong>, then <strong>File → New</strong> — the new image’s canvas size is <strong>w</strong> and <strong>h</strong>.</li>
+  <li><strong>x, y:</strong> use Godot Method 1 or the script instead of fighting the status bar. If you insist: the bar often shows the <strong>whole image</strong> as <code>66 704</code> — that is <strong>not</strong> your crop position. Move the cursor to the <strong>top-left pixel inside your selection</strong> and look for the <strong>moving cursor coordinates</strong> — those are <code>x, y</code>.</li>
+</ul>
+
+<h2>Copy values into the gun profile (not the scratch scene)</h2>
+<ol class="steps">
+  <li>Open the weapon’s resource under <span class="path">resources/items/weapons/</span> (or duplicate an existing <code>.tres</code> for a new gun).</li>
+  <li>Enable <strong>Use Sprite Region Rect</strong> and set <strong>Sprite Region Rect</strong> to the same <code>x, y, w, h</code> from Method 1 or 2.</li>
+  <li>For run start: <span class="path">scenes/player/Player.tscn</span> → <strong>WeaponController → Starting Weapon</strong> = that <code>.tres</code>. For the shop: add the same resource to <strong>ShopManager → Available Weapons</strong> in <span class="path">scenes/world/Main.tscn</span>.</li>
+</ol>
+<p class="muted">You only touch <strong>WeaponController → Use Weapon Region Manual</strong> for one-off experiments; normal play uses <strong>WeaponData</strong> on each gun.</p>
+
+<h2>About “66 704 60 19” in Aseprite’s footer</h2>
+<p>Often <strong>66 × 704</strong> is simply the <strong>full file size</strong>. <strong>60 × 19</strong> can be your <strong>selection size</strong> (<code>w, h</code>). That still leaves <code>x, y</code> — use <strong>Method 1 or 2</strong> so you’re not guessing.</p>
+
+<p class="muted">Files: this guide, <code>scenes/debug/WeaponRegionScratch.tscn</code>, <code>docs/aseprite_weapon_rect_from_selection.lua</code></p>
+</body>
+</html>

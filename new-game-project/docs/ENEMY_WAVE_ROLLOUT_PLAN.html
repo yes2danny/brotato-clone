@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Enemy &amp; wave rollout plan — BrotatoClone</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg:#0e1016; --card:#151a24; --b:#263041; --t:#e7ebf5; --m:#8b95ad; --a:#6ee7b7; --w:#fbbf24; --r:#f87171; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--t); font-family:"DM Sans",system-ui,sans-serif; line-height:1.55; font-size:1rem; }
+    .top { background:linear-gradient(90deg,#134e4a,#5b21b6); padding:.5rem 1rem; font-family:"JetBrains Mono",monospace; font-size:.65rem; letter-spacing:.12em; text-transform:uppercase; text-align:center; color:#fff9; }
+    .w { max-width:980px; margin:0 auto; padding:2rem 1.25rem 4rem; }
+    h1 { font-size:clamp(1.5rem,3vw,2.1rem); margin:0 0 .5rem; letter-spacing:-.02em; }
+    .lead { color:var(--m); max-width:62ch; margin:0 0 1.5rem; }
+    h2 { font-size:1.15rem; color:var(--a); margin:2rem 0 .6rem; border-bottom:1px solid var(--b); padding-bottom:.35rem; }
+    h3 { font-size:1rem; color:#c4b5fd; margin:1.25rem 0 .4rem; }
+    .card { background:var(--card); border:1px solid var(--b); border-radius:10px; padding:1rem 1.15rem; margin:.75rem 0; }
+    p { margin:.5rem 0; }
+    ul { margin:.35rem 0; padding-left:1.2rem; }
+    li { margin:.28rem 0; }
+    code, .mono { font-family:"JetBrains Mono",monospace; font-size:.82em; background:#0b0d12; padding:.1em .35em; border-radius:4px; border:1px solid var(--b); }
+    table { width:100%; border-collapse:collapse; font-size:.88rem; margin:.75rem 0; }
+    th, td { border:1px solid var(--b); padding:.45rem .55rem; text-align:left; vertical-align:top; }
+    th { background:#0b0d12; color:var(--m); font-family:"JetBrains Mono",monospace; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; }
+    .tag { display:inline-block; font-size:.68rem; padding:.15rem .45rem; border-radius:999px; border:1px solid var(--b); color:var(--m); margin-right:.35rem; }
+    .tag-boss { border-color:#a78bfa; color:#ddd6fe; }
+    .tag-mini { border-color:var(--w); color:#fde68a; }
+    .note { font-size:.88rem; color:var(--m); border-left:3px solid var(--w); padding:.5rem .75rem; background:#0b0d12; margin:1rem 0; }
+    .phase { display:grid; gap:.5rem; }
+    @media(min-width:720px){ .phase { grid-template-columns:1fr 1fr; } }
+    footer { margin-top:3rem; font-family:"JetBrains Mono",monospace; font-size:.72rem; color:var(--m); text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="top">Planning doc — implementation order — align with WaveData / WaveManager / EnemySpawner</div>
+  <div class="w">
+    <h1>Enemy megapack rollout &amp; wave plan</h1>
+    <p class="lead">You have <strong>~48+ character art kits</strong> under <code>assets/sprites/characters/megapack/</code> (42 with <code>Idle/000.png</code> layout + 6 Goblin sheet folders). The game only runs <strong>four</strong> enemy scenes today. This document is the <strong>implementation plan</strong>: how to wire kits into scenes, drive pools by wave, scale HP with progression, and schedule mini-bosses — without blocking on “all 50 at once.”</p>
+    <p class="note"><strong>Superseded for numbers + deferred backlog:</strong> use <code>docs/Main_ENEMY_WAVE_ROADMAP_V2.html</code> — see the table of contents link <strong>§11 · deferred (do later)</strong> for issues intentionally parked until after the wave spine ships.</p>
+
+    <div class="card">
+      <strong>Current code facts</strong>
+      <ul>
+        <li><code>WaveData</code> exists with <code>enemy_scenes</code>, timing, and <code>is_boss_wave</code> — but <code>WaveManager</code> does <strong>not</strong> read it yet; it only shortens spawn interval.</li>
+        <li><code>EnemySpawner</code> spawns a <strong>uniform random</strong> pick from one global <code>enemy_scenes</code> array on <code>Main.tscn</code>.</li>
+        <li><code>EnemyData</code> defines <code>health_scale_per_wave</code> / <code>speed_scale_per_wave</code> — schema exists; <code>EnemyAI</code> is not shown applying wave scaling in the reviewed flow (wire-up is part of this plan).</li>
+      </ul>
+    </div>
+
+    <h2>1 — Target architecture (what we will build)</h2>
+    <ol>
+      <li><strong>Wave-driven spawner</strong> — <code>WaveManager</code> loads an ordered list of <code>WaveData</code> resources (or one <code>WaveTable.tres</code> holding an array). On <code>wave_started</code>, push the active wave’s <code>enemy_scenes</code> pool (and spawn interval / duration overrides) into <code>EnemySpawner</code> via a new method e.g. <code>apply_wave(wave: WaveData, wave_index: int)</code>.</li>
+      <li><strong>One scene per “role”</strong> — Keep <code>EnemyAI.gd</code> + <code>HealthSystem</code>. Each new enemy is a duplicated <code>Enemy.tscn</code> (or a single generic <code>Enemy_Megapack.tscn</code> with an <code>EnemyData</code> export). Prefer <strong>EnemyData .tres per kit</strong> for tuning without duplicating scripts.</li>
+      <li><strong>Wave scaling hook</strong> — On spawn, pass <code>current_wave</code> (from <code>WaveManager</code> or a tiny autoload snapshot) into the enemy so HP/speed become: <code>final_hp = round(base_hp * (1 + health_scale_per_wave * (wave - 1)))</code> with a <strong>per-tier cap</strong> so late waves do not explode past fun.</li>
+      <li><strong>Mini-boss channel</strong> — Extend <code>WaveData</code> with exports such as <code>mini_boss_scene: PackedScene</code>, <code>mini_boss_count: int</code>, <code>mini_boss_hp_multiplier: float</code>, <code>pause_trash_spawns: bool</code> during intro optional. When the wave starts, spawn the mini-boss(es) once, then normal spawner fills trash.</li>
+      <li><strong>Full boss waves</strong> — Use existing <code>is_boss_wave</code>: longer duration, slower trash OR no trash, single <code>boss_scene</code> + adds phase later.</li>
+    </ol>
+
+    <h2>2 — Implementation phases (order of work)</h2>
+    <div class="phase">
+      <div class="card">
+        <h3>Phase A — Spine (required)</h3>
+        <ul>
+          <li>Wire <code>WaveManager</code> to <code>@export var waves: Array[WaveData]</code> (or load path).</li>
+          <li><code>_start_wave()</code>: resolve wave by index, apply duration/break to timers, call <code>EnemySpawner.apply_wave(active)</code>.</li>
+          <li>Fallback: if array empty, keep today’s behavior so nothing breaks mid-migration.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Phase B — Scaling (required for “stronger over time”)</h3>
+        <ul>
+          <li>Either apply scaling in <code>EnemyAI._ready</code> from <code>EnemyData</code> + wave index, or add <code>EnemyScaler.apply(enemy, wave)</code>.</li>
+          <li>Use <code>health_scale_per_wave</code> on data; add <code>global_hp_curve</code> on <code>WaveData</code> if some waves need extra +15% without new scenes.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Phase C — Content pipeline (parallelizable)</h3>
+        <ul>
+          <li>Batch-create <code>scenes/enemies/megapack/</code> scenes: template + <code>EnemyData</code> per kit (name, base HP, speed tier).</li>
+          <li>Group kits by <strong>silhouette size</strong> (hitbox radius) so spawn ring does not clip walls.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Phase D — Boss / mini-boss (after A)</h3>
+        <ul>
+          <li>Implement mini-boss spawn from <code>WaveData</code> fields; mark spawned node <code>add_to_group("mini_boss")</code> for UI skull icon later.</li>
+          <li>Boss waves: test with <code>FrogBoss</code> or largest kit first.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>3 — Enemy tier bands (megapack → role)</h2>
+    <p class="mono" style="font-size:.78rem;line-height:1.45">Tier F (tutorial trash): Dummy_LVL1–4, Mushroom — low HP, readable patterns.<br />
+    Tier E (early swarm): Goblin Regular/Barrel variants not yet in scenes → fast/low or slow/tanky pairs.<br />
+    Tier D (mid): Ent_LVL1–2, Monsterfly_01, Mimic_LVL1–2, Dwarfette_LVL1–2, FrogMonster.<br />
+    Tier C (mid+): RhinoMonster_01_Regular, 02_Silver, Sorcerer_LVL1–2, Ent_LVL3, Dwarfette_LVL3.<br />
+    Tier B (heavy): RhinoMonster_03_Gold, 05_Orc, 06_OrcRedSkinned, Sorcerer_LVL3–4, Mimic_LVL3–4, Ent_LVL4, MonsterSlasher_01.<br />
+    Tier A (elite / mini-boss bodies): Cyclop_Archer_01 (already used), Vampire_Archer_01, RhinoMonster_04_Devil, 07–10 variants, Knight_LVL3–4.<br />
+    Tier S (boss candidates): FrogBoss, GameMaster (optional joke boss), stacked Rhinos with unique moves later.</p>
+    <p class="note">Exact tier = tunable. Start conservative: if a sprite is <strong>large</strong> or sheet suggests <strong>boss</strong>, keep it out of random trash until wave 8+.</p>
+
+    <h2>4 — Wave schedule (example 20-wave skeleton)</h2>
+    <p>Numbers below are <strong>design targets</strong> for <code>WaveData</code> rows. Trash = spawner pool. Mini-boss = extra spawn at wave start. HP mult = on top of per-kit base + per-wave scaling.</p>
+    <table>
+      <thead>
+        <tr><th>Waves</th><th>Trash pool (examples)</th><th>Spawn pressure</th><th>Mini-boss</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1–2</td><td>Dummy_LVL1, Mushroom, Goblin Barrel green (existing)</td><td>Relaxed interval, teach movement</td><td>—</td></tr>
+        <tr><td>3–4</td><td>+ Ent_LVL1, Monsterfly_01</td><td>Default interval</td><td>—</td></tr>
+        <tr><td>5</td><td>Same as 3–4</td><td>Slightly faster</td><td><span class="tag tag-mini">Mini</span> 1× Cyclop Archer, <strong>×2.0 HP</strong>, +20% damage</td></tr>
+        <tr><td>6–7</td><td>+ Mimic_LVL1, Dwarfette_LVL1</td><td>+ trash weight on smalls</td><td>—</td></tr>
+        <tr><td>8–9</td><td>+ Rhino 01 Regular, Sorcerer_LVL1</td><td>Interval −0.1 from table</td><td>—</td></tr>
+        <tr><td>10</td><td>Pool from 8–9 only (no new types)</td><td>Slower spawns, longer wave</td><td><span class="tag tag-mini">Mini</span> 1× Vampire Archer or Rhino Silver, <strong>×2.5 HP</strong></td></tr>
+        <tr><td>11–13</td><td>+ Rhino Gold/Orc line, Sorcerer 2–3, Ent_LVL3</td><td>Resume normal ramp</td><td>—</td></tr>
+        <tr><td>14–15</td><td>+ MonsterSlasher, Mimic 3</td><td>Pressure up</td><td>—</td></tr>
+        <tr><td>15</td><td>Same</td><td>—</td><td><span class="tag tag-mini">Mini</span> 2× elite: e.g. Cyclop + Mimic3 at <strong>×1.8 HP</strong> each (shorter individual fights)</td></tr>
+        <tr><td>16–19</td><td>Full mid-late pool; drop Dummies from weight</td><td>Hard floor on interval</td><td>—</td></tr>
+        <tr><td>20</td><td>Minimal trash</td><td>Long wave timer</td><td><span class="tag tag-boss">Boss</span> <code>is_boss_wave</code>: FrogBoss (or Rhino Devil), <strong>×5–8 HP</strong>, custom telegraph attacks later</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Repeat a <strong>pattern every 5 waves</strong>: mini at 5,10,15; <strong>boss every 10</strong> (10 = “mini gauntlet”, 20 = true boss). Waves 25+ re-use table with +global HP% and new pool slots (Rhino 07–10, Knight LVL4, etc.).</p>
+
+    <h2>5 — HP progression (stronger enemies + scaling)</h2>
+    <ul>
+      <li><strong>Per-kit base</strong> — Set in <code>EnemyData.max_health</code> (e.g. Dummy 12, Goblin green 30, Rhino 80).</li>
+      <li><strong>Per-wave growth</strong> — <code>hp_out = round(base * (1 + health_scale_per_wave * (wave - 1)))</code>; suggest <strong>0.04–0.08</strong> for trash, <strong>0.02–0.04</strong> for already huge kits.</li>
+      <li><strong>WaveData override</strong> — Optional <code>enemy_hp_multiplier: float = 1.0</code> for “this wave is brutal.”</li>
+      <li><strong>Mini-boss</strong> — Multiply after wave scaling: <code>hp * mini_boss_hp_multiplier</code> (2.0 / 2.5 / …).</li>
+      <li><strong>Cap</strong> — <code>min(hp, base * 6)</code> per non-boss to avoid one-shots breaking fun; bosses uncapped or higher cap.</li>
+    </ul>
+
+    <h2>6 — Mini-boss vs boss (definitions)</h2>
+    <ul>
+      <li><strong>Mini-boss</strong> — Spawns at wave start, 1–2 count, larger HP multiplier, optional unique tint/scale 1.15×, drops bonus gold/XP later. Still uses <code>EnemyAI</code> until you add bespoke boss scripts.</li>
+      <li><strong>Boss wave</strong> — <code>is_boss_wave == true</code>: clear trash spawns or cap at very low rate; spawn one <code>boss_scene</code>; extend <code>wave_duration</code>; UI banner “Boss!”</li>
+    </ul>
+
+    <h2>7 — Practical rollout (not all 50 day one)</h2>
+    <ol>
+      <li><strong>Wave 1–5 kit</strong> — Implement Phase A+B, then add <strong>6–8 new scenes</strong> (Dummy, Mushroom, Ent1, Monsterfly, + keep current goblins).</li>
+      <li><strong>Mini wave 5</strong> — Re-use Cyclop with multiplier first (fast win).</li>
+      <li><strong>Expand pool by band</strong> — Add 5–8 scenes per milestone until megapack coverage is complete.</li>
+      <li><strong>Automate (optional later)</strong> — Editor tool or script that reads megapack folder names and emits placeholder <code>EnemyData</code> + scenes.</li>
+    </ol>
+
+    <footer><code>docs/ENEMY_WAVE_ROLLOUT_PLAN.html</code> — plan only; implement in phases A→D</footer>
+  </div>
+</body>
+</html>

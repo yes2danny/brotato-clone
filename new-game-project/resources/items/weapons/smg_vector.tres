@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/data/WeaponData.gd" id="1_weapon_data"]
+[ext_resource type="Texture2D" path="res://assets/projectiles/BulletsAndBombs-PROJECTILEKIT/SPRITES SEPARATED/Projectiles-Bullets-(RIGHT)/Tiny-Bullet (1).png" id="2_bullet"]
+
+[resource]
+script = ExtResource("1_weapon_data")
+weapon_name = "Vector"
+description = "SMG profile (custom sheet crop)."
+bullet_sprite = ExtResource("2_bullet")
+cost = 65
+damage = 9
+fire_rate = 12.0
+bullet_speed = 480.0
+bullet_lifetime = 2.0
+detection_range = 300.0
+projectile_count = 1
+spread_angle = 5.5
+use_sprite_region_rect = true
+sprite_region_rect = Rect2(3, 429, 40, 24)
+spritesheet_cell_index = 0
+weapon_sprite_scale = Vector2(1.35, 1.35)
+damage_scale = 1.15
+fire_rate_scale = 1.1

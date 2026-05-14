@@ -1,0 +1,23 @@
+[remap]
+
+importer="YATI"
+type="PackedScene"
+uid="uid://bqme47w7dx8iu"
+path="res://.godot/imported/wall-1and2-rule0-erases all generated tiles and resets them to their initial state.tmx-ed05ce223122a62c20685271de76ef6c.tscn"
+
+[deps]
+
+source_file="res://assets/sprites/tilemaps/cemetery/TiledMap Editor/Rules/wall-1and2-rule0-erases all generated tiles and resets them to their initial state.tmx"
+dest_files=["res://.godot/imported/wall-1and2-rule0-erases all generated tiles and resets them to their initial state.tmx-ed05ce223122a62c20685271de76ef6c.tscn"]
+
+[params]
+
+use_default_filter=false
+add_class_as_metadata=false
+add_id_as_metadata=false
+no_alternative_tiles=false
+map_wangset_to_terrain=false
+custom_data_prefix="data_"
+tiled_project_file=""
+post_processor=""
+save_tileset_to=""

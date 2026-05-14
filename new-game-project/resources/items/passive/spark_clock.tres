@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/data/ItemData.gd" id="1_item_data"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/shop_icons/icon_fire_rate_spark_clock_64.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_item_data")
+item_name = "Spark Clock"
+description = "+25% fire rate. Time is bullets now."
+icon = ExtResource("2_icon")
+cost = 70
+rarity = 1
+bonus_fire_rate = 0.25
