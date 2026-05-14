@@ -8,6 +8,6 @@ script = ExtResource("1_item_data")
 item_name = "Jet-Too Boarding Pass"
 description = "Each wave: +20% move speed for 15s, then -10% move speed. Delayed departure."
 icon = ExtResource("2_icon")
-cost = 45
+cost = 165
 rarity = 2
 bonus_delayed_departure = 1

@@ -8,6 +8,6 @@ script = ExtResource("1_item_data")
 item_name = "Questionable Mystery Box"
 description = "Random upside, random downside. Could be treasure. Could be soup."
 icon = ExtResource("2_icon")
-cost = 45
+cost = 225
 rarity = 3
 mystery_box_rolls = 1

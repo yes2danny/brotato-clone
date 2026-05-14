@@ -8,6 +8,6 @@ script = ExtResource("1_item_data")
 item_name = "Overclocked Toaster"
 description = "+15% fire rate. Bread goes in. Violence comes out."
 icon = ExtResource("2_icon")
-cost = 55
+cost = 170
 rarity = 2
 bonus_fire_rate = 0.15

@@ -8,6 +8,6 @@ script = ExtResource("1_item_data")
 item_name = "Tin Can Armor"
 description = "+2 armor. Technically protective. Emotionally loud."
 icon = ExtResource("2_icon")
-cost = 60
+cost = 130
 rarity = 1
 bonus_armor = 2

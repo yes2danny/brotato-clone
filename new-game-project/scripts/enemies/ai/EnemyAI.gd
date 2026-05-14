@@ -185,7 +185,7 @@ func _on_died() -> void:
 func _compute_gold_drop() -> int:
 	var mh: int = health_system.max_health if health_system else 30
 	var dm: int = damage
-	# Tougher bodies and harder hitters pay more; tweak divisors globally if economy drifts.
-	var raw: int = (mh * 3 + dm * 8) / 25
+	# Tougher bodies and harder hitters pay more, but early waves should not fund the whole shelf.
+	var raw: int = int(roundf(float(mh + dm * 2) / 55.0))
 	var scaled: int = int(roundf(float(raw) * gold_drop_multiplier))
 	return maxi(1, scaled + gold_drop_bonus)

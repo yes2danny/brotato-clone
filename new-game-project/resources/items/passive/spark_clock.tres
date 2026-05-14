@@ -8,6 +8,6 @@ script = ExtResource("1_item_data")
 item_name = "Spark Clock"
 description = "+25% fire rate. Time is bullets now."
 icon = ExtResource("2_icon")
-cost = 70
+cost = 155
 rarity = 1
 bonus_fire_rate = 0.25

@@ -8,6 +8,6 @@ script = ExtResource("1_item_data")
 item_name = "Heart Charm"
 description = "+20 max health. For emotional and structural support."
 icon = ExtResource("2_icon")
-cost = 45
+cost = 95
 rarity = 0
 bonus_max_health = 20
