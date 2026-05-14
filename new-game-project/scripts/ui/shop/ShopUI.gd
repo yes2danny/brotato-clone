@@ -85,6 +85,7 @@ var _last_coin_quip_idx: int = -1
 var _dim: ColorRect = null
 var _toast: Label = null
 var _gold_label: Label = null
+var _wave_label: Label = null
 var _tagline: Label = null
 var _item_row: HBoxContainer = null
 var _reroll_btn: Button = null
@@ -235,6 +236,20 @@ func _build_ui() -> void:
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	outer.add_child(title)
 
+	var header_row := HBoxContainer.new()
+	header_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	header_row.add_theme_constant_override("separation", 16)
+	outer.add_child(header_row)
+
+	_wave_label = Label.new()
+	_wave_label.name = "WaveLabel"
+	_wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_wave_label.add_theme_font_size_override("font_size", 18)
+	_wave_label.add_theme_color_override("font_color", Color(0.72, 0.76, 0.88))
+	_wave_label.add_theme_color_override("font_outline_color", Color(0.05, 0.06, 0.1, 0.7))
+	_wave_label.add_theme_constant_override("outline_size", 2)
+	header_row.add_child(_wave_label)
+
 	_gold_label = Label.new()
 	_gold_label.name = "GoldLabel"
 	_gold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -242,8 +257,7 @@ func _build_ui() -> void:
 	_gold_label.add_theme_color_override("font_color", Color(0.98, 0.86, 0.42))
 	_gold_label.add_theme_color_override("font_outline_color", Color(0.08, 0.06, 0.02, 0.75))
 	_gold_label.add_theme_constant_override("outline_size", 3)
-	_gold_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	outer.add_child(_gold_label)
+	header_row.add_child(_gold_label)
 
 	_item_row = HBoxContainer.new()
 	_item_row.name = "ItemRow"
@@ -418,10 +432,13 @@ func _on_shop_opened(offerings: Array) -> void:
 	_apply_viewport_to_shop()
 	if _tagline:
 		_tagline.text = _pick_coin_quip()
+	if _wave_label and _shop_manager:
+		_wave_label.text = "Wave %d" % (GameManager.waves_completed + 1)
 	visible = true
 	_rebuild_row(offerings)
 	if _shop_manager:
 		_on_rerolls_changed(_shop_manager.free_rerolls)
+	_animate_shop_open()
 
 
 func _on_shop_rerolled(offerings: Array) -> void:
@@ -436,7 +453,7 @@ func _on_shop_closed() -> void:
 
 func _on_gold_changed(amount: int) -> void:
 	if _gold_label:
-		_gold_label.text = "Gold: %d" % amount
+		_gold_label.text = "🪙 %d" % amount
 
 
 func _on_rerolls_changed(amount: int) -> void:
@@ -457,6 +474,20 @@ func _on_continue_pressed() -> void:
 	if _shop_manager:
 		_shop_manager.close_shop()
 
+
+func _animate_shop_open() -> void:
+	if _dim:
+		_dim.modulate.a = 0.0
+		var tw := create_tween().set_parallel(true)
+		tw.tween_property(_dim, "modulate:a", 0.9, 0.25).from(0.0)
+	var panel := _shop_shell if _shop_shell else _flat_panel
+	if panel:
+		panel.pivot_offset = panel.size * 0.5
+		panel.scale = Vector2(0.92, 0.92)
+		panel.modulate.a = 0.0
+		var tw := create_tween().set_parallel(true)
+		tw.tween_property(panel, "scale", Vector2.ONE, 0.3).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+		tw.tween_property(panel, "modulate:a", 1.0, 0.2)
 
 func _clear_row() -> void:
 	for c in _item_row.get_children():
@@ -493,7 +524,7 @@ func _make_slot_cell(offer: Variant) -> Control:
 
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(0, card_min_height)
-	card.mouse_filter = Control.MOUSE_FILTER_PASS
+	card.mouse_filter = Control.MOUSE_FILTER_STOP
 
 	if offer == null:
 		var sb_in := _slot_stylebox(false)
@@ -515,6 +546,8 @@ func _make_slot_cell(offer: Variant) -> Control:
 
 	var offer_item: ShopItem = offer
 	var use_active := not offer_item.is_purchased
+	if offer_item.is_purchased:
+		card.modulate = Color(1, 1, 1, 0.45)
 	var sb := _slot_stylebox(use_active)
 	sb.content_margin_left = 8.0
 	sb.content_margin_right = 8.0
@@ -533,7 +566,7 @@ func _make_slot_cell(offer: Variant) -> Control:
 
 	var rarity_bar := ColorRect.new()
 	rarity_bar.color = _rarity_color(offer_item.rarity)
-	rarity_bar.custom_minimum_size = Vector2(0, 4)
+	rarity_bar.custom_minimum_size = Vector2(0, 8)
 	rarity_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.add_child(rarity_bar)
 
@@ -563,6 +596,11 @@ func _make_slot_cell(offer: Variant) -> Control:
 		icon_area.add_child(ph)
 	top.add_child(icon_area)
 
+	var name_row := HBoxContainer.new()
+	name_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	name_row.add_theme_constant_override("separation", 6)
+	top.add_child(name_row)
+
 	var name_l := Label.new()
 	name_l.text = offer_item.display_name
 	name_l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -570,7 +608,16 @@ func _make_slot_cell(offer: Variant) -> Control:
 	name_l.add_theme_font_size_override("font_size", 13)
 	name_l.add_theme_color_override("font_color", Color(0.94, 0.95, 1.0))
 	name_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top.add_child(name_l)
+	name_row.add_child(name_l)
+
+	if offer_item.is_weapon():
+		var badge := Label.new()
+		badge.text = "WPN"
+		badge.add_theme_font_size_override("font_size", 9)
+		badge.add_theme_color_override("font_color", Color(0.98, 0.62, 0.18))
+		badge.add_theme_color_override("font_outline_color", Color(0.1, 0.06, 0.02, 0.8))
+		badge.add_theme_constant_override("outline_size", 2)
+		name_row.add_child(badge)
 
 	var desc := Label.new()
 	desc.text = offer_item.display_description if offer_item.display_description != "" else " "
@@ -605,7 +652,22 @@ func _make_slot_cell(offer: Variant) -> Control:
 		buy.pressed.connect(_on_buy_pressed.bind(offer_item))
 	buy_row.add_child(buy)
 
+	card.mouse_entered.connect(_on_card_hovered.bind(card, true))
+	card.mouse_exited.connect(_on_card_hovered.bind(card, false))
+
 	return wrap
+
+
+func _on_card_hovered(card: PanelContainer, hovered: bool) -> void:
+	if card.modulate.a < 0.5:
+		return
+	var tw := create_tween().set_parallel(true)
+	if hovered:
+		tw.tween_property(card, "scale", Vector2(1.04, 1.04), 0.12).set_ease(Tween.EASE_OUT)
+		tw.tween_property(card, "modulate", Color(1, 1, 1, 1.0), 0.12)
+	else:
+		tw.tween_property(card, "scale", Vector2.ONE, 0.12).set_ease(Tween.EASE_OUT)
+		tw.tween_property(card, "modulate", Color(1, 1, 1, 1.0), 0.12)
 
 
 func _rarity_color(rarity: int) -> Color:
