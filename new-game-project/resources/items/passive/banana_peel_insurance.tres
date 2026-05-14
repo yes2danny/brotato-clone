@@ -8,6 +8,6 @@ script = ExtResource("1_item_data")
 item_name = "Banana Peel Insurance"
 description = "Blocks the next hit. Coverage may vary."
 icon = ExtResource("2_icon")
-cost = 45
+cost = 110
 rarity = 1
 bonus_shield_hits = 1

@@ -8,6 +8,6 @@ script = ExtResource("1_item_data")
 item_name = "Stop Sign?"
 description = "Blocks the next hit. What stop sign, man?"
 icon = ExtResource("2_icon")
-cost = 45
+cost = 115
 rarity = 1
 bonus_shield_hits = 1

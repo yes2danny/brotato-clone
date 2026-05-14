@@ -6,8 +6,8 @@
 [resource]
 script = ExtResource("1_item_data")
 item_name = "Merchant Coupon"
-description = "+20 gold now. Expired yesterday. Still works somehow."
+description = "Next shop prices are -10%. Expired yesterday. Still works somehow."
 icon = ExtResource("2_icon")
-cost = 10
+cost = 70
 rarity = 0
-bonus_gold = 20
+bonus_next_shop_price_percent = -0.1

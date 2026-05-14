@@ -52,8 +52,8 @@ func _ready() -> void:
 func open_shop() -> void:
 	if GameManager.state != GameManager.GameState.PLAYING:
 		return
-	# Small payout so real items stay affordable once you assign .tres in the Inspector
-	var wave_bonus: int = 18 + GameManager.waves_completed * 6
+	# Small reliable stipend; most gold still comes from collected enemy drops.
+	var wave_bonus: int = 16 + GameManager.waves_completed * 4
 	add_gold(wave_bonus)
 	var price_percent: float = next_shop_price_percent
 	var force_high_rarity: bool = guaranteed_high_rarity_shops > 0

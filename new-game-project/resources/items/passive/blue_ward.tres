@@ -8,6 +8,6 @@ script = ExtResource("1_item_data")
 item_name = "Blue Ward"
 description = "Blocks the next hit. Personal space, but magical."
 icon = ExtResource("2_icon")
-cost = 50
+cost = 120
 rarity = 1
 bonus_shield_hits = 1

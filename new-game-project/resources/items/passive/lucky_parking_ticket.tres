@@ -6,8 +6,9 @@
 [resource]
 script = ExtResource("1_item_data")
 item_name = "Lucky Parking Ticket"
-description = "+35 gold now. Somehow, this is a tax write-off."
+description = "+60 gold now and +1 free shop reroll. Somehow, this is a tax write-off."
 icon = ExtResource("2_icon")
-cost = 25
+cost = 185
 rarity = 2
-bonus_gold = 35
+bonus_gold = 60
+bonus_free_rerolls = 1
