@@ -11,8 +11,9 @@ config_version=5
 [application]
 
 config/name="BrotatoClone"
-run/main_scene="res://scenes/world/Main.tscn"
+run/main_scene="res://scenes/MainMenu.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
+run/flush_stdout_on_print=true
 config/icon="res://icon.svg"
 
 [autoload]
@@ -22,6 +23,11 @@ GameManager="*res://scripts/systems/GameManager.gd"
 XPDropSystem="*res://scripts/items/pickups/XPDropSystem.gd"
 GoldDropSystem="*res://scripts/items/pickups/GoldDropSystem.gd"
 DevDebug="*res://scripts/debug/DevDebug.gd"
+
+[debug]
+
+file_logging/enable_file_logging=true
+file_logging/max_log_files=10
 
 [editor_plugins]
 

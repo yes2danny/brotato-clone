@@ -1,3 +1,6 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Local crash / run logs (see RunGodotWithLog.ps1)
+_logs/

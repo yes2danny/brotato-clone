@@ -52,8 +52,8 @@ func _ready() -> void:
 func open_shop() -> void:
 	if GameManager.state != GameManager.GameState.PLAYING:
 		return
-	# Small reliable stipend; most gold still comes from collected enemy drops.
-	var wave_bonus: int = 16 + GameManager.waves_completed * 4
+	# Stipend so the first shop visit can buy at least one common (~75g) after wave 1 if they collected drops.
+	var wave_bonus: int = 35 + GameManager.waves_completed * 10
 	add_gold(wave_bonus)
 	var price_percent: float = next_shop_price_percent
 	var force_high_rarity: bool = guaranteed_high_rarity_shops > 0

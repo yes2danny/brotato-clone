@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://enemy_scene_01"]
+[gd_scene load_steps=23 format=3 uid="uid://enemy_scene_01"]
 
 ; ── Scripts ──
 [ext_resource type="Script" path="res://scripts/enemies/ai/EnemyAI.gd" id="1_enemy"]
@@ -21,10 +21,51 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_01 (Green Skinned)/Goblin_Barrel_01_Move/007.png" id="11_move7"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_01 (Green Skinned)/Goblin_Barrel_01_Move/008.png" id="12_move8"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_01 (Green Skinned)/Goblin_Barrel_01_Move/009.png" id="13_move9"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_01 (Green Skinned)/Goblin_Barrel_01_ATK_5x1.png" id="15_attack"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack0"]
+atlas = ExtResource("15_attack")
+region = Rect2(0, 0, 38, 26)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack1"]
+atlas = ExtResource("15_attack")
+region = Rect2(38, 0, 38, 26)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack2"]
+atlas = ExtResource("15_attack")
+region = Rect2(76, 0, 38, 26)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack3"]
+atlas = ExtResource("15_attack")
+region = Rect2(114, 0, 38, 26)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack4"]
+atlas = ExtResource("15_attack")
+region = Rect2(152, 0, 38, 26)
 
 ; ── SpriteFrames: Idle (1 frame) + Move (10 frames) animations ──
 [sub_resource type="SpriteFrames" id="SpriteFrames_goblin"]
 animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_attack0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_attack1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_attack2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_attack3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_attack4")
+}],
+"loop": false,
+"name": &"Attack",
+"speed": 12.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("3_idle0")

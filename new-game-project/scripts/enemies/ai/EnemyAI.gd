@@ -13,6 +13,7 @@ extends CharacterBody2D
 @export var move_speed: float = 80.0
 @export var damage: int = 10
 @export var contact_cooldown: float = 1.0
+@export var attack_animation_name: StringName = &"Attack"
 
 ## Extra gold dropped on death (added after the HP/damage formula).
 @export var gold_drop_bonus: int = 0
@@ -37,10 +38,32 @@ extends CharacterBody2D
 
 enum State { WANDER, CHASE }
 
+var _hp_mult_pending: float = 1.0
+var _dmg_mult_pending: float = 1.0
+
+func apply_wave_scaling(hp_mult: float, dmg_mult: float) -> void:
+	_hp_mult_pending = hp_mult
+	_dmg_mult_pending = dmg_mult
+	# If we're already ready, apply immediately
+	if health_system != null:
+		_apply_scaling_to_stats()
+
+func _apply_scaling_to_stats() -> void:
+	if health_system and _hp_mult_pending != 1.0:
+		health_system.max_health = int(round(health_system.max_health * _hp_mult_pending))
+		if "current_health" in health_system:
+			health_system.current_health = health_system.max_health
+		elif health_system.has_method("heal"):
+			health_system.heal(99999) # fallback
+			
+	if _dmg_mult_pending != 1.0:
+		damage = int(round(damage * _dmg_mult_pending))
+
 var state: State = State.WANDER
 var player: CharacterBody2D = null
 
 var _contact_timer: float = 0.0
+var _attack_animation_timer: float = 0.0
 var _alert_burst_timer: float = 0.0
 var _wander_target: Vector2 = Vector2.ZERO
 var _wander_timer: float = 0.0
@@ -51,6 +74,7 @@ var _wall_slide_timer: float = 0.0
 func _ready() -> void:
 	add_to_group("enemies")
 	health_system.died.connect(_on_died)
+	_apply_scaling_to_stats()
 
 	var players = get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
@@ -74,6 +98,8 @@ func _physics_process(delta: float) -> void:
 		current_speed *= alert_burst_speed_multiplier
 
 	velocity = (move_dir * current_speed) + (_get_separation_force() * separation_strength)
+	if _attack_animation_timer > 0.0:
+		_attack_animation_timer = maxf(_attack_animation_timer - delta, 0.0)
 	_update_sprite()
 	move_and_slide()
 	_process_contact_damage(delta)
@@ -151,6 +177,9 @@ func _update_sprite() -> void:
 	elif velocity.x > 0:
 		sprite.flip_h = false
 
+	if _attack_animation_timer > 0.0:
+		return
+
 	sprite.play("Move")
 
 
@@ -173,6 +202,21 @@ func _deal_contact_damage() -> void:
 	if player_health:
 		player_health.take_damage(damage)
 		_contact_timer = contact_cooldown
+		_play_attack_animation()
+
+
+func _play_attack_animation() -> void:
+	if sprite == null or sprite.sprite_frames == null:
+		return
+	if not sprite.sprite_frames.has_animation(attack_animation_name):
+		return
+
+	sprite.play(attack_animation_name)
+	var frame_count: int = sprite.sprite_frames.get_frame_count(attack_animation_name)
+	var speed: float = sprite.sprite_frames.get_animation_speed(attack_animation_name)
+	if frame_count <= 0 or speed <= 0.0:
+		return
+	_attack_animation_timer = float(frame_count) / speed
 
 
 func _on_died() -> void:
@@ -185,7 +229,8 @@ func _on_died() -> void:
 func _compute_gold_drop() -> int:
 	var mh: int = health_system.max_health if health_system else 30
 	var dm: int = damage
-	# Tougher bodies and harder hitters pay more, but early waves should not fund the whole shelf.
-	var raw: int = int(roundf(float(mh + dm * 2) / 55.0))
+	# Tougher bodies and harder hitters pay more. Divisor tuned so wave-1 kills + stipend
+	# can afford a ~75g common item after the first shop (see ShopManager.open_shop wave_bonus).
+	var raw: int = int(roundf(float(mh + dm * 2) / 25.0))
 	var scaled: int = int(roundf(float(raw) * gold_drop_multiplier))
 	return maxi(1, scaled + gold_drop_bonus)

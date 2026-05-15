@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Wave Roadmap v2 — BrotatoClone — 20-wave math + full roster</title>
+  <title>Wave Roadmap v3 — BrotatoClone — rebalanced difficulty + unit HP/DMG per wave</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -129,11 +129,11 @@
   </style>
 </head>
 <body>
-  <div class="top">Wave roadmap v2 · supersedes ENEMY_WAVE_ROLLOUT_PLAN.html · math + all 54 sprites + boss schedule</div>
+  <div class="top">Wave roadmap v3 · difficulty rebalance pass · steeper early HP/DMG · actual unit stats per wave · supersedes v2</div>
   <div class="w">
 
-    <h1>20-wave roadmap, with math.</h1>
-    <p class="sub">Audit of the v1 plan, then a full rebuild: numbers per wave (NPW), HP / damage / spawn-interval equations, every one of the <strong>54 megapack characters</strong> slotted to a wave band, mini-bosses at 5 / 10 / 15, and a real boss fight at 20. Tuned against what Brotato and Vampire Survivors actually feel like to play.</p>
+    <h1>20-wave roadmap, with math. <span style="color:var(--a2);font-size:1rem;font-weight:400">[v3 — difficulty rebalance]</span></h1>
+    <p class="sub">v3 rebalance pass: the v2 HP/DMG multipliers started at 1.00× making wave 1 enemies die in 1–2 hits — trivially easy. This doc reworks the four difficulty levers so early waves feel like <em>Brotato D0</em> (pressured but fair), adds §3.10 showing <strong>actual HP and DMG numbers</strong> per unit at key waves, and flags a unit base-stat mismatch that was hiding the problem. Formulas only; .tres file updates are a separate task.</p>
 
     <div class="toc">
       <a href="#faults">1 · faults in v1</a>
@@ -212,8 +212,11 @@
     <p>Matches Brotato's 20→60s ramp. Long enough at wave 20 to give the boss room to breathe; short enough at wave 1 not to bore.</p>
 
     <h3>3.2 — Spawn interval (pressure lever)</h3>
-    <p>Seconds between trash spawns from the ring spawner. Cap floor at 0.4s so it never gets unfair.</p>
-    <span class="eq">T(w) = max(0.4, 2.0 − 0.08·w)        # seconds
+    <p>Seconds between trash spawns from the ring spawner. Floor tightened to 0.35s. <strong>[v3 change]</strong> Starting interval reduced from 2.0 to 1.60 so wave 1 already has real spawn pressure — the old formula gave 1.92s which meant the player had nearly 2 full seconds between each enemy. Floor hits at wave 15–16.</p>
+    <span class="eq">T(w) = max(0.35, 1.60 − 0.08·w)       # seconds  [rebalanced v3]
+  → w1=1.52  w5=1.20  w10=0.80  w15=0.40  w16+=0.35 (floor)
+
+  OLD (v2, too gentle): T(w) = max(0.4, 2.0 − 0.08·w)
   → w1=1.92  w5=1.60  w10=1.20  w15=0.80  w20=0.40</span>
 
     <h3>3.3 — Total spawns per wave (the NPW you asked for)</h3>
@@ -226,19 +229,30 @@
     <p>* Wave 20 is a <strong>boss wave override</strong> — it does not follow this formula. Trash is throttled (T=1.0s, N_max=30) so the boss reads clearly. ~60 trash spawns + ~13 scripted boss adds + 1 boss ≈ 75 total enemies. See §6.</p>
 
     <h3>3.4 — Max concurrent enemies (the screen-pressure lever)</h3>
-    <p>Hard cap on enemies alive at once so the player isn't drowned <em>and</em> performance doesn't tank on low-end PCs.</p>
-    <span class="eq">N_max(w) = round(10 + 2·w + 0.15·w²)
-  → w1=12   w5=24   w10=45   w15=74   w20=110</span>
+    <p>Hard cap on enemies alive at once so the player isn't drowned <em>and</em> performance doesn't tank on low-end PCs. <strong>[v3 change]</strong> Base raised from 10 to 16 and linear coefficient from 2→2.5 so wave 1 opens with 19 slots instead of 12 — more enemies on screen at once from the jump.</p>
+    <span class="eq">N_max(w) = round(16 + 2.5·w + 0.18·w²)   [rebalanced v3]
+  → w1=19  w5=33  w10=59  w15=94  w16+=floor (boss wave 20 overrides to 30)
+
+  OLD (v2): N_max(w) = round(10 + 2·w + 0.15·w²)
+  → w1=12  w5=24  w10=45  w15=74  w20=110</span>
     <p>If <code>get_tree().get_nodes_in_group("enemies").size() >= N_max(w)</code>, spawner skips its tick. This is your kindness valve.</p>
 
     <h3>3.5 — Enemy HP multiplier</h3>
-    <p>Multiplies each enemy's base HP (from its <code>EnemyData.max_health</code>). Capped so wave 20 doesn't turn every goblin into a brick.</p>
-    <span class="eq">HP_mult(w) = min(3.5, 1 + 0.08·(w − 1))
+    <p>Multiplies each enemy's base HP (from its scene's <code>max_health</code> export). <strong>[v3 change — this was the main problem.]</strong> The old formula started at 1.00× meaning wave 1 enemies had literally zero HP scaling. A GoblinGreen (30 base HP) at 1.00× dies in ~1.5 seconds at starting DPS. Now we start at 1.80× so wave 1 enemies take 2–3 hits and actually threaten the player. The curve grows at 0.16 per wave (vs old 0.08) for a steeper but fair ramp.</p>
+    <span class="eq">HP_mult(w) = min(5.0, 1.80 + 0.16·(w − 1))   [rebalanced v3]
+  → w1=1.80  w5=2.44  w10=3.24  w15=4.04  w20=4.84
+  (cap of 5.0 not reached until wave 21 — no artificial ceiling in the run)
+
+  OLD (v2, the reason early waves felt trivial):
+  HP_mult(w) = min(3.5, 1 + 0.08·(w − 1))
   → w1=1.00  w5=1.32  w10=1.72  w15=2.12  w20=2.52</span>
 
     <h3>3.6 — Enemy damage multiplier</h3>
-    <p>Multiplies contact / projectile damage on enemies. Grows slower than HP so the game gets <em>longer</em> before it gets <em>more lethal</em>.</p>
-    <span class="eq">DMG_mult(w) = min(2.0, 1 + 0.04·(w − 1))
+    <p>Multiplies contact damage on enemies. Still grows slower than HP (so fights get longer before they get more lethal), but starts at 1.15× instead of 1.00× so a GoblinGreen hit on wave 1 deals 11.5 instead of 10 — small but noticeable. Cap raised to 2.8. Hits cap around wave 19.</p>
+    <span class="eq">DMG_mult(w) = min(2.8, 1.15 + 0.09·(w − 1))   [rebalanced v3]
+  → w1=1.15  w5=1.51  w10=1.96  w15=2.41  w19=2.77  w20=2.80 (cap)
+
+  OLD (v2): DMG_mult(w) = min(2.0, 1 + 0.04·(w − 1))
   → w1=1.00  w5=1.16  w10=1.36  w15=1.56  w20=1.76</span>
 
     <h3>3.7 — XP per kill</h3>
@@ -256,6 +270,78 @@
   HP_avg_pool(w) ≈ HP_mult(w) · base_avg(w)
   base_avg(w) grows from 15 (w1 trash) → 80 (w20 trash) as pool shifts</span>
     <p>Concrete: wave 10 ≈ <code>(45 · 1.72 · 40) / 5 = 619 DPS</code>. Wave 20 ≈ <code>(110 · 2.52 · 80) / 5 ≈ 4435 DPS</code>. Your default weapon at <code>10 dmg × 4 shots/s = 40 DPS</code>, so the player needs roughly <strong>×100 effective DPS growth across the run</strong>. That's what items and weapon upgrades pay for — see §7.</p>
+
+    <!-- ─── 3.10 ACTUAL UNIT STATS ─── -->
+    <h3>3.10 — Actual unit HP and DMG at key waves <span style="color:var(--a2)">[new in v3 — this is what was missing]</span></h3>
+    <p>The formulas are only useful if you know what they produce for your <em>actual scenes</em>. Here are the 5 units we currently have, their base stats, and what those scale to at key wave milestones. This is the table you should use when playtesting to check if difficulty feels right.</p>
+
+    <div class="note bad"><strong>⚠ Unit mismatch flagged:</strong> GoblinRed (230 base HP, 22 DMG) and Cyclop (110 base HP, 16 DMG) have base stats completely out of proportion with early-wave placement. GoblinRed at wave 4 with ×2.28 HP = <strong>524 HP</strong> — that's a bullet sponge the player cannot realistically kill early. The wave schedule must push GoblinRed to wave 10+ or its base HP needs to come down. Cyclop (110 HP) is borderline for wave 3 — acceptable only because the player should already have some upgrades by wave 3, but it should feel like a scary rare encounter, not a common spawn.</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Unit</th>
+          <th>Base HP</th>
+          <th>Base DMG</th>
+          <th>Speed</th>
+          <th>W1 (HP×1.80 / DMG×1.15)</th>
+          <th>W3 (HP×2.12 / DMG×1.33)</th>
+          <th>W5 (HP×2.44 / DMG×1.51)</th>
+          <th>W10 (HP×3.24 / DMG×1.96)</th>
+          <th>W15 (HP×4.04 / DMG×2.41)</th>
+          <th>First wave in pool</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Dummy</strong></td><td>21</td><td>5</td><td>55 (slow)</td>
+          <td>38 HP / 6 DMG</td>
+          <td>45 HP / 7 DMG</td>
+          <td>51 HP / 8 DMG</td>
+          <td>68 HP / 10 DMG</td>
+          <td>85 HP / 12 DMG</td>
+          <td>Wave 1 (exit pool ~W9)</td>
+        </tr>
+        <tr>
+          <td><strong>GoblinGreen</strong></td><td>30</td><td>10</td><td>80</td>
+          <td>54 HP / 12 DMG</td>
+          <td>64 HP / 13 DMG</td>
+          <td>73 HP / 15 DMG</td>
+          <td>97 HP / 20 DMG</td>
+          <td>121 HP / 24 DMG</td>
+          <td>Wave 1 (exit pool ~W11)</td>
+        </tr>
+        <tr>
+          <td><strong>GoblinBlue</strong></td><td>20</td><td>8</td><td>130 (fast!)</td>
+          <td>36 HP / 9 DMG</td>
+          <td>42 HP / 11 DMG</td>
+          <td>49 HP / 12 DMG</td>
+          <td>65 HP / 16 DMG</td>
+          <td>81 HP / 19 DMG</td>
+          <td>Wave 1–2 (stays in pool longer)</td>
+        </tr>
+        <tr style="background:rgba(251,191,36,0.06)">
+          <td><strong>Cyclop</strong> ⚠</td><td>110</td><td>16</td><td>70</td>
+          <td>— (too early)</td>
+          <td>233 HP / 21 DMG</td>
+          <td>268 HP / 24 DMG</td>
+          <td>356 HP / 31 DMG</td>
+          <td>445 HP / 39 DMG</td>
+          <td>Wave 3 (OK as rare; scary encounter)</td>
+        </tr>
+        <tr style="background:rgba(248,113,113,0.06)">
+          <td><strong>GoblinRed</strong> 🚨</td><td>230</td><td>22</td><td>50 (slow tank)</td>
+          <td>— (do not use)</td>
+          <td>— (do not use)</td>
+          <td>561 HP / 33 DMG</td>
+          <td>745 HP / 43 DMG</td>
+          <td>929 HP / 53 DMG</td>
+          <td>⚠ Move to Wave 10+ or reduce base HP to ~60</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note good"><strong>Reading this table:</strong> "54 HP / 12 DMG" means GoblinGreen at wave 1 has 54 effective HP and deals 12 damage per contact hit (1s cooldown). If your starting gun does ~20 DPS, GoblinGreen takes ~2.7 seconds to kill — feels real. If you're 1-shotting everything through wave 4, the .tres multipliers aren't being applied correctly, not the formulas.</div>
 
     <!-- ─── 4 TABLE ─── -->
     <h2 id="table">4 — The 20-wave table (the actual schedule)</h2>
@@ -275,29 +361,29 @@
         </tr>
       </thead>
       <tbody>
-        <tr><td>1</td><td>22</td><td>1.92</td><td class="r">14</td><td class="r">12</td><td class="r">1.00</td><td class="r">1.00</td><td>Dummy_LVL1, Mushroom, Goblin_Regular green</td><td>—</td></tr>
-        <tr><td>2</td><td>24</td><td>1.84</td><td class="r">20</td><td class="r">15</td><td class="r">1.08</td><td class="r">1.04</td><td>+ Dummy_LVL2, Goblin_Regular blue</td><td>—</td></tr>
-        <tr><td>3</td><td>26</td><td>1.76</td><td class="r">26</td><td class="r">17</td><td class="r">1.16</td><td class="r">1.08</td><td>+ Goblin_Barrel green, Monsterfly_01</td><td>—</td></tr>
-        <tr><td>4</td><td>28</td><td>1.68</td><td class="r">34</td><td class="r">20</td><td class="r">1.24</td><td class="r">1.12</td><td>+ Dummy_LVL3, Goblin_Regular red, Ent_LVL1</td><td>—</td></tr>
-        <tr class="mini"><td>5</td><td>30</td><td>1.60</td><td class="r">42</td><td class="r">24</td><td class="r">1.32</td><td class="r">1.16</td><td>+ Goblin_Barrel blue, Mimic_LVL1</td><td><span class="tag tag-mini">MINI 1</span> Cyclop_Archer_01 ×1, HP ×3.0, DMG ×1.5</td></tr>
-        <tr><td>6</td><td>32</td><td>1.52</td><td class="r">52</td><td class="r">27</td><td class="r">1.40</td><td class="r">1.20</td><td>+ Dummy_LVL4, Goblin_Barrel red, Dwarfette_LVL1</td><td>—</td></tr>
-        <tr><td>7</td><td>34</td><td>1.44</td><td class="r">62</td><td class="r">31</td><td class="r">1.48</td><td class="r">1.24</td><td>+ FrogMonster, Ent_LVL2</td><td>—</td></tr>
-        <tr><td>8</td><td>36</td><td>1.36</td><td class="r">74</td><td class="r">36</td><td class="r">1.56</td><td class="r">1.28</td><td>+ Mimic_LVL2, Sorcerer_LVL1, Orc_Archer green</td><td>—</td></tr>
-        <tr><td>9</td><td>38</td><td>1.28</td><td class="r">86</td><td class="r">40</td><td class="r">1.64</td><td class="r">1.32</td><td>+ Dwarfette_LVL2, Knight_LVL1</td><td>Drop Dummy_LVL1–2 from pool</td></tr>
-        <tr class="mini"><td>10</td><td>40</td><td>1.20</td><td class="r">100</td><td class="r">45</td><td class="r">1.72</td><td class="r">1.36</td><td>+ RhinoMonster_01 Regular, Orc_Barbare green</td><td><span class="tag tag-mini">MINI 2</span> Vampire_Archer ×1 + RhinoMonster_02 Silver ×1, HP ×3.5 each</td></tr>
-        <tr><td>11</td><td>42</td><td>1.12</td><td class="r">114</td><td class="r">50</td><td class="r">1.80</td><td class="r">1.40</td><td>+ Ent_LVL3, Sorcerer_LVL2, Orc_Archer blue</td><td>Drop Goblin_Regular green/blue</td></tr>
-        <tr><td>12</td><td>44</td><td>1.04</td><td class="r">130</td><td class="r">56</td><td class="r">1.88</td><td class="r">1.44</td><td>+ Mimic_LVL3, Dwarfette_LVL3, Knight_LVL2</td><td>—</td></tr>
-        <tr><td>13</td><td>46</td><td>0.96</td><td class="r">146</td><td class="r">61</td><td class="r">1.96</td><td class="r">1.48</td><td>+ RhinoMonster_03 Gold, Orc_Barbare blue</td><td>—</td></tr>
-        <tr><td>14</td><td>48</td><td>0.88</td><td class="r">164</td><td class="r">67</td><td class="r">2.04</td><td class="r">1.52</td><td>+ Sorcerer_LVL3, MonsterSlasher_01</td><td>—</td></tr>
-        <tr class="mini"><td>15</td><td>50</td><td>0.80</td><td class="r">182</td><td class="r">74</td><td class="r">2.12</td><td class="r">1.56</td><td>+ Ent_LVL4, Orc_Archer red</td><td><span class="tag tag-mini">MINI 3</span> Knight_LVL3 ×2 + Mimic_LVL4 ×1, HP ×3.0 each + shared "shield" buff</td></tr>
-        <tr><td>16</td><td>52</td><td>0.72</td><td class="r">202</td><td class="r">80</td><td class="r">2.20</td><td class="r">1.60</td><td>+ RhinoMonster_05 Orc, RhinoMonster_06 OrcRed</td><td>Drop Goblin_Regular red, Monsterfly</td></tr>
-        <tr><td>17</td><td>54</td><td>0.64</td><td class="r">222</td><td class="r">87</td><td class="r">2.28</td><td class="r">1.64</td><td>+ Dwarfette_LVL4, Orc_Barbare red, Sorcerer_LVL4</td><td>—</td></tr>
-        <tr><td>18</td><td>56</td><td>0.56</td><td class="r">244</td><td class="r">95</td><td class="r">2.36</td><td class="r">1.68</td><td>+ RhinoMonster_04 Devil, Knight_LVL4</td><td>—</td></tr>
-        <tr><td>19</td><td>58</td><td>0.48</td><td class="r">266</td><td class="r">102</td><td class="r">2.44</td><td class="r">1.72</td><td>+ RhinoMonster_07 Frozen, 08 Bioluminescent, 09 Radioactive, 10 Oniric</td><td>"Rhino night" — all 10 rhinos in pool, ×1.1 weight</td></tr>
-        <tr class="final"><td>20</td><td>60</td><td>1.00*</td><td class="r">~75*</td><td class="r">30*</td><td class="r">2.52</td><td class="r">1.76</td><td>Throttled trash (tier D + E only) + scripted boss adds</td><td><span class="tag tag-final">FINAL BOSS</span> FrogBoss + GameMaster phase 3 — see §6</td></tr>
+        <tr><td>1</td><td>60</td><td>1.52</td><td class="r">15</td><td class="r">19</td><td class="r"><strong>1.80</strong></td><td class="r"><strong>1.15</strong></td><td>Dummy (38HP/6DMG), GoblinGreen (54HP/12DMG), GoblinBlue (36HP/9DMG)</td><td>—</td></tr>
+        <tr><td>2</td><td>60</td><td>1.44</td><td class="r">20</td><td class="r">22</td><td class="r">1.96</td><td class="r">1.24</td><td>Same pool · GoblinGreen now 59HP/12DMG · GoblinBlue 39HP/10DMG</td><td>—</td></tr>
+        <tr><td>3</td><td>60</td><td>1.36</td><td class="r">27</td><td class="r">25</td><td class="r">2.12</td><td class="r">1.33</td><td>+ Cyclop (233HP/21DMG — rare spawn, scary) · GoblinGreen 64HP/13DMG</td><td>—</td></tr>
+        <tr><td>4</td><td>60</td><td>1.28</td><td class="r">34</td><td class="r">29</td><td class="r">2.28</td><td class="r">1.42</td><td>+ Goblin_Barrel green, Monsterfly_01 · GoblinGreen 68HP/14DMG</td><td>—</td></tr>
+        <tr class="mini"><td>5</td><td>60</td><td>1.20</td><td class="r">42</td><td class="r">33</td><td class="r">2.44</td><td class="r">1.51</td><td>+ Goblin_Barrel blue, Mimic_LVL1 · Cyclop 268HP/24DMG as trash (low weight)</td><td><span class="tag tag-mini">MINI 1</span> Cyclop_Archer_01 ×1 HP×3.0 DMG×1.5 → 330HP/24DMG</td></tr>
+        <tr><td>6</td><td>60</td><td>1.12</td><td class="r">52</td><td class="r">37</td><td class="r">2.60</td><td class="r">1.60</td><td>+ Dummy_LVL4, Goblin_Barrel red, Dwarfette_LVL1 · GoblinGreen 78HP/16DMG</td><td>Drop Dummy from pool</td></tr>
+        <tr><td>7</td><td>60</td><td>1.04</td><td class="r">62</td><td class="r">42</td><td class="r">2.76</td><td class="r">1.69</td><td>+ FrogMonster, Ent_LVL2 · Cyclop 304HP/27DMG</td><td>—</td></tr>
+        <tr><td>8</td><td>60</td><td>0.96</td><td class="r">74</td><td class="r">48</td><td class="r">2.92</td><td class="r">1.78</td><td>+ Mimic_LVL2, Sorcerer_LVL1, Orc_Archer green · GoblinGreen 88HP/18DMG</td><td>—</td></tr>
+        <tr><td>9</td><td>60</td><td>0.88</td><td class="r">86</td><td class="r">53</td><td class="r">3.08</td><td class="r">1.87</td><td>+ Dwarfette_LVL2, Knight_LVL1 · Cyclop 339HP/30DMG</td><td>Drop GoblinGreen from pool</td></tr>
+        <tr class="mini"><td>10</td><td>60</td><td>0.80</td><td class="r">100</td><td class="r">59</td><td class="r">3.24</td><td class="r">1.96</td><td>+ GoblinRed enters pool (745HP/43DMG — rare, high weight cap) · RhinoMonster_01</td><td><span class="tag tag-mini">MINI 2</span> Vampire_Archer ×1 + RhinoMonster_02 ×1, HP×3.5 each</td></tr>
+        <tr><td>11</td><td>60</td><td>0.72</td><td class="r">114</td><td class="r">65</td><td class="r">3.40</td><td class="r">2.05</td><td>+ Ent_LVL3, Sorcerer_LVL2, Orc_Archer blue · GoblinBlue 68HP/16DMG</td><td>Drop GoblinBlue from pool</td></tr>
+        <tr><td>12</td><td>60</td><td>0.64</td><td class="r">130</td><td class="r">72</td><td class="r">3.56</td><td class="r">2.14</td><td>+ Mimic_LVL3, Dwarfette_LVL3, Knight_LVL2 · GoblinRed 820HP/47DMG</td><td>—</td></tr>
+        <tr><td>13</td><td>60</td><td>0.56</td><td class="r">146</td><td class="r">79</td><td class="r">3.72</td><td class="r">2.23</td><td>+ RhinoMonster_03 Gold, Orc_Barbare blue</td><td>—</td></tr>
+        <tr><td>14</td><td>60</td><td>0.48</td><td class="r">164</td><td class="r">86</td><td class="r">3.88</td><td class="r">2.32</td><td>+ Sorcerer_LVL3, MonsterSlasher_01 · Cyclop 427HP/37DMG as mid-tier trash</td><td>—</td></tr>
+        <tr class="mini"><td>15</td><td>60</td><td>0.40</td><td class="r">182</td><td class="r">94</td><td class="r">4.04</td><td class="r">2.41</td><td>+ Ent_LVL4, Orc_Archer red · GoblinRed 929HP/53DMG</td><td><span class="tag tag-mini">MINI 3</span> Knight_LVL3 ×2 + Mimic_LVL4 ×1, HP×3.0 + shield link</td></tr>
+        <tr><td>16</td><td>60</td><td>0.35</td><td class="r">202</td><td class="r">102</td><td class="r">4.20</td><td class="r">2.50</td><td>+ RhinoMonster_05 Orc, RhinoMonster_06 OrcRed · floor hit on T</td><td>Drop GoblinRed from trash pool (too slow at max depth)</td></tr>
+        <tr><td>17</td><td>60</td><td>0.35</td><td class="r">222</td><td class="r">111</td><td class="r">4.36</td><td class="r">2.59</td><td>+ Dwarfette_LVL4, Orc_Barbare red, Sorcerer_LVL4</td><td>—</td></tr>
+        <tr><td>18</td><td>60</td><td>0.35</td><td class="r">244</td><td class="r">119</td><td class="r">4.52</td><td class="r">2.68</td><td>+ RhinoMonster_04 Devil, Knight_LVL4</td><td>—</td></tr>
+        <tr><td>19</td><td>60</td><td>0.35</td><td class="r">266</td><td class="r">128</td><td class="r">4.68</td><td class="r">2.77</td><td>+ RhinoMonster_07–10 (Frozen/Bio/Radio/Oniric) · "Rhino night"</td><td>DMG cap approaches (2.77 of 2.80)</td></tr>
+        <tr class="final"><td>20</td><td>60</td><td>1.00*</td><td class="r">~75*</td><td class="r">30*</td><td class="r">4.84</td><td class="r">2.80</td><td>Throttled trash (tier D+E only) + scripted boss adds</td><td><span class="tag tag-final">FINAL BOSS</span> FrogBoss + GameMaster phase 3 — see §6</td></tr>
       </tbody>
     </table>
-    <p class="note good"><strong>Reading the table:</strong> spawn interval (T) hits its floor at wave 20, so beyond that pressure can't increase via timing — it has to come from <em>composition</em> (which is why pool widens late). HP and DMG multipliers grow linearly. If wave 13 feels too easy in playtest, the lever to twist first is <em>pool composition</em> (swap a Goblin slot for a Rhino), not raw HP.</p>
+    <p class="note good"><strong>Reading the table [v3]:</strong> T hits its floor at wave 15–16 (0.35s), so late-game pressure comes from composition not timing. HP× and DMG× now grow steeply enough that even early waves demand real play — a GoblinGreen at wave 1 has 54 HP (vs 30 at 1.00×). If a specific wave still feels too easy in playtest, first twist is <em>pool composition</em> (swap a weak slot for a Cyclop); second twist is raising hp_mult by 0.10 for that wave only in the .tres file. Don't touch the formula — spot-fix individual waves.</p>
 
     <!-- ─── 5 ROSTER ─── -->
     <h2 id="roster">5 — Full 54-character roster → tiers and unlock waves</h2>
@@ -603,7 +689,7 @@
     </div>
 
     <footer>
-      <code>docs/Main_ENEMY_WAVE_ROADMAP_V2.html</code> · supersedes <code>docs/ENEMY_WAVE_ROLLOUT_PLAN.html</code> · numbers are starting points, twist them in playtest
+      <code>docs/Main_ENEMY_WAVE_ROADMAP_V2.html</code> [v3 rebalance] · HP starts at 1.80× · DMG starts at 1.15× · N_max starts at 19 · actual unit stats in §3.10 · GoblinRed deferred to W10+ · numbers are starting points, twist them in playtest
     </footer>
   </div>
 </body>

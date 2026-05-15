@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://ck6ca38pyast3" path="res://assets/sprites/characters/megapack/Knight_LVL1/Move_20x1.png" id="3_c3xxp"]
 [ext_resource type="Script" uid="uid://cqkm1fboqtdlw" path="res://scripts/weapons/WeaponController.gd" id="3_weapon"]
 [ext_resource type="PackedScene" uid="uid://bullet_scene_01" path="res://scenes/weapons/projectiles/Bullet.tscn" id="4_bullet"]
-[ext_resource type="Resource" path="res://resources/items/weapons/rifle_ar_1.tres" id="5_start_weapon"]
+[ext_resource type="Resource" path="res://resources/items/weapons/glock.tres" id="5_start_weapon"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_npwbq"]
 atlas = ExtResource("2_tpg5x")

@@ -8,6 +8,8 @@ need to wire up a new scene.
 
 ## Enemy Roster (already wired in)
 
+**Full table (stats, tiers, spawn-by-wave behavior, attack types, next asset picks):** see [ENEMY_ROSTER.md](./ENEMY_ROSTER.md).
+
 | Scene File | Color | Speed | HP | Damage | Role |
 |---|---|---|---|---|---|
 | `Enemy.tscn` | Green Goblin | 80 | 30 | 10 | Balanced starter |
@@ -145,6 +147,8 @@ each one directly as its own `ext_resource Texture2D`. No AtlasTexture slicing n
 ---
 
 ## Full Character Roster — assets/sprites/characters/megapack/
+
+**Design sheet (rank, attack intent, suggested HP/damage, recommended first wave):** [ENEMY_DESIGN_CATALOG.md](./ENEMY_DESIGN_CATALOG.md)
 
 Every folder listed here is a separate character with its own sprite sheets.
 Check inside each folder for Idle and Move sheets before building a scene.

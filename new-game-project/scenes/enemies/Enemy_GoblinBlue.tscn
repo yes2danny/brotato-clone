@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://enemy_goblin_blue"]
+[gd_scene load_steps=25 format=3 uid="uid://enemy_goblin_blue"]
 
 ; ── Scripts ──
 [ext_resource type="Script" path="res://scripts/enemies/ai/EnemyAI.gd" id="1_enemy"]
@@ -8,6 +8,7 @@
 ; ── Blue Goblin sprite sheet — 1 idle frame, 10 move frames, 38x26 each ──
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_02 (Blue Skinned)/Goblin_Barrel_02_Idle_1x1.png" id="4_idle"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_02 (Blue Skinned)/Goblin_Barrel_02_Move_10x1.png" id="5_move"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_02 (Blue Skinned)/Goblin_Barrel_02_ATK_5x1.png" id="6_attack"]
 
 ; ── AtlasTexture slices the sprite sheet into individual frames ──
 ; Idle: 1 frame at (0,0) size 38x26
@@ -56,8 +57,48 @@ region = Rect2(304, 0, 38, 26)
 atlas = ExtResource("5_move")
 region = Rect2(342, 0, 38, 26)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack0"]
+atlas = ExtResource("6_attack")
+region = Rect2(0, 0, 38, 26)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack1"]
+atlas = ExtResource("6_attack")
+region = Rect2(38, 0, 38, 26)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack2"]
+atlas = ExtResource("6_attack")
+region = Rect2(76, 0, 38, 26)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack3"]
+atlas = ExtResource("6_attack")
+region = Rect2(114, 0, 38, 26)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack4"]
+atlas = ExtResource("6_attack")
+region = Rect2(152, 0, 38, 26)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_blue"]
 animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_attack0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_attack1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_attack2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_attack3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_attack4")
+}],
+"loop": false,
+"name": &"Attack",
+"speed": 12.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_idle0")

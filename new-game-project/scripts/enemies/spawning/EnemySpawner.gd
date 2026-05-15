@@ -26,7 +26,17 @@ extends Node2D
 @export var map_half_size: float = 960.0
 @export var map_spawn_margin: float = 48.0
 
+## Option B (roadmap): 60s waves; `N_total` is not a hard spawn cap (see `WaveCurve` comment).
+## These multiply the doc curve outputs — use 1.0 to match the HTML exactly.
+@export_range(0.70, 1.0, 0.01) var spawn_interval_scale: float = 0.90
+@export_range(1.0, 1.5, 0.01) var extra_hp_mult: float = 1.10
+@export_range(1.0, 1.5, 0.01) var extra_dmg_mult: float = 1.08
+
+const GOBLIN_SCENE = preload("res://scenes/enemies/Enemy_TreasureGoblin.tscn")
+const SPAWN_SCENE_META := &"spawn_scene_path"
+
 var _timer: float = 0.0      # Countdown to next spawn
+var _goblin_check_timer: float = 3.0 # Periodically checks for treasure goblin spawn conditions
 var player: Node2D = null    # Reference to the player
 var is_active: bool = true   # Can be toggled off between waves
 
@@ -53,16 +63,96 @@ func _process(delta: float) -> void:
 		_spawn_enemy()
 		_timer = spawn_interval  # Reset the countdown
 
+	_goblin_check_timer -= delta
+	if _goblin_check_timer <= 0:
+		_goblin_check_timer = 5.0
+		# Spawn a treasure goblin if there's a lot of uncollected gold and no goblin is currently active
+		if get_tree().get_nodes_in_group("gold_coin").size() >= 5 and get_tree().get_nodes_in_group("treasure_goblin").size() < 2:
+			var spawn_pos = _find_valid_spawn_position()
+			if spawn_pos != Vector2.ZERO:
+				var goblin = GOBLIN_SCENE.instantiate()
+				get_tree().current_scene.add_child(goblin)
+				goblin.global_position = spawn_pos
+
+
+var current_wave_data: WaveData = null
+var _active_wave_number: int = 1
+var _n_max: int = 999999
+var _curve_hp_mult: float = 1.0
+var _curve_dmg_mult: float = 1.0
+
+
+func apply_wave_data(data: WaveData, wave_number: int) -> void:
+	current_wave_data = data
+	_active_wave_number = wave_number
+
+	_n_max = WaveCurve.n_max_concurrent(wave_number)
+	_curve_hp_mult = WaveCurve.hp_mult(wave_number) * extra_hp_mult
+	_curve_dmg_mult = WaveCurve.dmg_mult(wave_number) * extra_dmg_mult
+
+	var t_spawn: float = WaveCurve.spawn_interval_seconds(wave_number) * spawn_interval_scale
+	spawn_interval = maxf(WaveCurve.SPAWN_INTERVAL_FLOOR, t_spawn)
+	min_spawn_interval = WaveCurve.SPAWN_INTERVAL_FLOOR
+
+
+func clear_wave_data() -> void:
+	current_wave_data = null
+
+
+func _live_enemy_count() -> int:
+	return get_tree().get_nodes_in_group("enemies").size()
+
+
+func _alive_count_for_scene_path(scene_path: String) -> int:
+	if scene_path.is_empty():
+		return 0
+	var n: int = 0
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if not is_instance_valid(e):
+			continue
+		if e.get_meta(SPAWN_SCENE_META, "") == scene_path:
+			n += 1
+			continue
+		# Fallback for anything spawned before this meta existed.
+		if str(e.scene_file_path) == scene_path:
+			n += 1
+	return n
+
 
 func _spawn_enemy() -> void:
-	# No scenes in the pool? Nothing to spawn
-	if enemy_scenes.is_empty():
+	if _live_enemy_count() >= _n_max:
 		return
 
-	# Pick a random enemy type from the pool
-	var scene_to_spawn = enemy_scenes[randi() % enemy_scenes.size()]
-	if not scene_to_spawn:
-		return
+	var scene_to_spawn: PackedScene = null
+	
+	if current_wave_data and not current_wave_data.enemy_pool.is_empty():
+		var valid_entries: Array[WaveSpawnEntry] = []
+		var total_weight: float = 0.0
+		
+		for entry in current_wave_data.enemy_pool:
+			if entry == null or entry.enemy_scene == null:
+				continue
+			var path: String = entry.enemy_scene.resource_path
+			var cap_ok: bool = entry.max_alive <= 0 or _alive_count_for_scene_path(path) < entry.max_alive
+			if cap_ok:
+				valid_entries.append(entry)
+				total_weight += entry.weight
+				
+		if valid_entries.size() > 0:
+			var roll: float = randf() * total_weight
+			for entry in valid_entries:
+				roll -= entry.weight
+				if roll <= 0:
+					scene_to_spawn = entry.enemy_scene
+					break
+
+	# Fallback if no valid scene found from pool
+	if scene_to_spawn == null:
+		if enemy_scenes.is_empty():
+			return
+		scene_to_spawn = enemy_scenes[randi() % enemy_scenes.size()]
+		if scene_to_spawn == null:
+			return
 
 	# Find a spawn position that isn't inside a wall
 	var spawn_pos = _find_valid_spawn_position()
@@ -71,6 +161,13 @@ func _spawn_enemy() -> void:
 
 	# Create the enemy and place it
 	var enemy = scene_to_spawn.instantiate()
+	var scene_path: String = scene_to_spawn.resource_path
+	if not scene_path.is_empty():
+		enemy.set_meta(SPAWN_SCENE_META, scene_path)
+	
+	if enemy.has_method("apply_wave_scaling"):
+		enemy.apply_wave_scaling(_curve_hp_mult, _curve_dmg_mult)
+		
 	get_tree().current_scene.add_child(enemy)
 	enemy.global_position = spawn_pos
 

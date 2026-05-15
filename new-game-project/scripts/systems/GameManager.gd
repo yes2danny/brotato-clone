@@ -94,18 +94,23 @@ func register_wave_complete() -> void:
 	waves_completed += 1
 
 
-# Reload the current scene to restart
-func restart_game() -> void:
+## Clears run counters and XP; use before loading `Main.tscn` from the main menu.
+func begin_new_run() -> void:
 	enemies_killed = 0
 	waves_completed = 0
 	time_survived = 0.0
 	last_run_meta_awarded = 0
 	state = GameState.PLAYING
 	XPSystem.reset_run()
+
+
+# Reload the current scene to restart
+func restart_game() -> void:
+	begin_new_run()
 	get_tree().reload_current_scene()
 
 
-# Go back to the main menu scene (create this scene later)
+# Go back to the main menu scene
 func load_main_menu() -> void:
 	state = GameState.PLAYING
 	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")

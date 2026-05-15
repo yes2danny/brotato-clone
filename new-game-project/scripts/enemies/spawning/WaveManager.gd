@@ -7,9 +7,8 @@ extends Node
 # short break → next wave (harder) → repeat.
 # ─────────────────────────────────────────────
 
-@export var wave_duration: float = 60.0          # How long each wave lasts (seconds)
+@export var wave_duration: float = 60.0          # Overridden each wave by WaveCurve.wave_duration_seconds (roadmap §4)
 @export var break_duration: float = 3.0          # Pause between waves
-@export var difficulty_reduction: float = 0.2    # How much to reduce spawn interval per wave
 
 # We'll find the spawner in _ready()
 var _spawner: Node = null
@@ -67,6 +66,15 @@ func _process(delta: float) -> void:
 
 func _start_wave() -> void:
 	_in_break = false
+	
+	var wave_path = "res://resources/enemies/waves/wave_%02d.tres" % current_wave
+	wave_duration = WaveCurve.wave_duration_seconds(current_wave)
+	if ResourceLoader.exists(wave_path):
+		var wave_data = load(wave_path) as WaveData
+		if wave_data and _spawner and _spawner.has_method("apply_wave_data"):
+			_spawner.apply_wave_data(wave_data, current_wave)
+	elif _spawner and _spawner.has_method("apply_wave_data"):
+		_spawner.apply_wave_data(null, current_wave)
 	_wave_timer = wave_duration
 
 	# Re-activate the spawner
@@ -95,10 +103,8 @@ func _end_wave() -> void:
 
 	emit_signal("wave_completed", current_wave)
 
-	# Ramp up difficulty for next wave
+	# Difficulty curve (spawn interval, HP/DMG, N_total, N_max) comes from WaveCurve + EnemySpawner.apply_wave_data.
 	current_wave += 1
-	if _spawner:
-		_spawner.increase_difficulty(difficulty_reduction)
 
 	if _shop_manager == null:
 		_hook_shop_manager()

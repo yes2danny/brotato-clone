@@ -3,18 +3,26 @@ extends Area2D
 # ─────────────────────────────────────────────
 # GoldCoin — World pickup (same feel as XPGem)
 # Flies toward the player in range; adds gold to ShopManager on pickup.
+# Optional lifetime: after despawn_after_seconds the coin vanishes (risk/reward).
+# Timer advances only while this node processes (paused tree = frozen timer).
 # ─────────────────────────────────────────────
 
 @export var gold_value: int = 3
-@export var attract_radius: float = 140.0
+@export var attract_radius: float = 90.0
 @export var collect_radius: float = 22.0
 @export var fly_speed: float = 220.0
+## 0 = never despawn. Otherwise seconds until the coin is removed (default 8).
+@export var despawn_after_seconds: float = 8.0
+## When remaining time is below this, modulate fades slightly so the deadline reads visually.
+@export var despawn_warn_seconds: float = 2.0
 
 var _player: Node2D = null
 var _collected: bool = false
+var _time_alive: float = 0.0
 
 
 func _ready() -> void:
+	add_to_group("gold_coin")
 	queue_redraw()
 	var players := get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
@@ -30,7 +38,21 @@ func _draw() -> void:
 
 
 func _process(delta: float) -> void:
-	if _collected or _player == null or not is_instance_valid(_player):
+	if _collected:
+		return
+
+	if despawn_after_seconds > 0.0:
+		_time_alive += delta
+		if _time_alive >= despawn_after_seconds:
+			queue_free()
+			return
+		var remaining: float = despawn_after_seconds - _time_alive
+		if remaining < despawn_warn_seconds and despawn_warn_seconds > 0.0:
+			modulate.a = lerpf(0.38, 1.0, remaining / despawn_warn_seconds)
+		else:
+			modulate.a = 1.0
+
+	if _player == null or not is_instance_valid(_player):
 		return
 	if GameManager.state != GameManager.GameState.PLAYING:
 		return
