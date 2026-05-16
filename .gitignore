@@ -8,3 +8,6 @@ desktop.ini
 
 # Logs / local
 *.log
+
+# Local extract / scratch (keep zips if committed intentionally)
+_vj_temp_*/

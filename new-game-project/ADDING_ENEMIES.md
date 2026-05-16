@@ -16,8 +16,41 @@ need to wire up a new scene.
 | `Enemy_GoblinBlue.tscn` | Blue Goblin | 130 | 20 | 8 | Fast runner, dies easy |
 | `Enemy_GoblinRed.tscn` | Red Goblin | 50 | 80 | 20 | Slow tank, hits hard |
 | `Enemy_Cyclop.tscn` | Cyclop Archer | 70 | 60 | 15 | Mid-tier bruiser |
+| `Enemy_Dummy.tscn` | Dummy | — | — | — | Early-wave fodder (retires ~wave 6) |
+| `Enemy_Mimic.tscn` | Mimic | — | — | — | Capped rare spawn (wave 5–6) |
+| `Enemy_GoblinRed.tscn` | Red Goblin | 50 | 80 | 20 | Slow tank |
 
-All four are in the EnemySpawner pool in Main.tscn. The spawner picks randomly each spawn.
+Roster is **not** in `Main.tscn` anymore — see **PoolState + wave files** below.
+
+---
+
+## Quick reference — PoolState (read this first)
+
+| Piece | Role |
+|-------|------|
+| `PoolState` autoload | Running list of who can spawn **right now** |
+| `resources/enemies/waves/wave_NN.tres` | Per-wave **deltas only** — not the full roster |
+| `pool_additions` | Add a type, or **upsert** weight / `max_alive` if already active |
+| `pool_removals` | Drop a type by `PackedScene` (matched by path) |
+| `EnemySpawner` | Weight-rolls from `PoolState.get_pool()` each spawn |
+
+**Rules**
+
+1. **New enemy type** → add one `WaveSpawnEntry` to `pool_additions` on the **first wave** it should appear. Do **not** edit later waves unless you retire or retune it.
+2. **Retire a type** → put its scene in `pool_removals` on the wave it leaves. Stays gone until a later wave adds it again.
+3. **Change spawn weight only** → on that wave, add a `WaveSpawnEntry` for that scene in `pool_additions` with the new weight (same path = in-place replace). You can list only the entries you are changing, or list everyone active that wave if you prefer a full rebalance snapshot (see `wave_06.tres`).
+4. **`weight`** — higher = more common. Rough total across the pool is ~100 for easy mental math, not required.
+5. **`max_alive`** — `0` = no per-type cap (global `N_max` from `WaveCurve` still applies). Use e.g. `3` for rare/elite types.
+6. **Run start** — `GameManager.begin_new_run()` and wave 1 both call `PoolState.reset()`; wave 1’s `pool_additions` seeds the run.
+
+**Inspector workflow (easiest)**
+
+1. Open `resources/enemies/waves/wave_09.tres` (or whichever wave).
+2. Under **Pool Additions**, add an element → set **Enemy Scene**, **Weight**, **Max Alive**.
+3. To retire: under **Pool Removals**, add the `PackedScene` to remove.
+4. Save. Play from wave 1 or use DevDebug **F6** to skip ahead.
+
+Console on wave change: `[PoolState] wave N  +[...]  -[...]  → size=...`
 
 ---
 
@@ -60,40 +93,70 @@ Save the copy as `scenes/enemies/Enemy_YourName.tscn`
 - Balanced: speed 70-90, max_health 30-50
 - Tank: speed 40-60, max_health 70-100
 
-### Step 3 — Register it in Main.tscn
+### Step 3 — Wire it into the pool via a wave file
 
-In `scenes/world/Main.tscn`:
+The spawner reads its roster from the **PoolState** autoload, not from
+`Main.tscn`. Each wave's `.tres` in `resources/enemies/waves/` only carries
+the delta against the prior wave:
 
-1. Add a new `ext_resource` line near the top with a unique ID:
+- `pool_additions: Array[WaveSpawnEntry]` — upsert. New scene → appended.
+  Existing scene → replaced in place (use this to retune weight / max_alive).
+- `pool_removals: Array[PackedScene]` — retire from the active pool.
+
+So adding a new enemy is just: pick the wave where it should first appear,
+open that `wave_NN.tres` in the Inspector, and add a `WaveSpawnEntry` to its
+`pool_additions` array. It will persist on every later wave automatically
+until some later wave puts the same scene in `pool_removals`.
+
+Example — drop Knight_LVL1 into the pool at wave 9:
+
 ```
-[ext_resource type="PackedScene" path="res://scenes/enemies/Enemy_YourName.tscn" id="15_enemy_yourname"]
+[ext_resource type="PackedScene" uid="uid://enemy_knight_lvl1" path="res://scenes/enemies/Enemy_Knight.tscn" id="9_knight"]
+
+[sub_resource type="Resource" id="Resource_knight"]
+script = ExtResource("1_entry")
+enemy_scene = ExtResource("9_knight")
+weight = 18.0
+max_alive = 0
+
+[resource]
+...
+pool_additions = Array[ExtResource("1_entry")]([SubResource("Resource_knight")])
 ```
 
-2. Increment `load_steps` at the very top of Main.tscn by 1
+You only need to touch **wave_09.tres**. No edits to waves 10–20.
 
-3. Add the new ID to the `enemy_scenes` array on EnemySpawner:
+To retire a type, add it to `pool_removals` on the wave it should leave:
+
 ```
-enemy_scenes = [ExtResource("11_enemy"), ExtResource("12_enemy_blue"), ..., ExtResource("15_enemy_yourname")]
+pool_removals = Array[PackedScene]([ExtResource("3_dummy"), ExtResource("7_mimic")])
 ```
 
-That's it. Hit Play and it'll show up in the random spawn pool immediately.
+That's it. Hit Play and the new roster will appear from that wave on.
 
 ---
 
 ## How EnemySpawner Works
 
-`scripts/enemies/spawning/EnemySpawner.gd`
+`scripts/enemies/spawning/EnemySpawner.gd` no longer holds the roster itself.
+On every spawn tick it asks `PoolState.get_pool()` for the currently active
+`Array[WaveSpawnEntry]` and weight-rolls one (respecting `max_alive` caps).
+
+`scripts/systems/PoolState.gd` (autoload) maintains the running pool. At the
+start of each wave, `WaveManager._start_wave()` does:
 
 ```gdscript
-@export var enemy_scenes: Array[PackedScene] = []
+PoolState.apply_wave(wave_data, current_wave)
 ```
 
-Every `spawn_interval` seconds it does:
-```gdscript
-var scene_to_spawn = enemy_scenes[randi() % enemy_scenes.size()]
-```
+`apply_wave()` first runs `pool_removals` (match by `enemy_scene.resource_path`),
+then upserts `pool_additions`. The pool persists across waves; only the
+deltas live in the `.tres` file. `PoolState.reset()` is called from
+`GameManager.begin_new_run()` and at the top of wave 1 so a new run always
+starts from an empty roster.
 
-So any scene in that array can spawn. No code changes needed — just add the scene to the array.
+The legacy `enemy_pool` field still works as a one-shot full-pool override
+when both delta arrays are empty — keep it empty in new wave files.
 
 ---
 

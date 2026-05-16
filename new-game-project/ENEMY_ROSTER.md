@@ -12,29 +12,30 @@ For the step-by-step workflow to wire a new scene, see [ADDING_ENEMIES.md](./ADD
 
 | System | Behavior |
 |--------|----------|
-| **Enemy mix** | `EnemySpawner.enemy_scenes` in `scenes/world/Main.tscn` is a **flat pool**. Every spawn picks **uniformly at random** from all scenes in the array. There is **no** per-wave enemy whitelist in code yet. |
-| **Wave number** | `WaveManager.current_wave` increments after each wave. Wave duration default: **60 s** (`WaveManager.wave_duration`). |
-| **Difficulty ramp** | Between waves, `EnemySpawner.increase_difficulty(0.2)` runs: **`spawn_interval` decreases by 0.2 s** per wave completed, floored at **`min_spawn_interval` (0.5 s)**. Enemy **stats do not scale** with wave — only **spawn rate** does. |
-| **Starting spawn interval** | **2.0 s** between spawns (`EnemySpawner.spawn_interval` default; not overridden in `Main.tscn` for the spawner node). |
+| **Active roster** | The **`PoolState` autoload** (`scripts/systems/PoolState.gd`) holds an `Array[WaveSpawnEntry]` representing what is currently in rotation. `EnemySpawner` weight-rolls from that list every spawn tick (respecting per-type `max_alive` caps). |
+| **Per-wave deltas** | Each `resources/enemies/waves/wave_NN.tres` declares two arrays: `pool_additions` (upserts — add or retune weight/cap) and `pool_removals` (retire by `PackedScene`). `WaveManager._start_wave()` calls `PoolState.apply_wave(wave_data, n)` before activating the spawner. The pool persists between waves; only the delta lives in each `.tres`. |
+| **Wave number** | `WaveManager.current_wave` increments after each wave. Wave duration is sourced from `WaveCurve.wave_duration_seconds(W)` (roadmap v2). |
+| **Difficulty ramp** | `EnemySpawner.apply_wave_data()` reads `WaveCurve` to set `spawn_interval`, `N_max`, `hp_mult`, and `dmg_mult` for the wave (multiplied by the spawner's `extra_*` knobs). Enemy stats DO scale with wave via `apply_wave_scaling()` on each instance. |
+| **Run reset** | `GameManager.begin_new_run()` calls `PoolState.reset()`, and `WaveManager._start_wave()` also resets when `current_wave == 1` — so the wave_01.tres `pool_additions` is the only seed for the roster on a fresh run. |
 
-**Effective spawn interval at the start of wave `W` (1-based), before any other edits:**
+### Current per-wave roster (from `wave_NN.tres`)
 
-`max(0.5, 2.0 − 0.2 × (W − 1))`
+| Wave | Net pool after this wave | Authored as |
+|-----:|--------------------------|-------------|
+| 1 | dummy, green, blue | `pool_additions = [dummy(40), green(35), blue(25)]` |
+| 2 | dummy, green, blue | weights upserted |
+| 3 | dummy, green, blue, cyclop | `+cyclop(20)` |
+| 4 | dummy, green, blue, cyclop | weight tune |
+| 5 | dummy, green, blue, cyclop, mimic | `+mimic(20, cap 3)` |
+| 6 | green, blue, cyclop, red | `−dummy, −mimic, +red(10)` |
+| 7–14 | green, blue, cyclop, red | weight tunes only |
+| 15 | green, blue, cyclop, red | partial tune (3 entries) |
+| 16–19 | green, blue, cyclop, red | weight tunes |
+| 20 | dummy, green, blue, cyclop | `−red, +dummy(18)` |
 
-| Wave `W` | Approx. spawn interval (s) |
-|----------|----------------------------|
-| 1 | 2.0 |
-| 2 | 1.8 |
-| 3 | 1.6 |
-| 4 | 1.4 |
-| 5 | 1.2 |
-| 6 | 1.0 |
-| 7 | 0.8 |
-| 8+ | **0.5** (floor) |
-
-So: **every wired enemy can appear from wave 1 onward**; later waves are harder because **more enemies per minute**, not because reds replace blues automatically.
-
-**Future hook (not wired):** `scripts/enemies/spawning/WaveData.gd` defines per-wave `enemy_scenes`, duration, and spawn interval, but **`WaveManager` does not read `.tres` wave files yet**. When that is implemented, this document’s “spawn by wave” column can be replaced with data-driven rows per wave file.
+So later waves are harder because **the pool composition shifts toward
+tankier types and `WaveCurve` keeps cranking spawn rate + HP/DMG** — not
+because every wave file has to re-list the entire roster.
 
 ---
 
@@ -57,7 +58,9 @@ Sprites named “Archer” or “Sorcerer” in the asset pack are **visual flav
 
 ## Wired enemies (in-game now)
 
-These four scenes are listed in `Main.tscn` → `EnemySpawner.enemy_scenes`.
+These scenes appear in the various `resources/enemies/waves/wave_NN.tres`
+`pool_additions` arrays; `PoolState` keeps the union of "currently active"
+entries for the spawner.
 
 **Tier** is an informal **design rank** for relative threat in the current contact-only combat (HP, damage per second-ish from cooldown, speed). Not stored in game data.
 
@@ -106,16 +109,14 @@ Priority assumes you still want **contact-only** chasers and **one new role per 
 | `Monsterfly_01` | Reads as flyer; with current AI it **still slides on the ground**. Fine as a “bug chaser”; true flight needs new movement. |
 | `Sorcerer_LVL*`, ranged orcs | **Needs projectile / cast state** not in `EnemyAI.gd` today. |
 | `FrogBoss`, `RhinoMonster_*`, `GameMaster` | Natural **boss or elite** scope — usually one-off scenes, not random horde filler. |
-| `Mimic_LVL*` | Fun **ambush** identity; might want spawn rules or a different spawn table when WaveData is wired. |
+| `Mimic_LVL*` | Already wired into wave 5 as a capped (`max_alive = 3`) ambush type that retires at wave 6 via `pool_removals`. |
 | `Vampire_Archer_01` | Documented in ADDING_ENEMIES as a **fast elite** candidate — still contact-only unless you add ranged. |
 
 ---
 
 ## Summary answers
 
-1. **How many wired?** **Four** (green, blue, red barrel goblins + cyclop).  
-2. **Per-wave enemy types?** **Not yet** — all four share the same pool from wave 1; difficulty is **spawn interval** only.  
-3. **Attack types?** **Contact only** on all current enemies.  
-4. **Best next models (quick):** **Dummy** (fodder), **Goblin_Regular** (variants), **Ent** (alternate tank), then **orc / mushroom / slasher** for silhouette variety; add **ranged behavior** only when you extend AI beyond contact damage.
-
-When `WaveManager` reads `WaveData` `.tres` files, update the **“How spawning works”** section and add a table per wave file listing `enemy_scenes` and timings.
+1. **How many wired?** **Six** scenes — green, blue, red barrel goblins, cyclop, dummy, mimic — cycled in and out of the active pool by the `wave_NN.tres` deltas.
+2. **Per-wave enemy types?** **Yes** — `PoolState` is the autoload source of truth. `wave_NN.tres` only carries `pool_additions` / `pool_removals` against the prior wave; everything else persists automatically.
+3. **Attack types?** **Contact only** on all current enemies.
+4. **Best next models (quick):** **Goblin_Regular** (variants), **Ent** (alternate tank), then **orc / mushroom / slasher** for silhouette variety; add **ranged behavior** only when you extend AI beyond contact damage.
