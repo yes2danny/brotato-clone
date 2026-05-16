@@ -32,6 +32,7 @@ func _ready() -> void:
 		push_warning("MainMenu: missing some pixel UI art; using fallback styles.")
 	_build_background()
 	_build_layout()
+	_build_version_stamp()
 	call_deferred("_finish_first_layout")
 
 
@@ -118,6 +119,31 @@ func _build_background() -> void:
 	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	shade.color = Color(0.0, 0.0, 0.0, 0.23)
 	add_child(shade)
+
+
+func _build_version_stamp() -> void:
+	var margin := MarginContainer.new()
+	margin.name = "VersionStampMargin"
+	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	margin.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	margin.anchor_left = 1.0
+	margin.anchor_top = 1.0
+	margin.anchor_right = 1.0
+	margin.anchor_bottom = 1.0
+	margin.offset_left = -180.0
+	margin.offset_top = -34.0
+	margin.offset_right = -12.0
+	margin.offset_bottom = -10.0
+	add_child(margin)
+
+	var label := Label.new()
+	label.name = "VersionStamp"
+	label.text = BuildInfo.display_text()
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 12)
+	label.add_theme_color_override("font_color", Color(0.72, 0.72, 0.72, 0.32))
+	margin.add_child(label)
 
 
 func _build_layout() -> void:

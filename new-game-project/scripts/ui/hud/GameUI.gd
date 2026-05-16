@@ -36,6 +36,7 @@ var _wave_banner_tween: Tween = null
 func _ready() -> void:
 	_find_or_build_hp_bar()
 	_build_wave_banner()
+	_build_version_stamp()
 	call_deferred("_connect_player_health")
 	_connect_wave_manager()
 	call_deferred("_setup_gold_hud")
@@ -209,6 +210,37 @@ func _setup_gold_hud() -> void:
 func _on_gold_hud_changed(amount: int) -> void:
 	if _gold_label:
 		_gold_label.text = "Gold: %d" % amount
+
+
+func _build_version_stamp() -> void:
+	var root := Control.new()
+	root.name = "VersionStampRoot"
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(root)
+
+	var margin := MarginContainer.new()
+	margin.name = "VersionStampMargin"
+	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	margin.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	margin.anchor_left = 1.0
+	margin.anchor_top = 1.0
+	margin.anchor_right = 1.0
+	margin.anchor_bottom = 1.0
+	margin.offset_left = -180.0
+	margin.offset_top = -34.0
+	margin.offset_right = -12.0
+	margin.offset_bottom = -10.0
+	root.add_child(margin)
+
+	var label := Label.new()
+	label.name = "VersionStamp"
+	label.text = BuildInfo.display_text()
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 12)
+	label.add_theme_color_override("font_color", Color(0.72, 0.72, 0.72, 0.32))
+	margin.add_child(label)
 
 
 func _build_wave_banner() -> void:

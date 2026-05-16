@@ -32,7 +32,7 @@ file_logging/max_log_files=10
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/YATI/plugin.cfg")
+enabled=PackedStringArray("res://addons/YATI/plugin.cfg", "res://addons/virtual_joystick_plus/plugin.cfg")
 
 [physics]
 
