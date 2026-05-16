@@ -1,32 +1,24 @@
-[gd_resource type="Resource" script_class="WaveData" load_steps=12 format=3 uid="uid://wave_04"]
+[gd_resource type="Resource" script_class="WaveData" load_steps=9 format=3 uid="uid://wave_04"]
 
 [ext_resource type="Script" path="res://scripts/enemies/spawning/WaveSpawnEntry.gd" id="1_entry"]
 [ext_resource type="Script" path="res://scripts/enemies/spawning/WaveData.gd" id="2_data"]
 [ext_resource type="PackedScene" uid="uid://enemy_dummy_lvl1" path="res://scenes/enemies/Enemy_Dummy.tscn" id="3_dummy"]
-[ext_resource type="PackedScene" path="res://scenes/enemies/Enemy.tscn" id="4_green"]
-[ext_resource type="PackedScene" path="res://scenes/enemies/Enemy_GoblinBlue.tscn" id="5_blue"]
-[ext_resource type="PackedScene" path="res://scenes/enemies/Enemy_Cyclop.tscn" id="6_cyclop"]
-[ext_resource type="PackedScene" path="res://scenes/enemies/Enemy_GoblinRed.tscn" id="7_red"]
+[ext_resource type="PackedScene" uid="uid://enemy_goblin_blue" path="res://scenes/enemies/Enemy_GoblinBlue.tscn" id="5_blue"]
+[ext_resource type="PackedScene" uid="uid://enemy_cyclop" path="res://scenes/enemies/Enemy_Cyclop.tscn" id="6_cyclop"]
 
-[sub_resource type="Resource" id="Resource_0"]
+[sub_resource type="Resource" id="Resource_dummy"]
 script = ExtResource("1_entry")
 enemy_scene = ExtResource("3_dummy")
 weight = 15.0
 max_alive = 0
 
-[sub_resource type="Resource" id="Resource_1"]
-script = ExtResource("1_entry")
-enemy_scene = ExtResource("4_green")
-weight = 34.0
-max_alive = 0
-
-[sub_resource type="Resource" id="Resource_2"]
+[sub_resource type="Resource" id="Resource_blue"]
 script = ExtResource("1_entry")
 enemy_scene = ExtResource("5_blue")
 weight = 26.0
 max_alive = 0
 
-[sub_resource type="Resource" id="Resource_3"]
+[sub_resource type="Resource" id="Resource_cyclop"]
 script = ExtResource("1_entry")
 enemy_scene = ExtResource("6_cyclop")
 weight = 25.0
@@ -43,5 +35,7 @@ min_spawn_interval = 0.35
 hp_mult = 1.0
 dmg_mult = 1.0
 enemy_scenes = Array[PackedScene]([])
-enemy_pool = Array[ExtResource("1_entry")]([SubResource("Resource_0"), SubResource("Resource_1"), SubResource("Resource_2"), SubResource("Resource_3")])
+pool_additions = Array[ExtResource("1_entry")]([SubResource("Resource_dummy"), SubResource("Resource_blue"), SubResource("Resource_cyclop")])
+pool_removals = Array[PackedScene]([])
+enemy_pool = Array[ExtResource("1_entry")]([])
 is_boss_wave = false
