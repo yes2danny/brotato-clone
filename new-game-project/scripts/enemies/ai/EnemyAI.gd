@@ -26,6 +26,7 @@ extends CharacterBody2D
 
 # Detection and chase tuning.
 @export var chase_range: float = 520.0
+@export var keep_chasing_after_spotted: bool = true
 @export var alert_burst_duration: float = 1.0
 @export var alert_burst_speed_multiplier: float = 1.45
 
@@ -109,7 +110,7 @@ func _update_state(delta: float) -> void:
 	var was_chasing: bool = state == State.CHASE
 	var can_see_player: bool = global_position.distance_to(player.global_position) <= chase_range
 
-	if can_see_player:
+	if can_see_player or (keep_chasing_after_spotted and was_chasing):
 		state = State.CHASE
 		if not was_chasing:
 			_alert_burst_timer = alert_burst_duration

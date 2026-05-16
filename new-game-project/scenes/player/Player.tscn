@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://cqkm1fboqtdlw" path="res://scripts/weapons/WeaponController.gd" id="3_weapon"]
 [ext_resource type="PackedScene" uid="uid://bullet_scene_01" path="res://scenes/weapons/projectiles/Bullet.tscn" id="4_bullet"]
 [ext_resource type="Resource" path="res://resources/items/weapons/glock.tres" id="5_start_weapon"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Knight_LVL1/Dash_8x1.png" id="6_roll"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_npwbq"]
 atlas = ExtResource("2_tpg5x")
@@ -96,6 +97,38 @@ region = Rect2(684, 0, 38, 35)
 atlas = ExtResource("3_c3xxp")
 region = Rect2(722, 0, 38, 35)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_roll0"]
+atlas = ExtResource("6_roll")
+region = Rect2(0, 0, 38, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_roll1"]
+atlas = ExtResource("6_roll")
+region = Rect2(38, 0, 38, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_roll2"]
+atlas = ExtResource("6_roll")
+region = Rect2(76, 0, 38, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_roll3"]
+atlas = ExtResource("6_roll")
+region = Rect2(114, 0, 38, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_roll4"]
+atlas = ExtResource("6_roll")
+region = Rect2(152, 0, 38, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_roll5"]
+atlas = ExtResource("6_roll")
+region = Rect2(190, 0, 38, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_roll6"]
+atlas = ExtResource("6_roll")
+region = Rect2(228, 0, 38, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_roll7"]
+atlas = ExtResource("6_roll")
+region = Rect2(266, 0, 38, 35)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_1hh02"]
 animations = [{
 "frames": [{
@@ -173,6 +206,35 @@ animations = [{
 "loop": true,
 "name": &"Move",
 "speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_roll0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_roll1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_roll2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_roll3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_roll4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_roll5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_roll6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_roll7")
+}],
+"loop": false,
+"name": &"Roll",
+"speed": 20.0
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]

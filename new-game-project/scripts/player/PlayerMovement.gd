@@ -8,6 +8,10 @@ extends CharacterBody2D
 @export var move_speed: float = 200.0
 @export var pickup_radius_bonus: float = 0.0
 @export var delayed_departure_boost_duration: float = 15.0
+@export var dodge_roll_speed: float = 460.0
+@export var dodge_roll_duration: float = 0.35
+@export var dodge_invulnerability_duration: float = 0.32
+@export var dodge_roll_cooldown: float = 1.0
 
 # AnimatedSprite2D plays the right animation automatically
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -17,6 +21,10 @@ var delayed_departure_stacks: int = 0
 var _wave_move_speed_multiplier: float = 1.0
 var _delayed_departure_timer: float = 0.0
 var _delayed_departure_boosting: bool = false
+var _roll_timer: float = 0.0
+var _roll_cooldown_timer: float = 0.0
+var _roll_direction: Vector2 = Vector2.RIGHT
+var _last_move_direction: Vector2 = Vector2.RIGHT
 
 
 func _ready() -> void:
@@ -54,17 +62,28 @@ func _physics_process(delta: float) -> void:
 
 	if input_dir.length() > 0:
 		input_dir = input_dir.normalized()
+		_last_move_direction = input_dir
 
-	velocity = input_dir * move_speed * _wave_move_speed_multiplier
+	_roll_cooldown_timer = maxf(_roll_cooldown_timer - delta, 0.0)
+	if _roll_timer > 0.0:
+		_roll_timer = maxf(_roll_timer - delta, 0.0)
+		velocity = _roll_direction * dodge_roll_speed
+	elif Input.is_action_just_pressed("ui_accept") and _roll_cooldown_timer <= 0.0:
+		_start_roll(input_dir)
+		velocity = _roll_direction * dodge_roll_speed
+	else:
+		velocity = input_dir * move_speed * _wave_move_speed_multiplier
 
 	# ── Flip sprite to face movement direction ──
-	if input_dir.x < 0:
+	if velocity.x < 0:
 		sprite.flip_h = true
-	elif input_dir.x > 0:
+	elif velocity.x > 0:
 		sprite.flip_h = false
 
 	# ── Play the right animation ──
-	if input_dir.length() > 0:
+	if _roll_timer > 0.0:
+		sprite.play("Roll")
+	elif input_dir.length() > 0:
 		sprite.play("Move")
 	else:
 		sprite.play("Idle")
@@ -79,6 +98,16 @@ func _on_player_died() -> void:
 
 func add_delayed_departure(amount: int) -> void:
 	delayed_departure_stacks = maxi(0, delayed_departure_stacks + amount)
+
+
+func _start_roll(input_dir: Vector2) -> void:
+	_roll_direction = input_dir if input_dir.length_squared() > 0.0 else _last_move_direction
+	if _roll_direction.length_squared() <= 0.0:
+		_roll_direction = Vector2.RIGHT
+	_roll_timer = dodge_roll_duration
+	_roll_cooldown_timer = dodge_roll_cooldown
+	if health_system and health_system.has_method("start_invulnerability"):
+		health_system.start_invulnerability(dodge_invulnerability_duration)
 
 
 func _connect_wave_manager() -> void:

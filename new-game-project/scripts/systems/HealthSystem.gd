@@ -13,6 +13,7 @@ extends Node
 var current_health: int = 0
 var is_dead: bool = false  # Prevents death from triggering more than once
 var shield_hits: int = 0
+var _invulnerability_timer: float = 0.0
 
 # Signals — the parent node (Player/Enemy) connects to these
 signal health_changed(current: int, maximum: int)  # For updating UI / health bars
@@ -24,11 +25,18 @@ func _ready() -> void:
 	current_health = max_health
 
 
+func _process(delta: float) -> void:
+	if _invulnerability_timer > 0.0:
+		_invulnerability_timer = maxf(_invulnerability_timer - delta, 0.0)
+
+
 # Call this to deal damage to this entity.
 # amount should be a positive number.
 func take_damage(amount: int) -> void:
 	if is_dead:
 		return  # Already dead, ignore further hits
+	if _invulnerability_timer > 0.0:
+		return
 	if shield_hits > 0:
 		shield_hits -= 1
 		emit_signal("health_changed", current_health, max_health)
@@ -68,6 +76,10 @@ func add_max_health(amount: int, heal_positive_amount: bool = true) -> void:
 func add_shield_hits(amount: int) -> void:
 	shield_hits += maxi(0, amount)
 	emit_signal("health_changed", current_health, max_health)
+
+
+func start_invulnerability(duration: float) -> void:
+	_invulnerability_timer = maxf(_invulnerability_timer, duration)
 
 
 # Internal — fires the died signal and flags this entity as dead

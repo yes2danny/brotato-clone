@@ -102,6 +102,8 @@ func begin_new_run() -> void:
 	last_run_meta_awarded = 0
 	state = GameState.PLAYING
 	XPSystem.reset_run()
+	# Wipe the active enemy pool so wave_01's `pool_additions` is the only seed.
+	PoolState.reset()
 
 
 # Reload the current scene to restart

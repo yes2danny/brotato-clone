@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 XPSystem="*res://scripts/systems/XPSystem.gd"
+PoolState="*res://scripts/systems/PoolState.gd"
 GameManager="*res://scripts/systems/GameManager.gd"
 XPDropSystem="*res://scripts/items/pickups/XPDropSystem.gd"
 GoldDropSystem="*res://scripts/items/pickups/GoldDropSystem.gd"

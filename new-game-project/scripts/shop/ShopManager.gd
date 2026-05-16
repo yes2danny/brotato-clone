@@ -49,12 +49,13 @@ func _ready() -> void:
 
 
 # Called by WaveManager at the end of each wave
-func open_shop() -> void:
+func open_shop(grant_wave_bonus: bool = true) -> void:
 	if GameManager.state != GameManager.GameState.PLAYING:
 		return
 	# Stipend so the first shop visit can buy at least one common (~75g) after wave 1 if they collected drops.
-	var wave_bonus: int = 35 + GameManager.waves_completed * 10
-	add_gold(wave_bonus)
+	if grant_wave_bonus:
+		var wave_bonus: int = 35 + GameManager.waves_completed * 10
+		add_gold(wave_bonus)
 	var price_percent: float = next_shop_price_percent
 	var force_high_rarity: bool = guaranteed_high_rarity_shops > 0
 	current_offerings = _generate_offerings(force_high_rarity, price_percent)

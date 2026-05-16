@@ -66,15 +66,25 @@ func _process(delta: float) -> void:
 
 func _start_wave() -> void:
 	_in_break = false
-	
+
+	# First wave of a fresh run: make sure PoolState begins empty so the
+	# wave_01.tres `pool_additions` is the only seed for the roster.
+	if current_wave == 1:
+		PoolState.reset()
+
 	var wave_path = "res://resources/enemies/waves/wave_%02d.tres" % current_wave
 	wave_duration = WaveCurve.wave_duration_seconds(current_wave)
+	var wave_data: WaveData = null
 	if ResourceLoader.exists(wave_path):
-		var wave_data = load(wave_path) as WaveData
-		if wave_data and _spawner and _spawner.has_method("apply_wave_data"):
-			_spawner.apply_wave_data(wave_data, current_wave)
-	elif _spawner and _spawner.has_method("apply_wave_data"):
-		_spawner.apply_wave_data(null, current_wave)
+		wave_data = load(wave_path) as WaveData
+
+	# Apply pool deltas BEFORE telling the spawner this wave is live, so the
+	# spawner's next `_spawn_enemy()` tick already sees the updated roster.
+	PoolState.apply_wave(wave_data, current_wave)
+
+	if _spawner and _spawner.has_method("apply_wave_data"):
+		_spawner.apply_wave_data(wave_data, current_wave)
+
 	_wave_timer = wave_duration
 
 	# Re-activate the spawner
@@ -85,7 +95,7 @@ func _start_wave() -> void:
 	print("Wave %d started!" % current_wave)
 
 
-func _end_wave() -> void:
+func _end_wave(grant_shop_bonus: bool = true) -> void:
 	_in_break = true
 	_break_timer = break_duration
 
@@ -117,7 +127,7 @@ func _end_wave() -> void:
 	# Between-wave shop (only entry point into the shop during a run)
 	if _shop_manager and _shop_manager.has_method("open_shop"):
 		_break_timer = 0.0
-		_shop_manager.open_shop()
+		_shop_manager.open_shop(grant_shop_bonus)
 	else:
 		_break_timer = break_duration
 
@@ -136,7 +146,7 @@ func dev_force_end_wave() -> bool:
 		return false
 	if _in_break:
 		return false
-	_end_wave()
+	_end_wave(false)
 	return true
 
 

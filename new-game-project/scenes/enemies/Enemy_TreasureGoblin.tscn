@@ -1,55 +1,50 @@
-[gd_scene load_steps=6 format=3 uid="uid://enemy_treasure_goblin"]
+[gd_scene load_steps=17 format=3 uid="uid://enemy_treasure_goblin"]
 
 [ext_resource type="Script" path="res://scripts/enemies/ai/TreasureGoblinAI.gd" id="1_enemy"]
 [ext_resource type="Script" path="res://scripts/systems/HealthSystem.gd" id="2_health"]
 [ext_resource type="PackedScene" path="res://scenes/items/pickups/XPGem.tscn" id="3_xpgem"]
 
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_01 (Green Skinned)/Goblin_Barrel_01_Idle_1x1.png" id="4_idle"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_01 (Green Skinned)/Goblin_Barrel_01_Move_10x1.png" id="5_move"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/custom/GoldThief/GoldThief_Run_9x1.png" id="4_run"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_idle0"]
-atlas = ExtResource("4_idle")
-region = Rect2(0, 0, 38, 26)
+atlas = ExtResource("4_run")
+region = Rect2(0, 0, 100, 100)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m0"]
-atlas = ExtResource("5_move")
-region = Rect2(0, 0, 38, 26)
+atlas = ExtResource("4_run")
+region = Rect2(0, 0, 100, 100)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m1"]
-atlas = ExtResource("5_move")
-region = Rect2(38, 0, 38, 26)
+atlas = ExtResource("4_run")
+region = Rect2(100, 0, 100, 100)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m2"]
-atlas = ExtResource("5_move")
-region = Rect2(76, 0, 38, 26)
+atlas = ExtResource("4_run")
+region = Rect2(200, 0, 100, 100)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m3"]
-atlas = ExtResource("5_move")
-region = Rect2(114, 0, 38, 26)
+atlas = ExtResource("4_run")
+region = Rect2(300, 0, 100, 100)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m4"]
-atlas = ExtResource("5_move")
-region = Rect2(152, 0, 38, 26)
+atlas = ExtResource("4_run")
+region = Rect2(400, 0, 100, 100)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m5"]
-atlas = ExtResource("5_move")
-region = Rect2(190, 0, 38, 26)
+atlas = ExtResource("4_run")
+region = Rect2(500, 0, 100, 100)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m6"]
-atlas = ExtResource("5_move")
-region = Rect2(228, 0, 38, 26)
+atlas = ExtResource("4_run")
+region = Rect2(600, 0, 100, 100)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m7"]
-atlas = ExtResource("5_move")
-region = Rect2(266, 0, 38, 26)
+atlas = ExtResource("4_run")
+region = Rect2(700, 0, 100, 100)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m8"]
-atlas = ExtResource("5_move")
-region = Rect2(304, 0, 38, 26)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_m9"]
-atlas = ExtResource("5_move")
-region = Rect2(342, 0, 38, 26)
+atlas = ExtResource("4_run")
+region = Rect2(800, 0, 100, 100)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_green"]
 animations = [{
@@ -88,13 +83,10 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_m8")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_m9")
 }],
 "loop": true,
 "name": &"Move",
-"speed": 10.0
+"speed": 9.0
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_1"]
@@ -107,7 +99,7 @@ script = ExtResource("1_enemy")
 sprite_frames = SubResource("SpriteFrames_green")
 animation = &"Idle"
 autoplay = "Idle"
-scale = Vector2(3, 3)
+scale = Vector2(1, 1)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_1")

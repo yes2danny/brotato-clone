@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://scripts/enemies/ai/EnemyAI.gd" id="1_enemy"]
 [ext_resource type="Script" path="res://scripts/systems/HealthSystem.gd" id="2_health"]
 [ext_resource type="PackedScene" path="res://scenes/items/pickups/XPGem.tscn" id="3_xpgem"]
+[ext_resource type="Material" path="res://resources/shaders/wave1_palette_unify_material.tres" id="7_wave1_shader"]
 
 ; ── Blue Goblin sprite sheet — 1 idle frame, 10 move frames, 38x26 each ──
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Goblin_Barrel_02 (Blue Skinned)/Goblin_Barrel_02_Idle_1x1.png" id="4_idle"]
@@ -156,6 +157,7 @@ contact_cooldown = 1.0
 xp_gem_scene = ExtResource("3_xpgem")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+material = ExtResource("7_wave1_shader")
 sprite_frames = SubResource("SpriteFrames_blue")
 animation = &"Idle"
 autoplay = "Idle"

@@ -4,19 +4,23 @@ extends Node2D
 # EnemySpawner
 # Place this node in your main game scene.
 # Spawns enemies in a ring around the player on a timer.
-# Picks randomly from a pool of enemy scene types.
-# Gets harder each wave by reducing the spawn interval.
+# Reads the active roster from the **PoolState** autoload — that singleton is
+# updated each wave by `WaveManager` (`PoolState.apply_wave(wave_data, n)`),
+# applying `pool_additions` / `pool_removals` deltas from `wave_NN.tres`.
 #
 # HOW TO ADD A NEW ENEMY TYPE:
 #   1. Create a new scene in scenes/enemies/ (copy Enemy.tscn as a starting point)
 #   2. Assign new sprites and adjust move_speed, damage, max_health in the scene
-#   3. In Main.tscn, drag the new scene into the enemy_scenes array on EnemySpawner
-#      OR add it to the enemy_scenes array in the Inspector (Node tab won't show it,
-#      use the Inspector panel with EnemySpawner selected)
+#   3. Add a `WaveSpawnEntry` for the new scene to **one** wave's
+#      `pool_additions` (the wave it should first appear). It will persist on
+#      every later wave until something later puts it in `pool_removals`.
+#   4. (Optional) Tweak its weight on a later wave by re-adding it in that
+#      wave's `pool_additions` — same scene path → in-place upsert.
 # ─────────────────────────────────────────────
 
-# Pool of enemy types to spawn — add more scenes here in the Inspector!
-# Each wave randomly picks from this list, so variety is automatic.
+## Last-resort flat pool when no wave is active (e.g. dev_spawn_one in a
+## scene loaded without WaveManager). PoolState is the real source of truth
+## once a wave starts.
 @export var enemy_scenes: Array[PackedScene] = []
 
 @export var spawn_interval: float = 2.0      # Starting seconds between each spawn
@@ -25,6 +29,7 @@ extends Node2D
 
 @export var map_half_size: float = 960.0
 @export var map_spawn_margin: float = 48.0
+@export var require_clear_path_from_player: bool = true
 
 ## Option B (roadmap): 60s waves; `N_total` is not a hard spawn cap (see `WaveCurve` comment).
 ## These multiply the doc curve outputs — use 1.0 to match the HTML exactly.
@@ -75,6 +80,8 @@ func _process(delta: float) -> void:
 				goblin.global_position = spawn_pos
 
 
+## Kept for any tooling that still pokes at it; the actual roster lives on
+## the PoolState autoload now (see `_active_pool()`).
 var current_wave_data: WaveData = null
 var _active_wave_number: int = 1
 var _n_max: int = 999999
@@ -97,6 +104,12 @@ func apply_wave_data(data: WaveData, wave_number: int) -> void:
 
 func clear_wave_data() -> void:
 	current_wave_data = null
+
+
+func _active_pool() -> Array[WaveSpawnEntry]:
+	# WaveManager pushes wave deltas into PoolState before the wave starts,
+	# so the singleton always holds the authoritative current roster.
+	return PoolState.get_pool()
 
 
 func _live_enemy_count() -> int:
@@ -124,12 +137,13 @@ func _spawn_enemy() -> void:
 		return
 
 	var scene_to_spawn: PackedScene = null
-	
-	if current_wave_data and not current_wave_data.enemy_pool.is_empty():
+
+	var pool: Array[WaveSpawnEntry] = _active_pool()
+	if not pool.is_empty():
 		var valid_entries: Array[WaveSpawnEntry] = []
 		var total_weight: float = 0.0
-		
-		for entry in current_wave_data.enemy_pool:
+
+		for entry in pool:
 			if entry == null or entry.enemy_scene == null:
 				continue
 			var path: String = entry.enemy_scene.resource_path
@@ -137,8 +151,8 @@ func _spawn_enemy() -> void:
 			if cap_ok:
 				valid_entries.append(entry)
 				total_weight += entry.weight
-				
-		if valid_entries.size() > 0:
+
+		if valid_entries.size() > 0 and total_weight > 0.0:
 			var roll: float = randf() * total_weight
 			for entry in valid_entries:
 				roll -= entry.weight
@@ -197,6 +211,8 @@ func _find_valid_spawn_position() -> Vector2:
 		var hits = space.intersect_point(query)
 		if hits.is_empty():
 			# Nothing solid here — safe to spawn!
+			if require_clear_path_from_player and not _has_clear_path_from_player(space, test_pos):
+				continue
 			return test_pos
 
 	# Tried 10 times and everything was blocked (rare). Skip this spawn tick.
@@ -207,6 +223,13 @@ func _is_inside_map_bounds(pos: Vector2) -> bool:
 	var min_pos = -map_half_size + map_spawn_margin
 	var max_pos = map_half_size - map_spawn_margin
 	return pos.x >= min_pos and pos.x <= max_pos and pos.y >= min_pos and pos.y <= max_pos
+
+
+func _has_clear_path_from_player(space: PhysicsDirectSpaceState2D, target_pos: Vector2) -> bool:
+	var ray = PhysicsRayQueryParameters2D.create(player.global_position, target_pos, 1)
+	ray.collide_with_bodies = true
+	ray.collide_with_areas = false
+	return space.intersect_ray(ray).is_empty()
 
 
 # Called by WaveManager each wave to ramp up difficulty
@@ -224,8 +247,8 @@ func set_active(active: bool) -> void:
 
 ## DevDebug: spawn one enemy immediately using the normal spawn rules (ignores is_active).
 func dev_spawn_one() -> void:
-	if enemy_scenes.is_empty():
-		push_warning("EnemySpawner.dev_spawn_one: enemy_scenes is empty")
+	if PoolState.get_pool_size() == 0 and enemy_scenes.is_empty():
+		push_warning("EnemySpawner.dev_spawn_one: PoolState empty and no enemy_scenes fallback")
 		return
 	if player == null or not is_instance_valid(player):
 		var players := get_tree().get_nodes_in_group("player")

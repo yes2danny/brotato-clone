@@ -9,7 +9,31 @@ extends Resource
 #
 # WaveManager applies `WaveCurve` (see docs/Main_ENEMY_WAVE_ROADMAP_V2.html §3–§4) for:
 # wave_duration, spawn_interval, min_spawn_interval, hp_mult, dmg_mult, N_max.
-# This resource mainly supplies `enemy_pool` (and future boss / mini fields).
+#
+# ── Pool model (v3) ───────────────────────────
+# Each wave is now described as **deltas** against the running PoolState
+# autoload, not as a full pool list:
+#
+#   `pool_additions` (Array[WaveSpawnEntry])
+#       Upsert: entries are appended to the active pool, OR — if a scene with
+#       the same `resource_path` is already active — replace it in place to
+#       tune weight / max_alive. Use this for both new roster entries
+#       ("introduce Knight_LVL1") AND for weight rebalancing on existing
+#       entries.
+#
+#   `pool_removals` (Array[PackedScene])
+#       Retire every active entry whose `enemy_scene.resource_path` matches.
+#       Use this when a type cycles out ("dummy and mimic exit at wave 6").
+#       The change is permanent until something is added back later.
+#
+# Wave 1 should populate `pool_additions` with the starting roster; PoolState
+# is empty before then. Anything not touched by a wave persists from the
+# previous wave automatically.
+#
+# Legacy `enemy_pool` is kept as a fallback: if a file leaves both delta
+# arrays empty AND fills `enemy_pool`, PoolState treats that as a hard reset
+# of the entire pool to those entries (one-shot full override). New wave
+# files should not use this — author with the delta arrays.
 # ─────────────────────────────────────────────
 
 class_name WaveData
@@ -31,11 +55,23 @@ class_name WaveData
 @export var dmg_mult: float = 1.0
 
 # ── Enemy Mix ──
-# List of enemy scenes to spawn during this wave.
-# If empty, WaveManager falls back to the default enemy.
+# Fallback flat-list of enemy scenes if no pool is active. Rarely used since
+# PoolState supplies the weighted roster now.
 @export var enemy_scenes: Array[PackedScene] = []
 
-# Array of WaveSpawnEntry to define weights and max caps.
+# ── PoolState deltas (v3) ──
+## Entries to add or upsert into the active pool. Upserts let you tune
+## weight / max_alive on an existing roster entry without re-listing the
+## whole pool. Match is by `enemy_scene.resource_path`.
+@export var pool_additions: Array[WaveSpawnEntry] = []
+
+## Scenes to retire from the active pool. Match is by `resource_path`.
+@export var pool_removals: Array[PackedScene] = []
+
+## DEPRECATED — legacy full-pool override. Authoring path:
+##  - New waves: leave empty, use `pool_additions` / `pool_removals`.
+##  - Old waves: if non-empty AND both delta arrays are empty, PoolState will
+##    treat this as a hard reset of the entire pool.
 @export var enemy_pool: Array[WaveSpawnEntry] = []
 
 # ── Special Flags ──

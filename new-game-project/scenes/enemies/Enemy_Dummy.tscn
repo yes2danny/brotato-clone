@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/enemies/ai/EnemyAI.gd" id="1_enemy"]
 [ext_resource type="Script" path="res://scripts/systems/HealthSystem.gd" id="2_health"]
 [ext_resource type="PackedScene" path="res://scenes/items/pickups/XPGem.tscn" id="3_xpgem"]
+[ext_resource type="Material" path="res://resources/shaders/wave1_palette_unify_material.tres" id="7_wave1_shader"]
 
 ; Dummy_LVL1 strips: Idle 68x30 (2 frames), Move 408x30 (12 frames) → 34x30 per frame
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Dummy_LVL1/Idle_2x1.png" id="4_idle"]
@@ -234,6 +235,7 @@ contact_cooldown = 1.2
 xp_gem_scene = ExtResource("3_xpgem")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+material = ExtResource("7_wave1_shader")
 sprite_frames = SubResource("SpriteFrames_dummy")
 animation = &"Idle"
 autoplay = "Idle"
