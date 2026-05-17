@@ -73,6 +73,7 @@ func _physics_process(delta: float) -> void:
 			_process_hunting(delta, available_gold, gold_count)
 
 func _process_hunting(delta: float, available_gold: Array[Node2D], gold_count: int) -> void:
+	# Bail out and retreat if gold is running low
 	if gold_count <= low_gold_retreat_threshold:
 		_low_gold_timer += delta
 		if _low_gold_timer >= low_gold_grace_duration:
@@ -80,44 +81,81 @@ func _process_hunting(delta: float, available_gold: Array[Node2D], gold_count: i
 			return
 	else:
 		_low_gold_timer = 0.0
-	
+
 	var dist_to_player = global_position.distance_to(player.global_position)
-	
-	if dist_to_player < flee_range and _cooldown_timer <= 0.0:
+
+	# Only burst-dash when the player gets DANGEROUSLY close (inner 60% of flee range).
+	# The old code dashed any time the player was within flee_range, which made the
+	# goblin look panicked instead of casually thieving.
+	var panic_range := flee_range * 0.6
+	if dist_to_player < panic_range and _cooldown_timer <= 0.0:
 		_trigger_boost()
-		
-	var move_dir := Vector2.ZERO
+
+	# We need a gold target to do the wandering thieving behavior.
+	# If there's nothing to steal, just retreat.
+	var nearest_gold := _nearest_gold(available_gold)
+	if nearest_gold == null:
+		_begin_retreat()
+		return
+
+	# ─── BLENDED STEERING (this is what kills the stutter) ───
+	# Instead of a hard switch between "flee" and "chase gold" (which caused the
+	# goblin to flip direction every time it crossed the flee_range boundary),
+	# we combine three forces every frame and normalize the result. Smooth = no studder.
+
+	# Force 1: pull toward the nearest coin
+	var to_gold := nearest_gold.global_position - global_position
+	var dist_to_gold := to_gold.length()
+	var gold_dir := to_gold.normalized() if dist_to_gold > 0.01 else Vector2.ZERO
+
+	# Force 2: push away from the player, ramping up smoothly as they close in.
+	# Squared falloff means barely any push at the edge of flee_range, strong push up close.
+	var to_player := player.global_position - global_position
+	var away_from_player := -to_player.normalized() if to_player.length() > 0.01 else Vector2.ZERO
+	var threat := 0.0
 	if dist_to_player < flee_range:
-		# Run away from player, but curve away from map edges to avoid getting cornered
-		var to_player = (player.global_position - global_position).normalized()
-		var away_from_player = -to_player
-		var map_center_dir = (Vector2.ZERO - global_position).normalized()
-		var dist_from_center = global_position.length()
-		
-		# Weight increases as we get closer to the arena edge (960 is the boundary)
-		var center_weight = clampf((dist_from_center - 600.0) / 300.0, 0.0, 1.5)
-		
-		# Calculate a perpendicular vector (sidestep) to skirt around the player
-		var perp = Vector2(-to_player.y, to_player.x)
-		if perp.dot(map_center_dir) < 0:
-			perp = -perp # Pick the sidestep direction that leads closer to the center
-			
-		move_dir = (away_from_player + (map_center_dir * center_weight) + (perp * center_weight * 0.8)).normalized()
-	else:
-		# Find nearest gold to steal
-		var nearest_gold := _nearest_gold(available_gold)
-		if nearest_gold:
-			move_dir = (nearest_gold.global_position - global_position).normalized()
-		else:
-			_begin_retreat()
-			return
-			
+		var t = 1.0 - clampf(dist_to_player / flee_range, 0.0, 1.0)
+		threat = t * t
+
+	# Force 3: a tangent "orbit" component perpendicular to the gold direction.
+	# This is what makes the goblin curve and wander around the coin pile instead
+	# of marching straight at it like a missile. We pick the orbit side that
+	# leads away from the player so the arcs look intentional, not random.
+	var orbit_dir := Vector2(-gold_dir.y, gold_dir.x)
+	if orbit_dir.dot(away_from_player) < 0:
+		orbit_dir = -orbit_dir
+
+	# When the goblin is already near the gold, prioritize wandering/orbit over
+	# approach. When it's far away, prioritize approach. Smooth blend = casual look.
+	var approach_weight := clampf(dist_to_gold / 120.0, 0.0, 1.0)
+
+	# Add a little time-based wobble so the goblin doesn't look robotic when
+	# orbiting. Uses its own position as a phase offset so multiple goblins
+	# don't wobble in sync.
+	var wobble_phase := Time.get_ticks_msec() / 1000.0 + global_position.x * 0.013
+	var wobble := Vector2(sin(wobble_phase * 2.3), cos(wobble_phase * 1.7)) * 0.15
+
+	var move_dir := (
+		gold_dir * approach_weight                       # head toward the prize
+		+ orbit_dir * (1.0 - approach_weight) * 0.9      # wander around it when close
+		+ away_from_player * threat * 1.6                # smoothly back off from player
+		+ wobble                                          # organic noise so they don't look robotic
+	).normalized()
+
+	# Pull back toward the arena center if we're near the boundary (prevents
+	# the goblin from getting cornered against a wall while orbiting).
+	var dist_from_center := global_position.length()
+	if dist_from_center > 600.0:
+		var center_pull := clampf((dist_from_center - 600.0) / 300.0, 0.0, 1.5)
+		var to_center := (Vector2.ZERO - global_position).normalized()
+		move_dir = (move_dir + to_center * center_pull).normalized()
+
 	move_dir = _apply_wall_slide(move_dir, delta)
-	
+
 	var current_speed = base_speed
 	if _boost_timer > 0.0:
 		current_speed = boost_speed
-		
+
 	velocity = move_dir * current_speed
 	move_and_slide()
 	_update_sprite()

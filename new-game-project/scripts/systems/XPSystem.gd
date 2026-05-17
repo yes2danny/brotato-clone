@@ -8,11 +8,14 @@ extends Node
 
 ## If true, leveling pauses the game and opens UpgradeManager (pick-a-buff cards).
 ## If false, level and XP bar still advance — no overlay, no pause.
-const SHOW_LEVEL_UP_UPGRADE_CARDS := false
+const SHOW_LEVEL_UP_UPGRADE_CARDS := true
 
 var current_xp: int = 0
 var current_level: int = 1
-var xp_to_next_level: int = 20  # XP needed for the first level up
+# XP needed for level 2. Raised from 20 → 100 so a wave has ~1-2 level-ups
+# instead of 3+ in the first 15 seconds. Each gem gives 5 XP so this means
+# you need to collect ~20 gems before your first card offer.
+var xp_to_next_level: int = 100
 
 # Signals so the UI can update whenever XP or level changes
 signal xp_changed(current: int, required: int)
@@ -29,14 +32,13 @@ func reset_run() -> void:
 
 # Call this when a gem is collected
 func add_xp(amount: int) -> void:
+	if amount <= 0:
+		return
 	current_xp += amount
 
-	# Tell the UI to refresh the XP bar
-	emit_signal("xp_changed", current_xp, xp_to_next_level)
-
-	# Check if we've hit the threshold
-	if current_xp >= xp_to_next_level:
+	while current_xp >= xp_to_next_level:
 		_level_up()
+	emit_signal("xp_changed", current_xp, xp_to_next_level)
 
 
 func _level_up() -> void:
@@ -44,8 +46,10 @@ func _level_up() -> void:
 	current_xp -= xp_to_next_level
 	current_level += 1
 
-	# Each level requires 20% more XP than the last
-	xp_to_next_level = int(xp_to_next_level * 1.2)
+	# Each level requires 30% more XP than the last (up from 20%).
+	# This keeps late-game level-ups feeling hard to earn — by wave 10+
+	# you're grinding toward each card rather than getting them every minute.
+	xp_to_next_level = maxi(int(roundf(float(xp_to_next_level) * 1.3)), xp_to_next_level + 1)
 
 	emit_signal("level_up", current_level)
 

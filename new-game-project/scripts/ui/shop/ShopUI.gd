@@ -3,10 +3,10 @@ extends CanvasLayer
 # ─────────────────────────────────────────────
 # ShopUI — Between-wave merchant UI (4 offers). Title + gold centered; rotating quips.
 #
-# Pixel UI & HUD — **Black** grid chrome + matching buttons:
-#   Panels/Black/GridPanelFrame.png, GridPanel.png
-#   Grid/Black/GridSlot.png, GridSlotInactive.png
-#   Buttons/Black/ButtonA_* / ButtonB_*
+# Pixel UI & HUD — **Blue** outer frame + buttons, **Black** grid slots for contrast:
+#   Panels/Blue/GridPanelFrame.png, GridPanel.png   ← outer shell uses blue theme
+#   Grid/Black/GridSlot.png, GridSlotInactive.png   ← card slots stay black (Blue has no GridSlot)
+#   Buttons/Blue/ButtonA_* / ButtonB_*              ← all buttons use blue variant
 #
 # Fits the panel to the window by setting **custom_minimum_size** only (capped to
 # ~92% × 88% of viewport). Avoids custom_maximum_size — not available on all Control types.
@@ -15,12 +15,16 @@ extends CanvasLayer
 
 const _PIXEL_PATCH_16 := 5
 
-const _PIXEL_FRAME := "res://assets/ui/pixel_ui/Panels/Black/GridPanelFrame.png"
-const _PIXEL_PANEL_GRID := "res://assets/ui/pixel_ui/Panels/Black/GridPanel.png"
+# ── Blue outer panels + buttons ──────────────────────────────────────────────
+const _PIXEL_FRAME := "res://assets/ui/pixel_ui/Panels/Blue/GridPanelFrame.png"
+const _PIXEL_PANEL_GRID := "res://assets/ui/pixel_ui/Panels/Blue/GridPanel.png"
+# Grid/Blue only has selectors, not slot sprites — keep Black for the item cards
 const _PIXEL_GRID_SLOT := "res://assets/ui/pixel_ui/Grid/Black/GridSlot.png"
 const _PIXEL_GRID_SLOT_INACTIVE := "res://assets/ui/pixel_ui/Grid/Black/GridSlotInactive.png"
-const _PIXEL_BTN_A := "res://assets/ui/pixel_ui/Buttons/Black/ButtonA_%s.png"
-const _PIXEL_BTN_B := "res://assets/ui/pixel_ui/Buttons/Black/ButtonB_%s.png"
+const _PIXEL_BTN_A := "res://assets/ui/pixel_ui/Buttons/Blue/ButtonA_%s.png"
+const _PIXEL_BTN_B := "res://assets/ui/pixel_ui/Buttons/Blue/ButtonB_%s.png"
+const _MEDIEVAL_PROP_ATLAS := "res://assets/ui/medieval_ui_paid/atlas.png"
+const _QUIP_BOX_ATLAS := "res://assets/ui/tiny_rpg_mana_soul_gui/button_b_atlas.png"
 
 ## Turn off to use flat programmer-art panels (no pack files required).
 @export var use_pixel_shop_ui: bool = true
@@ -92,6 +96,10 @@ var _reroll_btn: Button = null
 var _continue_btn: Button = null
 var _shop_shell: PanelContainer = null
 var _flat_panel: PanelContainer = null
+var _content_tabs: TabContainer = null
+var _shop_tab: Control = null
+var _spell_tree_ui: Control = null
+var _inventory_tab: Control = null
 
 
 func _ready() -> void:
@@ -140,9 +148,17 @@ func _apply_viewport_to_shop() -> void:
 	var margin_y := 40.0
 	var avail_w := maxf(240.0, vp.x - margin_x)
 	var avail_h := maxf(220.0, vp.y - margin_y)
-	# Prefer a readable shop size, but never wider/taller than the visible area.
-	var panel_w := minf(820.0, avail_w)
-	var panel_h := minf(500.0, avail_h)
+	var showing_spellbook := _content_tabs != null and _content_tabs.current_tab == 1
+
+	# Let the between-wave modal breathe with the actual window size.
+	# Shop stays around half-screen; Spellbook gets a much larger canvas because
+	# the branching layout genuinely needs it.
+	var desired_w := vp.x * (0.78 if showing_spellbook else 0.60)
+	var desired_h := vp.y * (0.82 if showing_spellbook else 0.52)
+	var min_w := 1180.0 if showing_spellbook else 900.0
+	var min_h := 760.0 if showing_spellbook else 500.0
+	var panel_w := minf(maxf(desired_w, min_w), avail_w)
+	var panel_h := minf(maxf(desired_h, min_h), avail_h)
 	var sz := Vector2(panel_w, panel_h)
 	if _shop_shell:
 		_shop_shell.custom_minimum_size = sz
@@ -220,9 +236,58 @@ func _build_ui() -> void:
 		panel.add_theme_stylebox_override("panel", flat)
 		center.add_child(panel)
 
-	var outer := VBoxContainer.new()
-	outer.add_theme_constant_override("separation", 10)
-	panel.add_child(outer)
+	_content_tabs = TabContainer.new()
+	_content_tabs.tabs_visible = true
+	_content_tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_content_tabs.tab_changed.connect(_on_tab_changed)
+	panel.add_child(_content_tabs)
+
+	_shop_tab = VBoxContainer.new()
+	_shop_tab.name = "Shop"
+	_shop_tab.add_theme_constant_override("separation", 10)
+	_content_tabs.add_child(_shop_tab)
+
+	var spell_tab := Control.new()
+	spell_tab.name = "Spellbook"
+	_content_tabs.add_child(spell_tab)
+
+	var SpellTreeUIScene := preload("res://scenes/ui/menus/SpellTreeUI.tscn")
+	_spell_tree_ui = SpellTreeUIScene.instantiate()
+	_spell_tree_ui.name = "SpellTreeUI"
+	_spell_tree_ui.set_anchors_preset(Control.PRESET_FULL_RECT)
+	spell_tab.add_child(_spell_tree_ui)
+
+	_inventory_tab = VBoxContainer.new()
+	_inventory_tab.name = "Inventory"
+	_inventory_tab.alignment = BoxContainer.ALIGNMENT_CENTER
+	_inventory_tab.add_theme_constant_override("separation", 10)
+	_content_tabs.add_child(_inventory_tab)
+
+	var inv_title := Label.new()
+	inv_title.text = "Inventory"
+	inv_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	inv_title.add_theme_font_size_override("font_size", 24)
+	inv_title.add_theme_color_override("font_color", Color(0.94, 0.95, 1.0))
+	_inventory_tab.add_child(inv_title)
+
+	var inv_body := Label.new()
+	inv_body.text = "Inventory system coming later.\nThis tab is reserved for your current build, equipped items, and future loadout details."
+	inv_body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	inv_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	inv_body.custom_minimum_size = Vector2(420, 0)
+	inv_body.add_theme_font_size_override("font_size", 14)
+	inv_body.add_theme_color_override("font_color", Color(0.72, 0.76, 0.86))
+	_inventory_tab.add_child(inv_body)
+
+	var outer := _shop_tab as VBoxContainer
+
+	var title_row := HBoxContainer.new()
+	title_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	title_row.add_theme_constant_override("separation", 14)
+	outer.add_child(title_row)
+
+	var left_lantern := _shop_prop(_MEDIEVAL_PROP_ATLAS, Rect2(0, 0, 32, 32), Vector2(24, 24))
+	title_row.add_child(left_lantern)
 
 	var title := Label.new()
 	title.name = "ShopTitle"
@@ -232,9 +297,13 @@ func _build_ui() -> void:
 	title.add_theme_color_override("font_color", Color(0.92, 0.94, 1.0))
 	title.add_theme_color_override("font_outline_color", Color(0.05, 0.06, 0.1, 0.75))
 	title.add_theme_constant_override("outline_size", 3)
-	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	outer.add_child(title)
+	title.autowrap_mode = TextServer.AUTOWRAP_OFF
+	title.custom_minimum_size = Vector2(220, 0)
+	title.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	title_row.add_child(title)
+
+	var right_lantern := _shop_prop(_MEDIEVAL_PROP_ATLAS, Rect2(0, 0, 32, 32), Vector2(24, 24))
+	title_row.add_child(right_lantern)
 
 	var header_row := HBoxContainer.new()
 	header_row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -262,7 +331,7 @@ func _build_ui() -> void:
 	_item_row = HBoxContainer.new()
 	_item_row.name = "ItemRow"
 	_item_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	_item_row.add_theme_constant_override("separation", 10)
+	_item_row.add_theme_constant_override("separation", 18)
 	_item_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	outer.add_child(_item_row)
 
@@ -297,18 +366,39 @@ func _build_ui() -> void:
 	_continue_btn.pressed.connect(_on_continue_pressed)
 	bottom_row.add_child(_continue_btn)
 
+	var quip_center := CenterContainer.new()
+	quip_center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	outer.add_child(quip_center)
+
+	var quip_panel := PanelContainer.new()
+	quip_panel.name = "ShopQuipPanel"
+	quip_panel.custom_minimum_size = Vector2(560, 40)
+	# Use a flat stylebox so the quip banner scales cleanly without stretching
+	# a tiny sprite across hundreds of pixels. Dark blue tint matches the new theme.
+	var quip_style := StyleBoxFlat.new()
+	quip_style.bg_color = Color(0.10, 0.14, 0.28, 0.88)   # deep navy, slightly transparent
+	quip_style.border_color = Color(0.32, 0.52, 0.82, 0.65) # soft blue border
+	quip_style.set_border_width_all(1)
+	quip_style.set_corner_radius_all(6)
+	quip_style.content_margin_left = 14
+	quip_style.content_margin_right = 14
+	quip_style.content_margin_top = 7
+	quip_style.content_margin_bottom = 7
+	quip_panel.add_theme_stylebox_override("panel", quip_style)
+	quip_center.add_child(quip_panel)
+
 	_tagline = Label.new()
 	_tagline.name = "ShopTagline"
 	_tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_tagline.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+	_tagline.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_tagline.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_tagline.max_lines_visible = 3
+	_tagline.max_lines_visible = 2
 	_tagline.add_theme_font_size_override("font_size", 11)
-	_tagline.add_theme_color_override("font_color", Color(0.68, 0.74, 0.88))
+	_tagline.add_theme_color_override("font_color", Color(0.78, 0.86, 1.0))  # slightly brighter on navy
 	_tagline.add_theme_constant_override("line_spacing", -1)
 	_tagline.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_tagline.custom_minimum_size = Vector2(120, 0)
-	outer.add_child(_tagline)
+	_tagline.custom_minimum_size = Vector2(520, 0)
+	quip_panel.add_child(_tagline)
 
 	_toast = Label.new()
 	_toast.name = "Toast"
@@ -342,6 +432,44 @@ func _ninepatch_from_path(path: String, ml: int, mt: int, mr: int, mb: int) -> S
 func _slot_stylebox(use_active_slot: bool) -> StyleBoxTexture:
 	var path := _PIXEL_GRID_SLOT if use_active_slot else _PIXEL_GRID_SLOT_INACTIVE
 	return _ninepatch_from_path(path, _PIXEL_PATCH_16, _PIXEL_PATCH_16, _PIXEL_PATCH_16, _PIXEL_PATCH_16)
+
+
+func _shop_prop(atlas_path: String, region: Rect2, display_size: Vector2) -> TextureRect:
+	var texture := TextureRect.new()
+	texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	texture.custom_minimum_size = display_size
+	texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	if FileAccess.file_exists(atlas_path):
+		var atlas := AtlasTexture.new()
+		atlas.atlas = load(atlas_path) as Texture2D
+		atlas.region = region
+		texture.texture = atlas
+	return texture
+
+
+func _stylebox_from_atlas(
+	atlas_path: String,
+	region: Rect2,
+	left: int,
+	top: int,
+	right: int,
+	bottom: int
+) -> StyleBoxTexture:
+	var atlas := AtlasTexture.new()
+	atlas.atlas = load(atlas_path) as Texture2D
+	atlas.region = region
+	var style := StyleBoxTexture.new()
+	style.texture = atlas
+	style.texture_margin_left = left
+	style.texture_margin_top = top
+	style.texture_margin_right = right
+	style.texture_margin_bottom = bottom
+	style.content_margin_left = 10
+	style.content_margin_top = 6
+	style.content_margin_right = 10
+	style.content_margin_bottom = 6
+	return style
 
 
 func _style_primary_button(btn: Button) -> void:
@@ -435,10 +563,25 @@ func _on_shop_opened(offerings: Array) -> void:
 	if _wave_label and _shop_manager:
 		_wave_label.text = "Wave %d" % (GameManager.waves_completed + 1)
 	visible = true
+	if _content_tabs:
+		_content_tabs.current_tab = 0
+	if _spell_tree_ui and _spell_tree_ui.has_method("close_tree"):
+		_spell_tree_ui.close_tree()
 	_rebuild_row(offerings)
 	if _shop_manager:
 		_on_rerolls_changed(_shop_manager.free_rerolls)
 	_animate_shop_open()
+
+
+func _on_tab_changed(_tab_index: int) -> void:
+	_apply_viewport_to_shop()
+	if _spell_tree_ui == null:
+		return
+	var showing_spellbook := _content_tabs != null and _content_tabs.current_tab == 1
+	if showing_spellbook and _spell_tree_ui.has_method("open_tree"):
+		_spell_tree_ui.open_tree()
+	elif not showing_spellbook and _spell_tree_ui.has_method("close_tree"):
+		_spell_tree_ui.close_tree()
 
 
 func _on_shop_rerolled(offerings: Array) -> void:
@@ -447,6 +590,8 @@ func _on_shop_rerolled(offerings: Array) -> void:
 
 
 func _on_shop_closed() -> void:
+	if _spell_tree_ui and _spell_tree_ui.has_method("close_tree"):
+		_spell_tree_ui.close_tree()
 	visible = false
 	_clear_row()
 
@@ -468,6 +613,14 @@ func _on_reroll_pressed() -> void:
 		return
 	if not _shop_manager.try_reroll():
 		_show_toast("No free rerolls")
+		return
+
+	# Play the dice sequence: grab → shake → roll
+	# Delays are in seconds — tweak these if the timing feels off
+	AudioManager.play_sequence(
+		["shop/reroll/dice_grab", "shop/reroll/dice_shake_3", "shop/reroll/dice_roll_3"],
+		[0.0, 0.2, 0.55]
+	)
 
 
 func _on_continue_pressed() -> void:
@@ -523,7 +676,7 @@ func _make_slot_cell(offer: Variant) -> Control:
 	wrap.add_theme_constant_override("margin_right", 1)
 
 	var card := PanelContainer.new()
-	card.custom_minimum_size = Vector2(0, card_min_height)
+	card.custom_minimum_size = Vector2(0, maxf(card_min_height, 230.0))
 	card.mouse_filter = Control.MOUSE_FILTER_STOP
 
 	if offer == null:
@@ -559,9 +712,6 @@ func _make_slot_cell(offer: Variant) -> Control:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 5)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	v.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	# Fixed inner height so the top block can absorb extra space and Buy stays on one baseline.
-	v.custom_minimum_size = Vector2(0, maxf(140.0, card_min_height - 28.0))
 	card.add_child(v)
 
 	var rarity_bar := ColorRect.new()
@@ -573,14 +723,13 @@ func _make_slot_cell(offer: Variant) -> Control:
 	var top := VBoxContainer.new()
 	top.add_theme_constant_override("separation", 5)
 	top.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	v.add_child(top)
 
 	var icon_area := CenterContainer.new()
-	icon_area.custom_minimum_size = Vector2(56, 56)
+	icon_area.custom_minimum_size = Vector2(72, 72)
 	if offer_item.display_icon:
 		var icon := TextureRect.new()
-		icon.custom_minimum_size = Vector2(52, 52)
+		icon.custom_minimum_size = Vector2(64, 64)
 		icon.texture = offer_item.display_icon
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -605,7 +754,7 @@ func _make_slot_cell(offer: Variant) -> Control:
 	name_l.text = offer_item.display_name
 	name_l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	name_l.max_lines_visible = 2
-	name_l.add_theme_font_size_override("font_size", 13)
+	name_l.add_theme_font_size_override("font_size", 15)
 	name_l.add_theme_color_override("font_color", Color(0.94, 0.95, 1.0))
 	name_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_row.add_child(name_l)
@@ -623,7 +772,7 @@ func _make_slot_cell(offer: Variant) -> Control:
 	desc.text = offer_item.display_description if offer_item.display_description != "" else " "
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc.max_lines_visible = 3
-	desc.add_theme_font_size_override("font_size", 10)
+	desc.add_theme_font_size_override("font_size", 12)
 	desc.add_theme_color_override("font_color", Color(0.7, 0.74, 0.84))
 	desc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(desc)
@@ -631,7 +780,7 @@ func _make_slot_cell(offer: Variant) -> Control:
 	var price := Label.new()
 	price.text = "%d gold" % offer_item.price
 	price.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	price.add_theme_font_size_override("font_size", 12)
+	price.add_theme_font_size_override("font_size", 14)
 	price.add_theme_color_override("font_color", Color(0.98, 0.82, 0.4))
 	top.add_child(price)
 
@@ -643,7 +792,7 @@ func _make_slot_cell(offer: Variant) -> Control:
 	var buy := Button.new()
 	buy.text = "Sold" if offer_item.is_purchased else "Buy"
 	buy.disabled = offer_item.is_purchased
-	buy.custom_minimum_size = Vector2(88, 28)
+	buy.custom_minimum_size = Vector2(108, 32)
 	if _pixel_ui_ready:
 		_style_pixel_muted_button(buy)
 	else:

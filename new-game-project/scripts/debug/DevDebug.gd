@@ -7,6 +7,7 @@ extends Node
 # on-screen hint panel with F1.
 #
 # F1  — Toggle this cheat sheet
+# TAB — Toggle debug menu
 # F4  — Wave timer −10 s (min 1 s left)
 # F5  — Spawn one enemy (uses EnemySpawner pool)
 # F6  — Force end current wave (same as timer hitting zero)
@@ -31,11 +32,19 @@ const _DEBUG_WEAPON_PATHS: Array[String] = [
 ]
 
 const _GOLD_BONUS := 100
+const _GOLD_BONUS_LARGE := 500
 const _WAVE_TIME_SHAVE := 10.0
 
 var _hint_layer: CanvasLayer = null
 var _hint_label: Label = null
 var _hints_visible: bool = false
+
+var _debug_menu_layer: CanvasLayer = null
+var _debug_menu_root: Control = null
+var _debug_menu_vbox: VBoxContainer = null
+var _debug_menu_status_label: Label = null
+var _debug_menu_visible: bool = false
+var _debug_menu_paused_tree: bool = false
 
 var _weapon_menu_layer: CanvasLayer = null
 var _weapon_menu_vbox: VBoxContainer = null
@@ -45,9 +54,10 @@ var _weapon_menu_visible: bool = false
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_hint_overlay()
+	_build_debug_menu()
 	_build_weapon_debug_menu()
 	if _shortcuts_allowed():
-		print("[DevDebug] Shortcuts on — F1 overlay | F9 weapon menu | F4–F8 see script header.")
+		print("[DevDebug] Shortcuts on — Tab debug menu | F1 overlay | F9 weapon menu | F4–F8 see script header.")
 
 
 func _shortcuts_allowed() -> bool:
@@ -97,7 +107,7 @@ func _build_hint_overlay() -> void:
 
 func _hint_text() -> String:
 	return (
-		"[Dev] F1 hide  |  F9 weapon menu  |  F4 −10s wave  |  F5 spawn enemy\n"
+		"[Dev] Tab menu  |  F1 hide  |  F9 weapon menu  |  F4 −10s wave  |  F5 spawn enemy\n"
 		+ "F6 end wave  |  F7 +100 gold  |  F8 close shop"
 	)
 
@@ -112,6 +122,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	match e.keycode:
+		KEY_TAB:
+			_toggle_debug_menu()
+			get_viewport().set_input_as_handled()
 		KEY_F1:
 			_toggle_hints()
 			get_viewport().set_input_as_handled()
@@ -138,10 +151,157 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 
+func _build_debug_menu() -> void:
+	_debug_menu_layer = CanvasLayer.new()
+	_debug_menu_layer.name = "DevDebugMenu"
+	_debug_menu_layer.layer = 101
+	_debug_menu_layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	_debug_menu_layer.visible = false
+	add_child(_debug_menu_layer)
+
+	_debug_menu_root = Control.new()
+	_debug_menu_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_debug_menu_root.mouse_filter = Control.MOUSE_FILTER_STOP
+	_debug_menu_layer.add_child(_debug_menu_root)
+
+	var dim := ColorRect.new()
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.color = Color(0, 0, 0, 0.45)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	dim.gui_input.connect(_on_debug_menu_dim_gui_input)
+	_debug_menu_root.add_child(dim)
+
+	var shell := MarginContainer.new()
+	shell.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shell.add_theme_constant_override("margin_left", 18)
+	shell.add_theme_constant_override("margin_top", 18)
+	shell.add_theme_constant_override("margin_right", 18)
+	shell.add_theme_constant_override("margin_bottom", 18)
+	shell.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_debug_menu_root.add_child(shell)
+
+	var align := HBoxContainer.new()
+	align.alignment = BoxContainer.ALIGNMENT_BEGIN
+	align.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	shell.add_child(align)
+
+	var panel := PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.09, 0.1, 0.14, 0.97)
+	sb.border_color = Color(0.75, 0.6, 0.28, 0.88)
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(10)
+	sb.content_margin_left = 14.0
+	sb.content_margin_right = 14.0
+	sb.content_margin_top = 12.0
+	sb.content_margin_bottom = 12.0
+	panel.add_theme_stylebox_override("panel", sb)
+	align.add_child(panel)
+
+	_debug_menu_vbox = VBoxContainer.new()
+	_debug_menu_vbox.add_theme_constant_override("separation", 10)
+	panel.add_child(_debug_menu_vbox)
+
+	var title := Label.new()
+	title.text = "Debug menu"
+	title.add_theme_font_size_override("font_size", 18)
+	_debug_menu_vbox.add_child(title)
+
+	var sub := Label.new()
+	sub.text = "Playtest tools. Open with Tab."
+	sub.add_theme_font_size_override("font_size", 12)
+	sub.add_theme_color_override("font_color", Color(0.78, 0.82, 0.9))
+	_debug_menu_vbox.add_child(sub)
+
+	_debug_menu_status_label = Label.new()
+	_debug_menu_status_label.text = "Gold: —"
+	_debug_menu_status_label.add_theme_font_size_override("font_size", 13)
+	_debug_menu_status_label.add_theme_color_override("font_color", Color(0.98, 0.86, 0.42))
+	_debug_menu_vbox.add_child(_debug_menu_status_label)
+
+	var gold_row := HBoxContainer.new()
+	gold_row.add_theme_constant_override("separation", 8)
+	_debug_menu_vbox.add_child(gold_row)
+
+	gold_row.add_child(_debug_button("+100 gold", func() -> void:
+		_add_gold()
+	))
+	gold_row.add_child(_debug_button("+500 gold", func() -> void:
+		_add_gold(_GOLD_BONUS_LARGE)
+	))
+
+	var tools_col := VBoxContainer.new()
+	tools_col.add_theme_constant_override("separation", 6)
+	_debug_menu_vbox.add_child(tools_col)
+
+	tools_col.add_child(_debug_button("Spawn enemy", func() -> void:
+		_spawn_enemy()
+		_refresh_debug_menu_status()
+	))
+	tools_col.add_child(_debug_button("End wave", func() -> void:
+		_end_wave()
+		_refresh_debug_menu_status()
+	))
+	tools_col.add_child(_debug_button("Close shop", func() -> void:
+		_close_shop()
+		_refresh_debug_menu_status()
+	))
+	tools_col.add_child(_debug_button("Weapon menu", func() -> void:
+		_toggle_weapon_debug_menu()
+	))
+
+	var close_btn := _debug_button("Close (Tab)", func() -> void:
+		_toggle_debug_menu()
+	)
+	close_btn.custom_minimum_size = Vector2(180, 34)
+	_debug_menu_vbox.add_child(close_btn)
+
+
+func _debug_button(text: String, action: Callable) -> Button:
+	var btn := Button.new()
+	btn.text = text
+	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	btn.custom_minimum_size = Vector2(180, 34)
+	btn.pressed.connect(action)
+	return btn
+
+
+func _on_debug_menu_dim_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		if _debug_menu_visible:
+			_toggle_debug_menu()
+
+
+func _toggle_debug_menu() -> void:
+	if _debug_menu_layer == null:
+		return
+	_debug_menu_visible = not _debug_menu_visible
+	_debug_menu_layer.visible = _debug_menu_visible
+	if _debug_menu_visible:
+		_debug_menu_paused_tree = not get_tree().paused
+		if _debug_menu_paused_tree:
+			get_tree().paused = true
+		_refresh_debug_menu_status()
+	else:
+		if _debug_menu_paused_tree:
+			get_tree().paused = false
+		_debug_menu_paused_tree = false
+
+
+func _refresh_debug_menu_status() -> void:
+	if _debug_menu_status_label == null:
+		return
+	var sm := get_tree().get_first_node_in_group("shop_manager")
+	if sm == null:
+		_debug_menu_status_label.text = "Gold: —"
+		return
+	_debug_menu_status_label.text = "Gold: %d" % sm.player_gold
+
+
 func _build_weapon_debug_menu() -> void:
 	_weapon_menu_layer = CanvasLayer.new()
 	_weapon_menu_layer.name = "DevDebugWeaponMenu"
-	_weapon_menu_layer.layer = 101
+	_weapon_menu_layer.layer = 102
 	_weapon_menu_layer.process_mode = Node.PROCESS_MODE_ALWAYS
 	_weapon_menu_layer.visible = false
 	add_child(_weapon_menu_layer)
@@ -329,11 +489,12 @@ func _skew_wave_time(delta_sec: float) -> void:
 		push_warning("[DevDebug] No WaveManager with dev_adjust_wave_time_remaining()")
 
 
-func _add_gold() -> void:
+func _add_gold(amount: int = _GOLD_BONUS) -> void:
 	var sm := get_tree().get_first_node_in_group("shop_manager")
 	if sm and sm.has_method("add_gold"):
-		sm.add_gold(_GOLD_BONUS)
-		print("[DevDebug] +%d gold" % _GOLD_BONUS)
+		sm.add_gold(amount)
+		_refresh_debug_menu_status()
+		print("[DevDebug] +%d gold" % amount)
 	else:
 		push_warning("[DevDebug] No ShopManager.add_gold")
 

@@ -1,0 +1,650 @@
+[gd_scene format=3 uid="uid://csnwd2ks4o5vw"]
+
+[ext_resource type="Script" uid="uid://cpcysisehmswe" path="res://scripts/ui/menus/SpellTreeUI.gd" id="1_tree_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menus/SpellNode.tscn" id="2_spell_node"]
+[ext_resource type="Script" uid="uid://cgf3tv2ctxbv0" path="res://scripts/ui/menus/SpellTreeLink.gd" id="3_spell_link"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_border"]
+bg_color = Color(0.07, 0.07, 0.11, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.74, 0.55, 0.28, 0.95)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_detail"]
+content_margin_left = 14.0
+content_margin_top = 14.0
+content_margin_right = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(0.08, 0.08, 0.13, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.33, 0.31, 0.28, 0.9)
+
+[node name="SpellTreeUI" type="Control" unique_id=1814244516]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_tree_script")
+
+[node name="Backdrop" type="ColorRect" parent="." unique_id=672514176]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.06, 0.1, 0.98)
+
+[node name="Border" type="PanelContainer" parent="." unique_id=1777708126]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = 18.0
+offset_right = -18.0
+offset_bottom = -18.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_border")
+
+[node name="Title" type="Label" parent="." unique_id=1068571322]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 22.0
+offset_right = 250.0
+offset_bottom = 56.0
+theme_override_colors/font_color = Color(0.98, 0.9, 0.66, 1)
+theme_override_font_sizes/font_size = 28
+text = "Spellbook"
+
+[node name="Subtitle" type="Label" parent="." unique_id=1786247825]
+layout_mode = 0
+offset_left = 38.0
+offset_top = 58.0
+offset_right = 420.0
+offset_bottom = 80.0
+theme_override_colors/font_color = Color(0.72, 0.74, 0.8, 1)
+theme_override_font_sizes/font_size = 14
+text = "Choose the path your magic grows through."
+
+[node name="Canvas" type="Control" parent="." unique_id=169983173]
+anchors_preset = 0
+offset_left = 28.0
+offset_top = 88.0
+offset_right = 1088.0
+offset_bottom = 818.0
+
+[node name="Lines" type="Node2D" parent="Canvas" unique_id=1796053673]
+
+[node name="FireballToExplosive" type="Line2D" parent="Canvas/Lines" unique_id=999596270]
+points = PackedVector2Array(51, 275, 152, 224)
+width = 3.0
+default_color = Color(0.75, 0.72, 0.64, 0.72)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/Fireball")
+to_node = NodePath("../../Nodes/ExplosiveFireball")
+
+[node name="ExplosiveToPillar" type="Line2D" parent="Canvas/Lines" unique_id=772608050]
+points = PackedVector2Array(152, 224, 318, 217)
+width = 3.0
+default_color = Color(0.75, 0.72, 0.64, 0.72)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/ExplosiveFireball")
+to_node = NodePath("../../Nodes/PillarFireball")
+
+[node name="ExplosiveToFireBomb" type="Line2D" parent="Canvas/Lines" unique_id=1674104875]
+points = PackedVector2Array(152, 224, 92, 395)
+width = 2.0
+default_color = Color(0.54, 0.48, 0.38, 0.62)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/ExplosiveFireball")
+to_node = NodePath("../../Nodes/FireBomb")
+
+[node name="ExplosiveToRingOfFire" type="Line2D" parent="Canvas/Lines" unique_id=1924470648]
+points = PackedVector2Array(152, 224, 232, 381)
+width = 2.0
+default_color = Color(0.54, 0.48, 0.38, 0.62)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/ExplosiveFireball")
+to_node = NodePath("../../Nodes/RingOfFire")
+
+[node name="PillarToSmallMeteor" type="Line2D" parent="Canvas/Lines" unique_id=77881617]
+points = PackedVector2Array(318, 217, 398, 315)
+width = 2.0
+default_color = Color(0.54, 0.48, 0.38, 0.62)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/PillarFireball")
+to_node = NodePath("../../Nodes/SmallMeteor")
+
+[node name="SparkToChain" type="Line2D" parent="Canvas/Lines" unique_id=1028501030]
+points = PackedVector2Array(46, 39, 133, 36)
+width = 3.0
+default_color = Color(0.75, 0.72, 0.64, 0.72)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/SparkBolt")
+to_node = NodePath("../../Nodes/ChainLightning")
+
+[node name="ChainToStrike" type="Line2D" parent="Canvas/Lines" unique_id=764254227]
+points = PackedVector2Array(133, 36, 223, 39)
+width = 3.0
+default_color = Color(0.75, 0.72, 0.64, 0.72)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/ChainLightning")
+to_node = NodePath("../../Nodes/LightningStrike")
+
+[node name="StrikeToBurst" type="Line2D" parent="Canvas/Lines" unique_id=272703589]
+points = PackedVector2Array(223, 39, 351, 60)
+width = 3.0
+default_color = Color(0.75, 0.72, 0.64, 0.72)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/LightningStrike")
+to_node = NodePath("../../Nodes/ElectricBurst")
+
+[node name="BurstToField" type="Line2D" parent="Canvas/Lines" unique_id=457011420]
+points = PackedVector2Array(351, 60, 454, 90)
+width = 3.0
+default_color = Color(0.75, 0.72, 0.64, 0.72)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/ElectricBurst")
+to_node = NodePath("../../Nodes/ElectricField")
+
+[node name="BurstToPulse" type="Line2D" parent="Canvas/Lines" unique_id=904721853]
+points = PackedVector2Array(351, 60, 395, -6)
+width = 2.0
+default_color = Color(0.54, 0.48, 0.38, 0.62)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/ElectricBurst")
+to_node = NodePath("../../Nodes/PulseBeam")
+
+[node name="AcidToToxic" type="Line2D" parent="Canvas/Lines" unique_id=2094295697]
+points = PackedVector2Array(568, 31, 666, 10)
+width = 3.0
+default_color = Color(0.75, 0.72, 0.64, 0.72)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/AcidGlob")
+to_node = NodePath("../../Nodes/ToxicBurst")
+
+[node name="ToxicToCloud" type="Line2D" parent="Canvas/Lines" unique_id=1840173594]
+points = PackedVector2Array(666, 10, 743, 50)
+width = 3.0
+default_color = Color(0.75, 0.72, 0.64, 0.72)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/ToxicBurst")
+to_node = NodePath("../../Nodes/PoisonCloud")
+
+[node name="CloudToVortex" type="Line2D" parent="Canvas/Lines" unique_id=436907510]
+points = PackedVector2Array(743, 50, 799, 106)
+width = 3.0
+default_color = Color(0.75, 0.72, 0.64, 0.72)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/PoisonCloud")
+to_node = NodePath("../../Nodes/GreenVortex")
+
+[node name="WaterDropToSplash" type="Line2D" parent="Canvas/Lines" unique_id=1938806240]
+points = PackedVector2Array(1055, 232, 1044, 117)
+width = 3.0
+default_color = Color(0.75, 0.72, 0.64, 0.72)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/WaterDrop")
+to_node = NodePath("../../Nodes/SplashBurst")
+
+[node name="SplashToWave" type="Line2D" parent="Canvas/Lines" unique_id=652321102]
+points = PackedVector2Array(1044, 117, 1005, 25)
+width = 3.0
+default_color = Color(0.75, 0.72, 0.64, 0.72)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/SplashBurst")
+to_node = NodePath("../../Nodes/Wave")
+
+[node name="WaveToWhirl" type="Line2D" parent="Canvas/Lines" unique_id=1521636563]
+points = PackedVector2Array(1005, 25, 921, -17)
+width = 3.0
+default_color = Color(0.75, 0.72, 0.64, 0.72)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/Wave")
+to_node = NodePath("../../Nodes/WaterWhirl")
+
+[node name="DarkBoltToVoid" type="Line2D" parent="Canvas/Lines" unique_id=331574342]
+points = PackedVector2Array(499, 327, 603, 337)
+width = 3.0
+default_color = Color(0.75, 0.72, 0.64, 0.72)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/DarkBolt")
+to_node = NodePath("../../Nodes/VoidOrb")
+
+[node name="VoidToSmoke" type="Line2D" parent="Canvas/Lines" unique_id=763471244]
+points = PackedVector2Array(603, 337, 693, 344)
+width = 3.0
+default_color = Color(0.75, 0.72, 0.64, 0.72)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/VoidOrb")
+to_node = NodePath("../../Nodes/SmokeCurse")
+
+[node name="SmokeToBlackHole" type="Line2D" parent="Canvas/Lines" unique_id=396720885]
+points = PackedVector2Array(693, 344, 800, 412)
+width = 3.0
+default_color = Color(0.75, 0.72, 0.64, 0.72)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/SmokeCurse")
+to_node = NodePath("../../Nodes/BlackHole")
+
+[node name="VoidToSkull" type="Line2D" parent="Canvas/Lines" unique_id=243142561]
+points = PackedVector2Array(603, 337, 546, 477)
+width = 2.0
+default_color = Color(0.54, 0.48, 0.38, 0.62)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/VoidOrb")
+to_node = NodePath("../../Nodes/SkullShot")
+
+[node name="SmokeToBlood" type="Line2D" parent="Canvas/Lines" unique_id=1752737954]
+points = PackedVector2Array(693, 344, 658, 486)
+width = 2.0
+default_color = Color(0.54, 0.48, 0.38, 0.62)
+script = ExtResource("3_spell_link")
+from_node = NodePath("../../Nodes/SmokeCurse")
+to_node = NodePath("../../Nodes/BloodExplosion")
+
+[node name="Labels" type="Control" parent="Canvas" unique_id=198417687]
+anchors_preset = 0
+offset_right = 1060.0
+offset_bottom = 730.0
+
+[node name="LightningLabel" type="Label" parent="Canvas/Labels" unique_id=191494689]
+layout_mode = 0
+offset_left = 86.0
+offset_top = 119.0
+offset_right = 178.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(0.8, 0.72, 0.56, 1)
+theme_override_font_sizes/font_size = 12
+text = "LIGHTNING"
+
+[node name="FireLabel" type="Label" parent="Canvas/Labels" unique_id=638580603]
+layout_mode = 0
+offset_left = 209.0
+offset_top = 187.0
+offset_right = 266.0
+offset_bottom = 204.0
+theme_override_colors/font_color = Color(0.8, 0.72, 0.56, 1)
+theme_override_font_sizes/font_size = 12
+text = "FIRE"
+
+[node name="PoisonLabel" type="Label" parent="Canvas/Labels" unique_id=842960488]
+layout_mode = 0
+offset_left = 627.0
+offset_top = 109.0
+offset_right = 702.0
+offset_bottom = 126.0
+theme_override_colors/font_color = Color(0.8, 0.72, 0.56, 1)
+theme_override_font_sizes/font_size = 12
+text = "POISON"
+
+[node name="WaterLabel" type="Label" parent="Canvas/Labels" unique_id=1417078944]
+layout_mode = 0
+offset_left = 935.0
+offset_top = 109.0
+offset_right = 996.0
+offset_bottom = 126.0
+theme_override_colors/font_color = Color(0.8, 0.72, 0.56, 1)
+theme_override_font_sizes/font_size = 12
+text = "WATER"
+
+[node name="DarkLabel" type="Label" parent="Canvas/Labels" unique_id=2129655302]
+layout_mode = 0
+offset_left = 605.0
+offset_top = 261.0
+offset_right = 665.0
+offset_bottom = 278.0
+theme_override_colors/font_color = Color(0.8, 0.72, 0.56, 1)
+theme_override_font_sizes/font_size = 12
+text = "DARK"
+
+[node name="Nodes" type="Control" parent="Canvas" unique_id=82062235]
+anchors_preset = 0
+offset_left = -3.0
+offset_top = -65.0
+offset_right = 1057.0
+offset_bottom = 665.0
+
+[node name="Fireball" parent="Canvas/Nodes" unique_id=1643530653 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 316.0
+offset_right = 78.0
+offset_bottom = 364.0
+spell_id = "fireball"
+display_name = "Fireball"
+branch_name = "Fire"
+color_name = "Red"
+
+[node name="ExplosiveFireball" parent="Canvas/Nodes" unique_id=600044240 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 131.0
+offset_top = 265.0
+offset_right = 179.0
+offset_bottom = 313.0
+spell_id = "explosive_fireball"
+display_name = "Explosive
+Fireball"
+branch_name = "Fire"
+color_name = "Red"
+
+[node name="PillarFireball" parent="Canvas/Nodes" unique_id=708488169 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 297.0
+offset_top = 258.0
+offset_right = 345.0
+offset_bottom = 306.0
+spell_id = "pillar_fireball"
+display_name = "Pillar
+Fireball"
+branch_name = "Fire"
+color_name = "Red"
+
+[node name="FireBomb" parent="Canvas/Nodes" unique_id=1408521601 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 71.0
+offset_top = 436.0
+offset_right = 119.0
+offset_bottom = 484.0
+spell_id = "fire_bomb"
+display_name = "Fire Bomb"
+branch_name = "Fire"
+color_name = "Red"
+is_side_spell = true
+
+[node name="RingOfFire" parent="Canvas/Nodes" unique_id=1823029494 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 211.0
+offset_top = 422.0
+offset_right = 259.0
+offset_bottom = 470.0
+spell_id = "ring_of_fire"
+display_name = "Ring of Fire"
+branch_name = "Fire"
+color_name = "Red"
+is_side_spell = true
+
+[node name="SmallMeteor" parent="Canvas/Nodes" unique_id=1317821334 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 377.0
+offset_top = 356.0
+offset_right = 425.0
+offset_bottom = 404.0
+spell_id = "small_meteor"
+display_name = "Small Meteor"
+branch_name = "Fire"
+color_name = "Red"
+is_side_spell = true
+
+[node name="SparkBolt" parent="Canvas/Nodes" unique_id=218129333 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 25.0
+offset_top = 80.0
+offset_right = 73.0
+offset_bottom = 128.0
+spell_id = "spark_bolt"
+display_name = "Spark
+Bolt"
+branch_name = "Lightning"
+color_name = "Blue"
+
+[node name="ChainLightning" parent="Canvas/Nodes" unique_id=1204261976 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 112.0
+offset_top = 77.0
+offset_right = 160.0
+offset_bottom = 125.0
+spell_id = "chain_lightning"
+display_name = "Chain
+Lightning"
+branch_name = "Lightning"
+color_name = "Blue"
+has_art = false
+
+[node name="LightningStrike" parent="Canvas/Nodes" unique_id=662280885 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 202.0
+offset_top = 80.0
+offset_right = 250.0
+offset_bottom = 128.0
+spell_id = "lightning_strike"
+display_name = "Lightning
+Strike"
+branch_name = "Lightning"
+color_name = "Blue"
+
+[node name="ElectricBurst" parent="Canvas/Nodes" unique_id=102210753 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 330.0
+offset_top = 101.0
+offset_right = 378.0
+offset_bottom = 149.0
+spell_id = "electric_burst"
+display_name = "Electric
+Burst"
+branch_name = "Lightning"
+color_name = "Blue"
+
+[node name="ElectricField" parent="Canvas/Nodes" unique_id=957184046 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 433.0
+offset_top = 131.0
+offset_right = 481.0
+offset_bottom = 179.0
+spell_id = "electric_field"
+display_name = "Electric
+Field"
+branch_name = "Lightning"
+color_name = "Blue"
+
+[node name="PulseBeam" parent="Canvas/Nodes" unique_id=1146621472 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 374.0
+offset_top = 35.0
+offset_right = 422.0
+offset_bottom = 83.0
+spell_id = "pulse_beam"
+display_name = "Pulse Beam"
+branch_name = "Lightning"
+color_name = "Blue"
+is_side_spell = true
+
+[node name="AcidGlob" parent="Canvas/Nodes" unique_id=1814676583 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 547.0
+offset_top = 72.0
+offset_right = 595.0
+offset_bottom = 120.0
+spell_id = "acid_glob"
+display_name = "Acid
+Glob"
+branch_name = "Poison"
+color_name = "Purple"
+has_art = false
+
+[node name="ToxicBurst" parent="Canvas/Nodes" unique_id=393458515 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 645.0
+offset_top = 51.0
+offset_right = 693.0
+offset_bottom = 99.0
+spell_id = "toxic_burst"
+display_name = "Toxic
+Burst"
+branch_name = "Poison"
+color_name = "Purple"
+
+[node name="PoisonCloud" parent="Canvas/Nodes" unique_id=1637317922 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 722.0
+offset_top = 91.0
+offset_right = 770.0
+offset_bottom = 139.0
+spell_id = "poison_cloud"
+display_name = "Poison
+Cloud"
+branch_name = "Poison"
+color_name = "Purple"
+
+[node name="GreenVortex" parent="Canvas/Nodes" unique_id=851731498 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 778.0
+offset_top = 147.0
+offset_right = 826.0
+offset_bottom = 195.0
+spell_id = "green_vortex"
+display_name = "Green
+Vortex"
+branch_name = "Poison"
+color_name = "Purple"
+
+[node name="WaterDrop" parent="Canvas/Nodes" unique_id=812603457 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 1034.0
+offset_top = 273.0
+offset_right = 1082.0
+offset_bottom = 321.0
+spell_id = "water_drop"
+display_name = "Water
+Drop"
+branch_name = "Water"
+
+[node name="SplashBurst" parent="Canvas/Nodes" unique_id=1505182765 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 1023.0
+offset_top = 158.0
+offset_right = 1071.0
+offset_bottom = 206.0
+spell_id = "splash_burst"
+display_name = "Splash
+Burst"
+branch_name = "Water"
+
+[node name="Wave" parent="Canvas/Nodes" unique_id=1894828109 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 984.0
+offset_top = 66.0
+offset_right = 1032.0
+offset_bottom = 114.0
+spell_id = "wave"
+display_name = "Wave"
+branch_name = "Water"
+
+[node name="WaterWhirl" parent="Canvas/Nodes" unique_id=1494161354 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 900.0
+offset_top = 24.0
+offset_right = 948.0
+offset_bottom = 72.0
+spell_id = "water_whirl"
+display_name = "Water
+Whirl"
+branch_name = "Water"
+
+[node name="DarkBolt" parent="Canvas/Nodes" unique_id=1364163237 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 478.0
+offset_top = 368.0
+offset_right = 526.0
+offset_bottom = 416.0
+spell_id = "dark_bolt"
+display_name = "Dark
+Bolt"
+branch_name = "Dark"
+color_name = "Grey"
+
+[node name="VoidOrb" parent="Canvas/Nodes" unique_id=332067504 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 582.0
+offset_top = 378.0
+offset_right = 630.0
+offset_bottom = 426.0
+spell_id = "void_orb"
+display_name = "Void
+Orb"
+branch_name = "Dark"
+color_name = "Grey"
+has_art = false
+
+[node name="SmokeCurse" parent="Canvas/Nodes" unique_id=98630128 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 672.0
+offset_top = 385.0
+offset_right = 720.0
+offset_bottom = 433.0
+spell_id = "smoke_curse"
+display_name = "Smoke
+Curse"
+branch_name = "Dark"
+color_name = "Grey"
+
+[node name="BlackHole" parent="Canvas/Nodes" unique_id=2090900577 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 779.0
+offset_top = 453.0
+offset_right = 827.0
+offset_bottom = 501.0
+spell_id = "black_hole"
+display_name = "Black
+Hole"
+branch_name = "Dark"
+color_name = "Grey"
+
+[node name="SkullShot" parent="Canvas/Nodes" unique_id=1445967840 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 525.0
+offset_top = 518.0
+offset_right = 573.0
+offset_bottom = 566.0
+spell_id = "skull_shot"
+display_name = "Skull Shot"
+branch_name = "Dark"
+color_name = "Grey"
+is_side_spell = true
+
+[node name="BloodExplosion" parent="Canvas/Nodes" unique_id=1658042114 instance=ExtResource("2_spell_node")]
+layout_mode = 0
+offset_left = 637.0
+offset_top = 527.0
+offset_right = 685.0
+offset_bottom = 575.0
+spell_id = "blood_explosion"
+display_name = "Blood Explosion"
+branch_name = "Dark"
+color_name = "Grey"
+is_side_spell = true
+
+[node name="DetailPanel" type="PanelContainer" parent="." unique_id=340029208]
+layout_mode = 0
+offset_left = 1138.0
+offset_top = 332.0
+offset_right = 1462.0
+offset_bottom = 404.0
+clip_contents = true
+theme_override_styles/panel = SubResource("StyleBoxFlat_detail")
+
+[node name="DetailBox" type="VBoxContainer" parent="DetailPanel" unique_id=1601475065]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="DetailPanel/DetailBox" unique_id=1094710277]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.92, 0.78, 1)
+theme_override_font_sizes/font_size = 18
+text = "Hover a spell"
+
+[node name="Body" type="Label" parent="DetailPanel/DetailBox" unique_id=1436082426]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.76, 0.78, 0.84, 1)
+theme_override_font_sizes/font_size = 12
+text = "Main-line nodes show the intended evolution path. Dim hollow nodes mark gaps we still want better art for."
+autowrap_mode = 3

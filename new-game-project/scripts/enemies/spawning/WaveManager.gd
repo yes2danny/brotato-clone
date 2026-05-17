@@ -19,6 +19,12 @@ var _break_timer: float = 0.0
 var _in_break: bool = false       # True during the between-wave pause (shop or timer fallback)
 var current_wave: int = 1
 
+# ── Per-wave stat tracking ─────────────────────────────────────────────────────
+# We snapshot kills and gold at the START of each wave, then diff at the end
+# so WaveSummaryUI can show "you killed X enemies and earned +Y gold THIS wave."
+var _wave_start_kills: int = 0
+var _wave_start_gold: int  = 0
+
 # Signals — GameUI can listen to these to display wave info
 signal wave_started(wave_number: int)
 signal wave_completed(wave_number: int)
@@ -87,6 +93,14 @@ func _start_wave() -> void:
 
 	_wave_timer = wave_duration
 
+	# ── Snapshot stats so we can diff them when the wave ends ─────────────────
+	_wave_start_kills = GameManager.enemies_killed
+	# ShopManager tracks the player's gold — grab it if available
+	if _shop_manager:
+		_wave_start_gold = _shop_manager.player_gold  # ShopManager stores gold as player_gold
+	else:
+		_wave_start_gold = 0
+
 	# Re-activate the spawner
 	if _spawner:
 		_spawner.set_active(true)
@@ -119,12 +133,45 @@ func _end_wave(grant_shop_bonus: bool = true) -> void:
 	if _shop_manager == null:
 		_hook_shop_manager()
 
-	if _shop_manager and _shop_manager.has_method("open_shop"):
-		print("Wave %d complete — shop is open." % [current_wave - 1])
-	else:
-		print("Wave %d complete! Next wave in %.0f seconds..." % [current_wave - 1, break_duration])
+	# ── Compute per-wave deltas for the summary screen ────────────────────────
+	var kills_this_wave: int = GameManager.enemies_killed - _wave_start_kills
+	var gold_this_wave: int  = 0
+	if _shop_manager:
+		# Gold earned = current gold minus what we had at wave start.
+		# Clamped to 0 so the display never shows a negative number
+		# (spending in the shop between waves won't bleed into the next wave's diff
+		# because we only snapshot at wave START, before the shop opens).
+		gold_this_wave = maxi(_shop_manager.gold - _wave_start_gold, 0)
 
-	# Between-wave shop (only entry point into the shop during a run)
+	print("Wave %d complete — kills: %d  gold: +%d" % [current_wave - 1, kills_this_wave, gold_this_wave])
+
+	# ── Show the wave summary card BEFORE opening the shop ────────────────────
+	# If WaveSummaryUI is in the scene it will call _open_shop_or_break() once
+	# the player clicks "Enter the Shop".  If it isn't there we fall through
+	# immediately to keep the game working without the UI node.
+	var summaries := get_tree().get_nodes_in_group("wave_summary")
+	if summaries.size() > 0:
+		var summary_ui = summaries[0]
+		# Connect ONE-SHOT so we only fire once per wave, not every wave forever
+		summary_ui.summary_dismissed.connect(
+				_on_summary_dismissed.bind(grant_shop_bonus), CONNECT_ONE_SHOT)
+		summary_ui.show_summary(current_wave - 1, kills_this_wave, gold_this_wave, current_wave)
+	else:
+		# No summary node present — open shop (or break timer) immediately
+		_open_shop_or_break(grant_shop_bonus)
+
+
+## Called when the player dismisses the WaveSummaryUI card.
+## At this point it's safe to open the shop (or start the fallback break timer).
+func _on_summary_dismissed(grant_shop_bonus: bool) -> void:
+	if GameManager.state != GameManager.GameState.PLAYING:
+		return
+	_open_shop_or_break(grant_shop_bonus)
+
+
+## Central place that decides: open shop or use the fallback countdown.
+## Extracted so both the summary path and the no-summary path call the same logic.
+func _open_shop_or_break(grant_shop_bonus: bool) -> void:
 	if _shop_manager and _shop_manager.has_method("open_shop"):
 		_break_timer = 0.0
 		_shop_manager.open_shop(grant_shop_bonus)

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="WaveData" load_steps=13 format=3 uid="uid://wave_06"]
+[gd_resource type="Resource" script_class="WaveData" load_steps=18 format=3 uid="uid://wave_06"]
 
 [ext_resource type="Script" path="res://scripts/enemies/spawning/WaveSpawnEntry.gd" id="1_entry"]
 [ext_resource type="Script" path="res://scripts/enemies/spawning/WaveData.gd" id="2_data"]
@@ -7,30 +7,56 @@
 [ext_resource type="PackedScene" uid="uid://enemy_goblin_blue" path="res://scenes/enemies/Enemy_GoblinBlue.tscn" id="5_blue"]
 [ext_resource type="PackedScene" uid="uid://enemy_cyclop" path="res://scenes/enemies/Enemy_Cyclop.tscn" id="6_cyclop"]
 [ext_resource type="PackedScene" uid="uid://enemy_mimic_lvl1" path="res://scenes/enemies/Enemy_Mimic.tscn" id="7_mimic"]
-[ext_resource type="PackedScene" uid="uid://enemy_goblin_red" path="res://scenes/enemies/Enemy_GoblinRed.tscn" id="8_red"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/Enemy_DummyLVL3.tscn" id="8_dummy3"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/Enemy_GoblinBarrelRed.tscn" id="9_barrel_red"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/Enemy_DwarfetteLVL1.tscn" id="10_dwarfette"]
+
+[sub_resource type="Resource" id="Resource_dummy"]
+script = ExtResource("1_entry")
+enemy_scene = ExtResource("3_dummy")
+weight = 8.0
+max_alive = 0
 
 [sub_resource type="Resource" id="Resource_green"]
 script = ExtResource("1_entry")
 enemy_scene = ExtResource("4_green")
-weight = 38.0
+weight = 22.0
 max_alive = 0
 
 [sub_resource type="Resource" id="Resource_blue"]
 script = ExtResource("1_entry")
 enemy_scene = ExtResource("5_blue")
-weight = 28.0
+weight = 20.0
 max_alive = 0
 
 [sub_resource type="Resource" id="Resource_cyclop"]
 script = ExtResource("1_entry")
 enemy_scene = ExtResource("6_cyclop")
-weight = 24.0
+weight = 14.0
 max_alive = 0
 
-[sub_resource type="Resource" id="Resource_red"]
+[sub_resource type="Resource" id="Resource_mimic"]
 script = ExtResource("1_entry")
-enemy_scene = ExtResource("8_red")
+enemy_scene = ExtResource("7_mimic")
 weight = 10.0
+max_alive = 3
+
+[sub_resource type="Resource" id="Resource_dummy3"]
+script = ExtResource("1_entry")
+enemy_scene = ExtResource("8_dummy3")
+weight = 10.0
+max_alive = 0
+
+[sub_resource type="Resource" id="Resource_barrel_red"]
+script = ExtResource("1_entry")
+enemy_scene = ExtResource("9_barrel_red")
+weight = 10.0
+max_alive = 0
+
+[sub_resource type="Resource" id="Resource_dwarfette"]
+script = ExtResource("1_entry")
+enemy_scene = ExtResource("10_dwarfette")
+weight = 6.0
 max_alive = 0
 
 [resource]
@@ -44,7 +70,7 @@ min_spawn_interval = 0.35
 hp_mult = 1.0
 dmg_mult = 1.0
 enemy_scenes = Array[PackedScene]([])
-pool_additions = Array[ExtResource("1_entry")]([SubResource("Resource_green"), SubResource("Resource_blue"), SubResource("Resource_cyclop"), SubResource("Resource_red")])
-pool_removals = Array[PackedScene]([ExtResource("3_dummy"), ExtResource("7_mimic")])
+pool_additions = Array[ExtResource("1_entry")]([SubResource("Resource_dummy"), SubResource("Resource_green"), SubResource("Resource_blue"), SubResource("Resource_cyclop"), SubResource("Resource_mimic"), SubResource("Resource_dummy3"), SubResource("Resource_barrel_red"), SubResource("Resource_dwarfette")])
+pool_removals = Array[PackedScene]([])
 enemy_pool = Array[ExtResource("1_entry")]([])
 is_boss_wave = false

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/spells/data/SpellData.gd" id="1_spelldata"]
+[ext_resource type="PackedScene" path="res://scenes/spells/effects/RingOfFireEffect.tscn" id="2_ring_scene"]
+[ext_resource type="Texture2D" path="res://assets/vfx/magic/magic_pack_16/ring_of_fire/sprites/frame-08.png" id="3_ring_icon"]
+
+[resource]
+script = ExtResource("1_spelldata")
+spell_name = "Ring of Fire"
+description = "Burst flames around yourself, scorching nearby enemies."
+icon = ExtResource("3_ring_icon")
+school = 0
+cast_type = 0
+cooldown = 4.0
+base_damage = 45
+detection_range = 0.0
+spell_scene = ExtResource("2_ring_scene")
+animation_frames_path = "res://assets/vfx/magic/magic_pack_16/ring_of_fire/sprites"
+effect_radius = 72.0
+visual_scale = 1.25
+rank = 1

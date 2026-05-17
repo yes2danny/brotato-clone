@@ -36,7 +36,6 @@
 [ext_resource type="Resource" path="res://resources/items/passive/jet_too_boarding_pass.tres" id="33_jet"]
 [ext_resource type="Resource" path="res://resources/items/passive/questionable_mystery_box.tres" id="34_box"]
 [ext_resource type="Resource" path="res://resources/items/passive/gem_alert_magnifier.tres" id="35_gem_alert"]
-[ext_resource type="PackedScene" path="res://scenes/ui/hud/MobileControls.tscn" id="37_mobile_controls"]
 
 [node name="Main" type="Node2D" unique_id=653105166]
 
@@ -89,8 +88,6 @@ script = ExtResource("6_upgrade")
 
 [node name="GameUI" type="CanvasLayer" parent="." unique_id=1434850024]
 script = ExtResource("7_gameui")
-
-[node name="MobileControls" parent="." instance=ExtResource("37_mobile_controls")]
 
 [node name="PauseMenu" type="CanvasLayer" parent="." unique_id=1656069387]
 layer = 5

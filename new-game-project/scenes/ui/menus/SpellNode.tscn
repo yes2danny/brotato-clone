@@ -1,0 +1,58 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/menus/SpellNode.gd" id="1_spell_node"]
+
+[node name="SpellNode" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 48.0
+offset_bottom = 48.0
+mouse_filter = 0
+script = ExtResource("1_spell_node")
+
+[node name="SelectionFill" type="ColorRect" parent="."]
+visible = false
+layout_mode = 0
+offset_left = 11.0
+offset_top = 11.0
+offset_right = 37.0
+offset_bottom = 37.0
+rotation = 0.785398
+pivot_offset = Vector2(13, 13)
+mouse_filter = 2
+color = Color(0.95, 0.9, 0.72, 0.8)
+
+[node name="Frame" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+texture_filter = 1
+
+[node name="Selector" type="TextureRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+texture_filter = 1
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 0
+offset_left = -26.0
+offset_top = 50.0
+offset_right = 74.0
+offset_bottom = 80.0
+mouse_filter = 2
+horizontal_alignment = 1
+autowrap_mode = 3

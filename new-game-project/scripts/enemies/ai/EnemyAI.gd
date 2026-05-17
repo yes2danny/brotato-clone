@@ -75,6 +75,9 @@ var _wall_slide_timer: float = 0.0
 func _ready() -> void:
 	add_to_group("enemies")
 	health_system.died.connect(_on_died)
+	# Connect the damage_taken signal so a floating number spawns every time this enemy is hit.
+	# The signal fires AFTER armor reduction, so the number matches what was actually dealt.
+	health_system.damage_taken.connect(_on_damage_taken)
 	_apply_scaling_to_stats()
 
 	var players = get_tree().get_nodes_in_group("player")
@@ -218,6 +221,13 @@ func _play_attack_animation() -> void:
 	if frame_count <= 0 or speed <= 0.0:
 		return
 	_attack_animation_timer = float(frame_count) / speed
+
+
+func _on_damage_taken(amount: int) -> void:
+	# Called by HealthSystem.damage_taken signal every time this enemy takes a hit.
+	# Tells the global DamageNumbers autoload to spawn a floating number at our position.
+	# The number floats upward and fades out automatically — no other cleanup needed.
+	DamageNumbers.spawn(global_position, amount)
 
 
 func _on_died() -> void:

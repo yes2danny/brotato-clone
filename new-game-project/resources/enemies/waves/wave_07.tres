@@ -1,34 +1,20 @@
-[gd_resource type="Resource" script_class="WaveData" load_steps=11 format=3 uid="uid://wave_07"]
+[gd_resource type="Resource" script_class="WaveData" load_steps=7 format=3 uid="uid://wave_07"]
 
 [ext_resource type="Script" path="res://scripts/enemies/spawning/WaveSpawnEntry.gd" id="1_entry"]
 [ext_resource type="Script" path="res://scripts/enemies/spawning/WaveData.gd" id="2_data"]
-[ext_resource type="PackedScene" uid="uid://enemy_scene_01" path="res://scenes/enemies/Enemy.tscn" id="4_green"]
-[ext_resource type="PackedScene" uid="uid://enemy_goblin_blue" path="res://scenes/enemies/Enemy_GoblinBlue.tscn" id="5_blue"]
-[ext_resource type="PackedScene" uid="uid://enemy_cyclop" path="res://scenes/enemies/Enemy_Cyclop.tscn" id="6_cyclop"]
-[ext_resource type="PackedScene" uid="uid://enemy_goblin_red" path="res://scenes/enemies/Enemy_GoblinRed.tscn" id="8_red"]
+[ext_resource type="PackedScene" uid="uid://enemy_frog_monster" path="res://scenes/enemies/Enemy_FrogMonster.tscn" id="9_frog"]
+[ext_resource type="PackedScene" uid="uid://enemy_ent_lvl2" path="res://scenes/enemies/Enemy_Ent_LVL2.tscn" id="10_ent"]
 
-[sub_resource type="Resource" id="Resource_green"]
+[sub_resource type="Resource" id="Resource_frog"]
 script = ExtResource("1_entry")
-enemy_scene = ExtResource("4_green")
-weight = 35.0
+enemy_scene = ExtResource("9_frog")
+weight = 20.0
 max_alive = 0
 
-[sub_resource type="Resource" id="Resource_blue"]
+[sub_resource type="Resource" id="Resource_ent"]
 script = ExtResource("1_entry")
-enemy_scene = ExtResource("5_blue")
-weight = 26.0
-max_alive = 0
-
-[sub_resource type="Resource" id="Resource_cyclop"]
-script = ExtResource("1_entry")
-enemy_scene = ExtResource("6_cyclop")
-weight = 26.0
-max_alive = 0
-
-[sub_resource type="Resource" id="Resource_red"]
-script = ExtResource("1_entry")
-enemy_scene = ExtResource("8_red")
-weight = 14.0
+enemy_scene = ExtResource("10_ent")
+weight = 20.0
 max_alive = 0
 
 [resource]
@@ -37,12 +23,12 @@ wave_number = 7
 wave_label = "Wave 7"
 wave_duration = 60.0
 break_duration = 3.0
-spawn_interval = 1.0
+spawn_interval = 1.04
 min_spawn_interval = 0.35
 hp_mult = 1.0
 dmg_mult = 1.0
 enemy_scenes = Array[PackedScene]([])
-pool_additions = Array[ExtResource("1_entry")]([SubResource("Resource_green"), SubResource("Resource_blue"), SubResource("Resource_cyclop"), SubResource("Resource_red")])
+pool_additions = Array[ExtResource("1_entry")]([SubResource("Resource_frog"), SubResource("Resource_ent")])
 pool_removals = Array[PackedScene]([])
 enemy_pool = Array[ExtResource("1_entry")]([])
 is_boss_wave = false

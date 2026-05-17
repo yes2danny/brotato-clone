@@ -5,9 +5,11 @@
 [ext_resource type="Texture2D" uid="uid://de6br8tw2hkio" path="res://assets/sprites/characters/megapack/Knight_LVL1/Idle_2x1.png" id="2_tpg5x"]
 [ext_resource type="Texture2D" uid="uid://ck6ca38pyast3" path="res://assets/sprites/characters/megapack/Knight_LVL1/Move_20x1.png" id="3_c3xxp"]
 [ext_resource type="Script" uid="uid://cqkm1fboqtdlw" path="res://scripts/weapons/WeaponController.gd" id="3_weapon"]
-[ext_resource type="PackedScene" uid="uid://bullet_scene_01" path="res://scenes/weapons/projectiles/Bullet.tscn" id="4_bullet"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/projectiles/Bullet.tscn" id="4_bullet"]
 [ext_resource type="Resource" path="res://resources/items/weapons/glock.tres" id="5_start_weapon"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Knight_LVL1/Dash_8x1.png" id="6_roll"]
+[ext_resource type="Texture2D" uid="uid://djqig2cv4kq00" path="res://assets/sprites/characters/megapack/Knight_LVL1/Dash_8x1.png" id="6_roll"]
+[ext_resource type="Script" uid="uid://was0bvf4b2vq" path="res://scripts/spells/SpellController.gd" id="9_pn6s4"]
+[ext_resource type="Resource" path="res://resources/spells/spell_fireball.tres" id="10_fireball_spell"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_npwbq"]
 atlas = ExtResource("2_tpg5x")
@@ -244,10 +246,10 @@ height = 20.0
 script = ExtResource("1_player")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2027414413]
+scale = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_1hh02")
 animation = &"Idle"
 autoplay = "Idle"
-scale = Vector2(3, 3)
 frame = 1
 frame_progress = 0.4757308
 
@@ -261,4 +263,7 @@ script = ExtResource("2_health")
 script = ExtResource("3_weapon")
 bullet_scene = ExtResource("4_bullet")
 starting_weapon = ExtResource("5_start_weapon")
-weapon_sprite_scale = Vector2(1.3, 1.3)
+
+[node name="SpellController" type="Node" parent="." unique_id=1416748474]
+script = ExtResource("9_pn6s4")
+starting_spell = ExtResource("10_fireball_spell")

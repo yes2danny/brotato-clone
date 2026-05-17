@@ -25,6 +25,11 @@ var _root_card: Control = null
 var _play_button: Button = null
 var _last_root_width := -1.0
 
+# ── Overlay panels (settings / how-to-play) ───────────────────────────────────
+# These are built lazily on first click and shown/hidden as needed.
+var _settings_overlay  : Control = null
+var _howtoplay_overlay : Control = null
+
 
 func _ready() -> void:
 	_pixel_ready = _check_pixel_assets()
@@ -312,12 +317,19 @@ func _build_menu_panel() -> Control:
 	_play_button.pressed.connect(_on_play_pressed)
 	v.add_child(_play_button)
 
-	var chronicle := Button.new()
-	chronicle.text = "CHRONICLE"
-	chronicle.custom_minimum_size = Vector2(0, 44)
-	_style_button(chronicle, PATH_BTN_BLACK, false)
-	chronicle.pressed.connect(_on_settings_pressed)
-	v.add_child(chronicle)
+	var settings_btn := Button.new()
+	settings_btn.text = "SETTINGS"
+	settings_btn.custom_minimum_size = Vector2(0, 44)
+	_style_button(settings_btn, PATH_BTN_BLACK, false)
+	settings_btn.pressed.connect(_on_settings_pressed)
+	v.add_child(settings_btn)
+
+	var howto_btn := Button.new()
+	howto_btn.text = "HOW TO PLAY"
+	howto_btn.custom_minimum_size = Vector2(0, 44)
+	_style_button(howto_btn, PATH_BTN_BLACK, false)
+	howto_btn.pressed.connect(_on_howtoplay_pressed)
+	v.add_child(howto_btn)
 
 	var quit := Button.new()
 	quit.text = "LEAVE HALL"
@@ -527,8 +539,290 @@ func _on_play_pressed() -> void:
 
 
 func _on_settings_pressed() -> void:
-	print("[MainMenu] Chronicle / settings coming soon.")
+	# Build the overlay once, then just toggle visibility
+	if _settings_overlay == null:
+		_settings_overlay = _build_settings_overlay()
+		add_child(_settings_overlay)
+	_settings_overlay.visible = true
+
+
+func _on_howtoplay_pressed() -> void:
+	if _howtoplay_overlay == null:
+		_howtoplay_overlay = _build_howtoplay_overlay()
+		add_child(_howtoplay_overlay)
+	_howtoplay_overlay.visible = true
 
 
 func _on_quit_pressed() -> void:
 	GameManager.quit_game()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Settings overlay
+# Shows master / music / SFX volume sliders and a fullscreen toggle.
+# Built programmatically so it matches the main-menu visual style exactly.
+# ─────────────────────────────────────────────────────────────────────────────
+
+func _build_settings_overlay() -> Control:
+	# Full-screen dim + centred card (same pattern as WaveSummaryUI / ShopUI)
+	var root := Control.new()
+	root.name = "SettingsOverlay"
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_STOP   # block clicks behind it
+
+	var dim := ColorRect.new()
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.color = Color(0.0, 0.0, 0.0, 0.80)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(dim)
+
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(center)
+
+	var card := _panel(PATH_PANEL_FRAME, PATH_PANEL_INNER,
+			Color(0.07, 0.065, 0.085, 0.97), Color(0.42, 0.32, 0.18))
+	card.custom_minimum_size = Vector2(440, 0)
+	center.add_child(card)
+
+	var pad := MarginContainer.new()
+	pad.add_theme_constant_override("margin_left",   28)
+	pad.add_theme_constant_override("margin_right",  28)
+	pad.add_theme_constant_override("margin_top",    24)
+	pad.add_theme_constant_override("margin_bottom", 24)
+	card.add_child(pad)
+
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 16)
+	pad.add_child(v)
+
+	# Title
+	var title := Label.new()
+	title.text = "SETTINGS"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 26)
+	title.add_theme_color_override("font_color", Color(0.95, 0.82, 0.44))
+	title.add_theme_color_override("font_outline_color", Color(0.035, 0.028, 0.04, 0.95))
+	title.add_theme_constant_override("outline_size", 4)
+	v.add_child(title)
+
+	_add_divider(v)
+
+	# ── Volume sliders ────────────────────────────────────────────────────────
+	# Godot uses AudioServer buses: 0 = Master, higher indices = named buses.
+	# We try to find "Music" and "SFX" buses by name; fall back to Master only.
+	_add_volume_row(v, "Master Volume", "Master")
+	_add_volume_row(v, "Music Volume",  "Music")
+	_add_volume_row(v, "SFX Volume",    "SFX")
+
+	_add_divider(v)
+
+	# ── Fullscreen toggle ─────────────────────────────────────────────────────
+	var fs_row := HBoxContainer.new()
+	fs_row.add_theme_constant_override("separation", 14)
+	v.add_child(fs_row)
+
+	var fs_label := Label.new()
+	fs_label.text = "Fullscreen"
+	fs_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	fs_label.add_theme_font_size_override("font_size", 15)
+	fs_label.add_theme_color_override("font_color", COLOR_PAPER)
+	fs_row.add_child(fs_label)
+
+	var fs_btn := CheckButton.new()
+	fs_btn.text = ""
+	# Set the toggle to match the current window mode
+	fs_btn.button_pressed = (DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN or
+							 DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+	fs_btn.toggled.connect(_on_fullscreen_toggled)
+	fs_row.add_child(fs_btn)
+
+	_add_divider(v)
+
+	# ── Back button ───────────────────────────────────────────────────────────
+	var back := Button.new()
+	back.text = "BACK"
+	back.custom_minimum_size = Vector2(0, 46)
+	_style_button(back, PATH_BTN_BLACK, false)
+	back.pressed.connect(func(): root.visible = false)
+	v.add_child(back)
+
+	return root
+
+
+## Adds one labelled HSlider row that controls an AudioServer bus by name.
+func _add_volume_row(parent: VBoxContainer, label_text: String, bus_name: String) -> void:
+	# If the bus doesn't exist in this project, skip the row rather than error
+	var bus_idx := AudioServer.get_bus_index(bus_name)
+	if bus_idx < 0:
+		return
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	parent.add_child(row)
+
+	var lbl := Label.new()
+	lbl.text = label_text
+	lbl.custom_minimum_size = Vector2(130, 0)
+	lbl.vertical_alignment  = VERTICAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 14)
+	lbl.add_theme_color_override("font_color", COLOR_PAPER)
+	row.add_child(lbl)
+
+	var slider := HSlider.new()
+	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slider.min_value  = 0.0
+	slider.max_value  = 1.0
+	slider.step       = 0.01
+	# AudioServer volumes are in linear scale; convert from dB
+	slider.value      = db_to_linear(AudioServer.get_bus_volume_db(bus_idx))
+	# Store bus index in metadata so the signal handler knows which bus to change
+	slider.set_meta("bus_idx", bus_idx)
+	slider.value_changed.connect(_on_volume_changed.bind(bus_idx))
+	row.add_child(slider)
+
+	# Percentage readout next to the slider
+	var pct := Label.new()
+	pct.custom_minimum_size = Vector2(40, 0)
+	pct.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	pct.add_theme_font_size_override("font_size", 13)
+	pct.add_theme_color_override("font_color", Color(0.72, 0.78, 0.62))
+	pct.text = "%d%%" % int(slider.value * 100)
+	row.add_child(pct)
+
+	# Keep the percentage label in sync as the slider moves
+	slider.value_changed.connect(func(v: float): pct.text = "%d%%" % int(v * 100))
+
+
+func _on_volume_changed(value: float, bus_idx: int) -> void:
+	# value is 0.0–1.0 linear; AudioServer wants dB
+	AudioServer.set_bus_volume_db(bus_idx, linear_to_db(value))
+
+
+func _on_fullscreen_toggled(pressed: bool) -> void:
+	if pressed:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	else:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# How to Play overlay
+# Quick reference card for movement, shooting, spells, and shop.
+# ─────────────────────────────────────────────────────────────────────────────
+
+func _build_howtoplay_overlay() -> Control:
+	var root := Control.new()
+	root.name = "HowToPlayOverlay"
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	var dim := ColorRect.new()
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.color = Color(0.0, 0.0, 0.0, 0.82)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(dim)
+
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(center)
+
+	var card := _panel(PATH_GOLD_FRAME, PATH_PANEL_INNER,
+			Color(0.07, 0.065, 0.05, 0.97), Color(0.84, 0.61, 0.24))
+	card.custom_minimum_size = Vector2(520, 0)
+	center.add_child(card)
+
+	var pad := MarginContainer.new()
+	pad.add_theme_constant_override("margin_left",   30)
+	pad.add_theme_constant_override("margin_right",  30)
+	pad.add_theme_constant_override("margin_top",    24)
+	pad.add_theme_constant_override("margin_bottom", 24)
+	card.add_child(pad)
+
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 14)
+	pad.add_child(v)
+
+	# Title
+	var title := Label.new()
+	title.text = "HOW TO PLAY"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 26)
+	title.add_theme_color_override("font_color", Color(0.95, 0.82, 0.44))
+	title.add_theme_color_override("font_outline_color", Color(0.035, 0.028, 0.04, 0.95))
+	title.add_theme_constant_override("outline_size", 4)
+	v.add_child(title)
+
+	_add_divider(v)
+
+	# Each section: a small header + two-column grid of key → action
+	_add_howto_section(v, "Movement & Combat", [
+		["WASD / Arrow Keys", "Move your character"],
+		["Spacebar",           "Dodge roll (i-frames!)"],
+		["Weapon auto-fires",  "Targets nearest enemy"],
+	])
+
+	_add_howto_section(v, "Spells", [
+		["1 / 2 / 3",          "Cast equipped spells"],
+		["Unlock spells",      "By levelling up in-run"],
+		["Cooldown shown",     "In the hotbar bottom-left"],
+	])
+
+	_add_howto_section(v, "Waves & Shop", [
+		["Survive the wave",   "Timer counts down top-left"],
+		["Wave ends → Shop",   "Buy upgrades between waves"],
+		["Gold from enemies",  "Spend in the shop to grow"],
+	])
+
+	_add_howto_section(v, "Progression", [
+		["Kill enemies → XP", "Level up for upgrade choices"],
+		["20 waves to win",   "Difficulty scales each wave"],
+		["Go fast",           "The rift doesn't wait"],
+	])
+
+	_add_divider(v)
+
+	var back := Button.new()
+	back.text = "BACK"
+	back.custom_minimum_size = Vector2(0, 46)
+	_style_button(back, PATH_BTN_BLACK, false)
+	back.pressed.connect(func(): root.visible = false)
+	v.add_child(back)
+
+	return root
+
+
+## Adds a labelled section with rows of [key, description] pairs.
+func _add_howto_section(parent: VBoxContainer, heading: String,
+		rows: Array) -> void:
+	var header := Label.new()
+	header.text = heading
+	header.add_theme_font_size_override("font_size", 14)
+	header.add_theme_color_override("font_color", Color(0.72, 0.88, 1.0))
+	header.add_theme_color_override("font_outline_color", Color(0.02, 0.02, 0.04, 0.9))
+	header.add_theme_constant_override("outline_size", 2)
+	parent.add_child(header)
+
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 16)
+	grid.add_theme_constant_override("v_separation", 4)
+	parent.add_child(grid)
+
+	for row in rows:
+		# Key / binding label — highlighted in gold
+		var key_lbl := Label.new()
+		key_lbl.text = row[0]
+		key_lbl.custom_minimum_size = Vector2(180, 0)
+		key_lbl.add_theme_font_size_override("font_size", 13)
+		key_lbl.add_theme_color_override("font_color", COLOR_PAPER)
+		key_lbl.add_theme_color_override("font_outline_color", Color(0.02, 0.018, 0.02, 0.75))
+		key_lbl.add_theme_constant_override("outline_size", 1)
+		grid.add_child(key_lbl)
+
+		# Description — dimmer text
+		var desc_lbl := Label.new()
+		desc_lbl.text = row[1]
+		desc_lbl.add_theme_font_size_override("font_size", 13)
+		desc_lbl.add_theme_color_override("font_color", Color(0.68, 0.72, 0.62))
+		grid.add_child(desc_lbl)

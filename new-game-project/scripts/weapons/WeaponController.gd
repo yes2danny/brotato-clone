@@ -205,3 +205,9 @@ func upgrade_fire_rate(multiplier: float) -> void:
 
 func upgrade_damage(amount: int) -> void:
 	bullet_damage = maxi(1, bullet_damage + amount)
+
+
+func get_aim_direction() -> Vector2:
+	if _aim_dir.length_squared() > 0.0:
+		return _aim_dir.normalized()
+	return Vector2.RIGHT

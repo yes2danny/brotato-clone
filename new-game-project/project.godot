@@ -24,6 +24,8 @@ GameManager="*res://scripts/systems/GameManager.gd"
 XPDropSystem="*res://scripts/items/pickups/XPDropSystem.gd"
 GoldDropSystem="*res://scripts/items/pickups/GoldDropSystem.gd"
 DevDebug="*res://scripts/debug/DevDebug.gd"
+AudioManager="*res://scripts/systems/AudioManager.gd"
+DamageNumbers="*res://scripts/systems/DamageNumbers.gd"
 
 [debug]
 
@@ -32,11 +34,18 @@ file_logging/max_log_files=10
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/YATI/plugin.cfg", "res://addons/virtual_joystick_plus/plugin.cfg")
+enabled=PackedStringArray("res://addons/YATI/plugin.cfg")
 
 [physics]
 
 3d/physics_engine="Jolt Physics"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep_width"
 
 [rendering]
 

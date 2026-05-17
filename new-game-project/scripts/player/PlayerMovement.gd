@@ -34,6 +34,7 @@ func _ready() -> void:
 	call_deferred("_connect_wave_manager")
 
 
+
 func _draw() -> void:
 	if health_system and int(health_system.get("shield_hits")) > 0:
 		draw_circle(Vector2.ZERO, 34.0, Color(0.22, 0.68, 1.0, 0.18))
@@ -98,6 +99,12 @@ func _on_player_died() -> void:
 
 func add_delayed_departure(amount: int) -> void:
 	delayed_departure_stacks = maxi(0, delayed_departure_stacks + amount)
+
+
+func get_last_move_direction() -> Vector2:
+	if _last_move_direction.length_squared() > 0.0:
+		return _last_move_direction.normalized()
+	return Vector2.RIGHT
 
 
 func _start_roll(input_dir: Vector2) -> void:

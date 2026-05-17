@@ -11,6 +11,8 @@ var hp_bar: ProgressBar = null
 var _hp_text_label: Label = null
 var xp_bar: ProgressBar = null
 var _gold_label: Label = null
+var _spell_progress_label: Label = null
+var _spell_progress_tween: Tween = null
 
 var _health_hooked: bool = false
 var _bar_smooth_speed: float = 10.0
@@ -40,10 +42,24 @@ func _ready() -> void:
 	call_deferred("_connect_player_health")
 	_connect_wave_manager()
 	call_deferred("_setup_gold_hud")
+	_setup_spell_progress_hud()
+	call_deferred("_connect_spell_progression_feedback")
+
+	# ── Spell Hotbar ──
+	# Spawns the 3-slot spell panel + ON/OFF button at the bottom-center.
+	# SpellHotbarUI finds SpellController on its own via the "spell_controller" group.
+	# Using preload() instead of `SpellHotbarUI.new()` (the class_name version) so
+	# this never silently fails if Godot's global script class cache is stale.
+	var SpellHotbarUIScript := preload("res://scripts/ui/hud/SpellHotbarUI.gd")
+	var hotbar: Control = SpellHotbarUIScript.new()
+	hotbar.name = "SpellHotbarUI"
+	add_child(hotbar)
+
 
 	# XP — only if scene already has a bar (unchanged behavior)
 	xp_bar = get_node_or_null("VBoxContainer/XPBar")
 	XPSystem.xp_changed.connect(_on_xp_changed)
+	XPSystem.level_up.connect(_on_level_up_progress)
 	if xp_bar:
 		xp_bar.step = 0.01
 		xp_bar.max_value = XPSystem.xp_to_next_level
@@ -166,6 +182,10 @@ func _on_xp_changed(current: int, required: int) -> void:
 		_xp_target_value = current
 
 
+func _on_level_up_progress(new_level: int) -> void:
+	_show_spell_progress_text("Level %d" % new_level, Color(0.98, 0.9, 0.52))
+
+
 func _setup_gold_hud() -> void:
 	var attach: Control = get_node_or_null("HudRoot") as Control
 	if attach == null:
@@ -205,6 +225,67 @@ func _setup_gold_hud() -> void:
 	if not sm.gold_changed.is_connected(_on_gold_hud_changed):
 		sm.gold_changed.connect(_on_gold_hud_changed)
 	_on_gold_hud_changed(sm.player_gold)
+
+
+func _setup_spell_progress_hud() -> void:
+	var root := Control.new()
+	root.name = "SpellProgressRoot"
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(root)
+
+	var center := CenterContainer.new()
+	center.name = "SpellProgressCenter"
+	center.anchor_left = 0.0
+	center.anchor_right = 1.0
+	center.anchor_top = 0.0
+	center.anchor_bottom = 0.0
+	center.offset_top = 54.0
+	center.offset_bottom = 102.0
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(center)
+
+	_spell_progress_label = Label.new()
+	_spell_progress_label.visible = false
+	_spell_progress_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_spell_progress_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_spell_progress_label.add_theme_font_size_override("font_size", 22)
+	_spell_progress_label.add_theme_color_override("font_color", Color(0.96, 0.92, 0.82))
+	_spell_progress_label.add_theme_color_override("font_outline_color", Color(0.05, 0.05, 0.08, 0.9))
+	_spell_progress_label.add_theme_constant_override("outline_size", 4)
+	center.add_child(_spell_progress_label)
+
+
+func _connect_spell_progression_feedback() -> void:
+	var controllers := get_tree().get_nodes_in_group("spell_controller")
+	if controllers.is_empty():
+		return
+	var spell_controller := controllers[0]
+	if spell_controller and not spell_controller.spell_unlocked.is_connected(_on_spell_unlocked_progress):
+		spell_controller.spell_unlocked.connect(_on_spell_unlocked_progress)
+
+
+func _on_spell_unlocked_progress(_spell_id: String, spell: SpellData, unlock_level: int) -> void:
+	_show_spell_progress_text("Level %d unlocked %s" % [unlock_level, spell.spell_name], Color(0.86, 0.98, 1.0))
+
+
+func _show_spell_progress_text(text: String, color: Color) -> void:
+	if _spell_progress_label == null:
+		return
+	if _spell_progress_tween != null and _spell_progress_tween.is_valid():
+		_spell_progress_tween.kill()
+	_spell_progress_label.text = text
+	_spell_progress_label.visible = true
+	_spell_progress_label.modulate = color
+	_spell_progress_label.modulate.a = 0.0
+	_spell_progress_tween = create_tween()
+	_spell_progress_tween.tween_property(_spell_progress_label, "modulate:a", 1.0, 0.16)
+	_spell_progress_tween.tween_interval(0.9)
+	_spell_progress_tween.tween_property(_spell_progress_label, "modulate:a", 0.0, 0.28)
+	_spell_progress_tween.finished.connect(func() -> void:
+		if _spell_progress_label:
+			_spell_progress_label.visible = false
+	)
 
 
 func _on_gold_hud_changed(amount: int) -> void:

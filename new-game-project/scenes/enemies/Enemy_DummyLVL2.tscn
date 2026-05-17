@@ -1,0 +1,190 @@
+; Dummy_LVL2 strips: Idle 66x35 (2 frames), Move 396x35 (12 frames), Dash 132x35 (4 frames)
+; All frames → 33x35 per cell.
+; Stats sit between LVL1 (HP=21, spd=55, dmg=5) and LVL3 (HP=24, spd=60, dmg=6),
+; but LVL2 is a little sturdier because it now softly screens nearby ranged allies.
+; No palette-unify shader — LVL2 enters mid-wave-3 after the tutorial palette is established.
+
+[gd_scene load_steps=30 format=3 uid="uid://enemy_dummy_lvl2"]
+
+[ext_resource type="Script" path="res://scripts/enemies/ai/ProtectorDummyAI.gd" id="1_enemy"]
+[ext_resource type="Script" path="res://scripts/systems/HealthSystem.gd" id="2_health"]
+[ext_resource type="PackedScene" path="res://scenes/items/pickups/XPGem.tscn" id="3_xpgem"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Dummy_LVL2/Idle_2x1.png" id="4_idle"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Dummy_LVL2/Move_12x1.png" id="5_move"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/megapack/Dummy_LVL2/Dash_4x1.png" id="6_attack"]
+
+; ── Idle frames (2) ──────────────────────────────────────
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle0"]
+atlas = ExtResource("4_idle")
+region = Rect2(0, 0, 33, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle1"]
+atlas = ExtResource("4_idle")
+region = Rect2(33, 0, 33, 35)
+
+; ── Move frames (12) ─────────────────────────────────────
+[sub_resource type="AtlasTexture" id="AtlasTexture_m0"]
+atlas = ExtResource("5_move")
+region = Rect2(0, 0, 33, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m1"]
+atlas = ExtResource("5_move")
+region = Rect2(33, 0, 33, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m2"]
+atlas = ExtResource("5_move")
+region = Rect2(66, 0, 33, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m3"]
+atlas = ExtResource("5_move")
+region = Rect2(99, 0, 33, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m4"]
+atlas = ExtResource("5_move")
+region = Rect2(132, 0, 33, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m5"]
+atlas = ExtResource("5_move")
+region = Rect2(165, 0, 33, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m6"]
+atlas = ExtResource("5_move")
+region = Rect2(198, 0, 33, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m7"]
+atlas = ExtResource("5_move")
+region = Rect2(231, 0, 33, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m8"]
+atlas = ExtResource("5_move")
+region = Rect2(264, 0, 33, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m9"]
+atlas = ExtResource("5_move")
+region = Rect2(297, 0, 33, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m10"]
+atlas = ExtResource("5_move")
+region = Rect2(330, 0, 33, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m11"]
+atlas = ExtResource("5_move")
+region = Rect2(363, 0, 33, 35)
+
+; ── Dash/Attack frames (4) ───────────────────────────────
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack0"]
+atlas = ExtResource("6_attack")
+region = Rect2(0, 0, 33, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack1"]
+atlas = ExtResource("6_attack")
+region = Rect2(33, 0, 33, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack2"]
+atlas = ExtResource("6_attack")
+region = Rect2(66, 0, 33, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack3"]
+atlas = ExtResource("6_attack")
+region = Rect2(99, 0, 33, 35)
+
+; ── AnimationLibrary ─────────────────────────────────────
+[sub_resource type="SpriteFrames" id="SpriteFrames_dummy2"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_attack0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_attack1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_attack2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_attack3")
+}],
+"loop": false,
+"name": &"Attack",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle1")
+}],
+"loop": true,
+"name": &"Idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m9")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m10")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m11")
+}],
+"loop": true,
+"name": &"Move",
+"speed": 12.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 14.0
+
+; ── Node tree ────────────────────────────────────────────
+[node name="Enemy" type="CharacterBody2D"]
+script = ExtResource("1_enemy")
+move_speed = 57.0
+damage = 5
+contact_cooldown = 1.2
+xp_gem_scene = ExtResource("3_xpgem")
+protect_search_radius = 320.0
+screen_distance_from_ranged = 72.0
+screen_influence = 0.42
+abandon_screen_player_distance = 150.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_dummy2")
+animation = &"Idle"
+autoplay = "Idle"
+scale = Vector2(3, 3)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_1")
+
+[node name="HealthSystem" type="Node" parent="."]
+script = ExtResource("2_health")
+max_health = 27

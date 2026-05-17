@@ -18,6 +18,7 @@ var _invulnerability_timer: float = 0.0
 # Signals — the parent node (Player/Enemy) connects to these
 signal health_changed(current: int, maximum: int)  # For updating UI / health bars
 signal died()                                       # For triggering death logic
+signal damage_taken(amount: int)                    # Fires with the ACTUAL damage dealt (after armor), used by DamageNumbers to spawn floating text
 
 
 func _ready() -> void:
@@ -46,6 +47,7 @@ func take_damage(amount: int) -> void:
 	current_health -= reduced_amount
 	current_health = max(current_health, 0)  # Clamp so health never goes below 0
 
+	emit_signal("damage_taken", reduced_amount)   # DamageNumbers listens to this to spawn a floating number
 	emit_signal("health_changed", current_health, max_health)
 
 	if current_health <= 0:

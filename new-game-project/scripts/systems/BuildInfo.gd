@@ -1,7 +1,7 @@
 class_name BuildInfo
 
 const GAME_VERSION := "v0.1.0"
-const BUILD_ID := "01a"
+const BUILD_ID := "01z"
 
 
 static func display_text() -> String:

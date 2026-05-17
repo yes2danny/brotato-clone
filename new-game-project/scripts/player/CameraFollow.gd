@@ -14,11 +14,22 @@ extends Camera2D
 # 0 = never moves, 1 = snaps instantly, ~5 is a nice smooth follow.
 @export var follow_speed: float = 5.0
 
+# How zoomed in the camera is. zoom = Vector2(1,1) means no zoom — you see
+# the entire map at once, which feels way too open for a Brotato-style game.
+# zoom = Vector2(2,2) means everything appears 2x bigger, so you only see
+# half the map width at a time — much more claustrophobic and intense.
+# Tweak this in the Inspector to taste. 2.0 is a solid Brotato-feeling start.
+@export var camera_zoom: float = 2.0
+
 # We'll grab a reference to the player once the scene is ready
 var player: Node2D = null
 
 
 func _ready() -> void:
+	# Apply zoom. Camera2D.zoom is a Vector2 — both axes should match for
+	# a uniform zoom (no stretching). We use our export value for both.
+	zoom = Vector2(camera_zoom, camera_zoom)
+
 	# Find the player by group — PlayerMovement.gd adds itself to "player" group
 	var players = get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
